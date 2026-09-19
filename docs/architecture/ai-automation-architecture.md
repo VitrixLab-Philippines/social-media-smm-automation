@@ -1,480 +1,235 @@
-# AI Automation Architecture
+# AI Automation Architecture for SMM
 
-## 1. Purpose
+This document defines the AI automation architecture for the social media management (SMM) platform. The design keeps AI as an assistive layer, while human approval and platform-specific safety rules remain in control of publishing.
 
-This document defines the target architecture for the social-media-smm-automation platform: an AI-assisted, event-driven system that can plan, generate, validate, schedule, publish, monitor, and optimize social content across multiple networks while keeping platform credentials, business rules, and human approvals isolated from model reasoning.
+## Goals
 
-## 2. Architecture principles
+- Turn raw signals into high-probability, brand-safe content ideas
+- Generate drafts for multiple platforms from a single content plan
+- Support Meta, LinkedIn, X, TikTok, and YouTube through platform adapters
+- Enforce moderation and approval before publishing
+- Keep credentials and secrets outside the repository
+- Support dry-run testing, scheduled automation, and analytics-driven optimization
 
-- **AI proposes; deterministic services execute.** LLMs generate plans/content/decisions, but publishing, permissions, rate limits, retries, and billing are enforced by application code.
-- **Human-in-the-loop by policy.** Drafting can be fully automated; high-risk actions (first-time account connection, sensitive content, destructive actions, or configurable approval thresholds) require approval.
-- **Provider abstraction.** Social networks are accessed through adapters so the core workflow is independent of Meta, X, LinkedIn, TikTok, etc.
-- **Event-driven workflows.** Long-running jobs use durable queues/workflows rather than synchronous API requests.
-- **Idempotent execution.** Every external side effect has an idempotency key and persisted execution state.
-- **Observable and auditable.** AI inputs/outputs, policy decisions, approvals, tool calls, publishing results, and optimization actions are traceable.
-- **Least privilege and secret isolation.** Models never receive raw OAuth secrets or unrestricted database credentials.
-
-## 3. Logical architecture
+## High-level architecture
 
 ```text
-                        ┌──────────────────────────────┐
-                        │          Web / API           │
-                        │ Dashboard · Calendar · Inbox │
-                        └──────────────┬───────────────┘
-                                       │
-                              Auth / Tenant / RBAC
-                                       │
-                        ┌──────────────▼───────────────┐
-                        │       Application Layer      │
-                        │ Campaigns · Content · Social │
-                        │ Approvals · Analytics · Jobs │
-                        └──────────────┬───────────────┘
-                                       │
-                         Commands / Events / Workflows
-                                       │
-              ┌────────────────────────▼────────────────────────┐
-              │              AI Orchestration Layer             │
-              │                                                 │
-              │  Planner → Research → Generator → Critic        │
-              │             → Policy/Brand Guard → Optimizer    │
-              │                                                 │
-              │  Model Gateway · Prompt Registry · AI Memory    │
-              └───────┬─────────────────┬──────────────────────┘
-                      │                 │
-             Tool calls / data     Structured AI outputs
-                      │                 │
-        ┌─────────────▼───────┐   ┌────▼─────────────────┐
-        │ Integration Layer   │   │ Knowledge / Data     │
-        │                     │   │                      │
-        │ Meta · LinkedIn     │   │ PostgreSQL           │
-        │ TikTok · X · etc.   │   │ Object Storage       │
-        │ Webhooks            │   │ Vector Index         │
-        └─────────────┬───────┘   │ Analytics Warehouse  │
-                      │            └──────────┬───────────┘
-                      ▼                       ▼
-               Social Networks          Metrics / Feedback
+Brand strategy + goals
+        |
+        v
+Signal ingestion (trends, search, audience behavior, CRM, web, internal briefs)
+        |
+        v
+AI topic scoring and content planning
+        |
+        v
+Content generation (captions, hooks, hashtags, creative concepts)
+        |
+        v
+Moderation + brand policy validation
+        |
+        v
+Human approval / review gate
+        |
+        v
+Platform adapters -> scheduler -> publisher
+        |
+        v
+Delivery events + audit logging
+        |
+        v
+Analytics collection
+        |
+        +-------------------> Feedback loop for future planning
 ```
 
-## 4. Core components
+## Core design principles
 
-### 4.1 API and application layer
+### 1. AI is advisory, not autonomous
 
-Responsibilities:
+AI is used to generate candidate content ideas, draft copy, and recommend posting strategies. It does not directly publish content unless the workflow explicitly permits it and an approval gate confirms it.
 
-- tenant/account management
-- user authentication and RBAC
-- social account connections
-- content/campaign CRUD
-- calendars and scheduling
-- approval queues
-- analytics dashboards
-- job status and audit-log access
+### 2. Platform logic is isolated
 
-The API should not call an LLM directly for critical workflows. It should submit a command to the workflow/job layer.
+Campaign planning and content approval do not depend on a specific social platform SDK. Platform adapters handle authentication, posting/scheduling, analytics retrieval, payload formatting, and error/retry behavior.
 
-### 4.2 Workflow orchestration
+### 3. Safety is enforced in the domain layer
 
-Use durable workflows for:
+Every content draft is checked against prohibited topics, disclosures/compliance, invalid copy, brand voice, and platform restrictions.
 
-1. content ideation
-2. campaign planning
-3. content generation
-4. asset processing
-5. validation/approval
-6. scheduled publishing
-7. webhook/event processing
-8. analytics ingestion
-9. performance analysis
-10. optimization/recommendation
+### 4. Local-first development with cloud scheduling
 
-Each workflow stores state and can safely resume after process or provider failures.
+Develop and test locally; use GitHub Actions or a scheduler for automated runs. Secrets remain outside source control.
 
-### 4.3 AI orchestration layer
+### 5. Dry-run is the default
 
-Recommended agent boundaries:
+All publishing flows support dry-run before live publishing.
 
-| Agent | Responsibility | Can mutate external systems? |
-|---|---|---|
-| Planner | Convert campaign goals into structured content plans | No |
-| Researcher | Gather approved knowledge/context | No |
-| Copy Generator | Create platform-specific drafts | No |
-| Creative Director | Generate briefs/prompts for visual assets | No |
-| Critic | Evaluate quality against explicit criteria | No |
-| Policy Guard | Check safety, brand, platform, and campaign rules | No |
-| Optimizer | Analyze metrics and propose changes | No |
-| Publisher | Request execution through deterministic tools | Only through publish service |
+## Components
 
-Prefer small specialized agents over one unrestricted agent.
+### Brand and policy layer
 
-### 4.4 Model gateway
+Responsible for brand voice, audience, prohibited topics, required disclosures, and content risk rules.
 
-All model access should go through a single internal gateway.
+### Signal and research layer
 
-Responsibilities:
+Collects campaign briefs, product notes/promotions, market/search trends, audience engagement patterns, and competitor activity to produce ranked topics.
 
-- provider/model selection
-- fallback models
-- token and cost accounting
-- structured-output enforcement
-- timeout/retry policy
-- prompt/version tracking
-- redaction
-- request/response telemetry
+### Content planning layer
 
-Suggested interface:
+Determines topics, target platforms, content type, publish window, conversation angle, and CTA strategy.
+
+### AI generation layer
+
+Generates post text, hooks, CTAs, hashtags, creative concepts, and A/B variations through a provider interface supporting OpenAI-compatible APIs, Azure OpenAI, Anthropic, custom models, and a local stub/mock provider.
+
+### Moderation and approval layer
+
+Validates quality, policy, disclaimers, claims, and platform restrictions. Failed content remains draft/rejected.
+
+### Publishing and scheduling layer
+
+Schedules/publishes approved content with platform constraints, permissions, posting limits, rate controls, retries, failures, and audit events.
+
+### Platform adapters
+
+Stable contracts for Meta (Instagram/Facebook Pages), LinkedIn, X, TikTok, and YouTube.
+
+### Analytics and feedback layer
+
+Collects reach, impressions, engagement, clicks, saves, shares, watch time, follower growth, and conversion events to inform future planning.
+
+## Workflow lifecycle
+
+1. Intake
+2. Signal enrichment
+3. Planning
+4. Draft generation
+5. Policy check
+6. Human review
+7. Schedule or publish
+8. Measure and optimize
+
+## Domain model
 
 ```text
-AIRequest
-  tenant_id
-  workflow_id
-  task_type
-  model_policy
-  system_prompt_version
-  input_context
-  output_schema
-  safety_policy
+BrandProfile
+  - name
+  - audience
+  - voice
+  - prohibited_topics
+  - required_disclosures
 
-AIResponse
-  structured_output
-  model
-  usage
-  latency_ms
-  policy_result
-  trace_id
+ContentDraft
+  - id
+  - topic
+  - platform
+  - text
+  - hashtags
+  - status
+  - metadata
+  - created_at
+
+PublishResult
+  - platform
+  - success
+  - external_id
+  - message
+  - dry_run
+
+AnalyticsSnapshot
+  - platform
+  - impressions
+  - engagements
+  - clicks
+  - followers_gained
 ```
 
-### 4.5 Tool layer
+## Safety and compliance
 
-AI agents should access capabilities through typed tools rather than arbitrary HTTP/database access.
+- Credentials must use environment variables or GitHub Secrets
+- Never commit API tokens or OAuth secrets
+- Dry-run is the default
+- Publishing is blocked when moderation fails
+- Every scheduled/published item is auditable
+- Required disclosures are enforced where applicable
+- Unsubstantiated product claims require human review
+- Empty captions are rejected
 
-Examples:
+## Technology boundaries
 
-- `get_brand_profile`
-- `search_content_library`
-- `get_campaign`
-- `create_draft`
-- `request_approval`
-- `generate_asset_brief`
-- `get_social_metrics`
-- `schedule_post`
-- `publish_post`
-- `reply_to_comment`
+Keep AI orchestration, content planning, moderation, scheduling, platform integrations, analytics, and infrastructure/secrets management separate.
 
-Every tool should declare:
-
-- input schema
-- output schema
-- required permissions
-- side-effect level
-- idempotency requirements
-- audit event
-
-## 5. Content lifecycle
+## Suggested implementation layers
 
 ```text
-BRIEF
-  ↓
-RESEARCH
-  ↓
-PLAN
-  ↓
-DRAFT
-  ↓
-AI CRITIC
-  ↓
-POLICY / BRAND VALIDATION
-  ↓
-┌───────────────┐
-│ Approval      │────── reject ───→ REVISE
-└──────┬────────┘
-       │ approve
-       ▼
-SCHEDULE
-       ↓
-PUBLISH
-       ↓
-COLLECT METRICS
-       ↓
-ANALYZE
-       ↓
-OPTIMIZATION RECOMMENDATION
-       └──────────────→ NEXT PLAN
+src/smm/
+├── ai/
+│   ├── prompts.py
+│   └── provider.py
+├── analytics/
+│   └── feedback.py
+├── cli.py
+├── config.py
+├── content/
+│   └── planner.py
+├── domain/
+│   └── models.py
+├── integrations/
+│   └── adapters.py
+├── moderation/
+│   └── policy.py
+├── publishing/
+│   ├── ports.py
+│   └── service.py
+├── research/
+│   └── signals.py
+├── workflows/
+│   └── daily.py
+└── __init__.py
 ```
 
-## 6. Data model boundaries
+## Implementation phases
 
-Minimum domain entities:
+### Phase 1: Foundation
 
-- `Tenant`
-- `User`
-- `Role`
-- `SocialAccount`
-- `OAuthCredentialReference`
-- `BrandProfile`
-- `Campaign`
-- `ContentPlan`
-- `ContentItem`
-- `Asset`
-- `Approval`
-- `Schedule`
-- `PublishAttempt`
-- `SocialPost`
-- `EngagementEvent`
-- `MetricSnapshot`
-- `AIExecution`
-- `AIArtifact`
-- `PromptVersion`
-- `ToolExecution`
-- `WorkflowRun`
-- `AuditEvent`
+- Project structure
+- Configuration and secrets
+- Dry-run publishing flow
+- Approval gate
+- Tests and CI
 
-Keep AI execution metadata separate from business content where practical so model traces can be retained, redacted, or deleted independently.
+### Phase 2: Meta-first launch
 
-## 7. Event architecture
+- Instagram/Facebook Pages integration
+- Content planning
+- AI-generated captions
+- Image caption variations
+- Approval workflow
 
-Canonical events:
+### Phase 3: Multi-platform expansion
 
-```text
-campaign.created
-content.plan.created
-content.draft.created
-content.validation.failed
-approval.requested
-approval.completed
-schedule.created
-publish.requested
-publish.succeeded
-publish.failed
-social.webhook.received
-engagement.received
-metrics.ingested
-optimization.proposed
-optimization.approved
-```
+- LinkedIn
+- X
+- TikTok
+- YouTube
+- Cross-platform scheduling
 
-Events should contain a tenant ID, aggregate ID, event ID, timestamp, schema version, correlation ID, and causation ID.
+### Phase 4: Intelligence loop
 
-## 8. Automation control plane
+- Analytics ingestion
+- Performance scoring
+- Best-post recommendation engine
+- Topic prioritization from historical results
 
-The automation control plane decides **when** and **whether** work runs.
+## Operational notes
 
-It should include:
+- Use GitHub Actions for scheduled planning and dry runs
+- Use a queue/job runner for live publishing jobs
+- Log timestamps, platform, account, status, and draft ID
+- Keep last-approved and last-published states
+- Retry safely; never silently republish without new approval
 
-- workflow scheduler
-- queue management
-- concurrency limits
-- provider rate-limit management
-- retry/dead-letter handling
-- approval gates
-- feature flags
-- tenant-level automation policies
-- budget/token limits
-- kill switches
+## Summary
 
-Example policy:
-
-```yaml
-automation:
-  auto_generate: true
-  auto_schedule: true
-  auto_publish: false
-  auto_reply: false
-
-approval:
-  required_for:
-    - first_publish
-    - regulated_topic
-    - low_confidence
-    - destructive_action
-
-limits:
-  max_posts_per_day: 10
-  max_ai_cost_per_campaign: 5.00
-```
-
-## 9. Safety and governance
-
-### AI safety boundary
-
-Never allow an LLM to directly:
-
-- obtain raw OAuth client secrets
-- execute arbitrary SQL
-- execute arbitrary shell commands
-- change tenant permissions
-- delete production data
-- bypass approval policy
-- invent publishing success
-
-### Publishing boundary
-
-All publishing must pass:
-
-```text
-AI recommendation
-      ↓
-Policy engine
-      ↓
-Approval gate (when required)
-      ↓
-Publish service
-      ↓
-Provider adapter
-      ↓
-Verified provider response
-      ↓
-Persist result + audit event
-```
-
-The system records provider-confirmed status rather than trusting model-generated status.
-
-## 10. Observability
-
-Track at minimum:
-
-- workflow success/failure rate
-- queue latency
-- provider API latency/errors
-- publish success rate
-- retry count
-- AI latency
-- token usage and cost
-- model/provider usage
-- validation rejection rate
-- approval turnaround time
-- content performance
-- engagement rate
-- attribution metrics
-- tool-call errors
-
-Every workflow should have a correlation/trace ID spanning API → workflow → AI → tool → provider.
-
-## 11. Recommended repository structure
-
-```text
-social-media-smm-automation/
-├── apps/
-│   ├── api/
-│   ├── web/
-│   └── worker/
-├── packages/
-│   ├── domain/
-│   ├── ai/
-│   │   ├── agents/
-│   │   ├── prompts/
-│   │   ├── schemas/
-│   │   ├── tools/
-│   │   └── gateway/
-│   ├── workflows/
-│   ├── integrations/
-│   │   ├── meta/
-│   │   ├── linkedin/
-│   │   ├── tiktok/
-│   │   └── x/
-│   ├── policy/
-│   ├── analytics/
-│   └── observability/
-├── infrastructure/
-│   ├── database/
-│   ├── queues/
-│   ├── storage/
-│   └── deployment/
-├── docs/
-│   ├── architecture/
-│   │   ├── ai-automation-architecture.md
-│   │   ├── workflows.md
-│   │   ├── integrations.md
-│   │   └── security.md
-│   └── adr/
-├── tests/
-│   ├── unit/
-│   ├── integration/
-│   ├── workflow/
-│   └── evaluation/
-└── README.md
-```
-
-This is a target structure; directories should be introduced incrementally as implementation begins.
-
-## 12. AI evaluation layer
-
-AI behavior should be tested independently from normal unit tests.
-
-Maintain evaluation datasets for:
-
-- brand voice adherence
-- factuality
-- platform-specific formatting
-- policy violations
-- hallucination resistance
-- tool-selection correctness
-- structured-output validity
-- multilingual quality
-- prompt-injection resistance
-
-A model/prompt change should be evaluated before promotion to production.
-
-## 13. Implementation phases
-
-### Phase 1 — Foundation
-
-- domain model
-- tenant/RBAC
-- social account abstraction
-- job/workflow infrastructure
-- audit logging
-- provider adapter interface
-
-### Phase 2 — AI content pipeline
-
-- model gateway
-- prompt registry
-- content planner
-- generator
-- critic
-- policy guard
-- structured AI schemas
-
-### Phase 3 — Publishing automation
-
-- scheduler
-- approval gates
-- publish service
-- idempotency
-- provider rate limiting
-- webhook ingestion
-
-### Phase 4 — Analytics and optimization
-
-- metric ingestion
-- performance aggregation
-- AI analysis
-- recommendation engine
-- controlled optimization experiments
-
-### Phase 5 — Autonomous operations
-
-Enable automation gradually using tenant-configurable policies, budgets, confidence thresholds, approval requirements, and kill switches.
-
-## 14. Architectural decision rule
-
-When deciding whether a capability belongs in AI or deterministic application code:
-
-```text
-Reasoning / generation / classification
-            → AI layer
-
-Authorization / validation / scheduling
-            → deterministic application layer
-
-External side effect
-            → deterministic tool + provider adapter
-
-Long-running state
-            → durable workflow
-
-Business-critical decision
-            → explicit policy + auditable rule
-```
-
-This separation is the primary guardrail for scaling the platform from AI-assisted SMM into reliable AI automation.
+This architecture creates a safe, scalable, extensible SMM automation system. AI reduces content-production workload while approval, moderation, and platform layers maintain control, compliance, and reliability.
