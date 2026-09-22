@@ -3,35 +3,37 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="AI-assisted social media workflow automation with planning, moderation, human approval, Meta publishing, scheduling, and analytics">
+<meta name="description" content="AI-assisted social media workflow automation with human approval gates and Meta publishing">
 <title>SMM Automation — Human‑approved AI workflow</title>
 <style>
 :root{
-  --bg:#08111f;
-  --panel:#0f1b2d;
-  --text:#eef5ff;
-  --muted:#9fb0c8;
-  --line:#22334b;
-  --primary:#65e4b0;
-  --secondary:#8aa8ff;
-  --accent:#4a90e2;
-  --space-0:0;
-  --space-1:0.25em;
-  --space-2:0.5em;
-  --space-3:0.75em;
-  --space-5:1.25em;
-  --space-8:2em;
-  --space-13:3.25em;
-  --space-21:5.25em;
-  --font-size-base:1rem;
-  --breakpoint-sm:375px;
-  --breakpoint-md:428px;
-  --breakpoint-lg:520px;
-  --line-height-base:1.5;
-  --line-height-tight:1.25;
-  --line-height-loose:1.628;
-  --radius-small:8px;
+  --bg:#0a0e1a;
+  --panel:#111827;
+  --surface:#0f172a;
+  --text:#f1f5f9;
+  --muted:#64748b;
+  --line:#1e293b;
+  --primary:#10b981;
+  --secondary:#3b82f6;
+  --accent:#f97316;
+  --radius-small:6px;
   --radius-medium:12px;
+  --radius-large:20px;
+  --space-0:0;
+  --space-1:0.25rem;
+  --space-2:0.5rem;
+  --space-3:1rem;
+  --space-5:2rem;
+  --space-8:3rem;
+  --space-13:4rem;
+  --space-21:7rem;
+  --font-size-base:1rem;
+  --breakpoint-sm:360px;
+  --breakpoint-md:420px;
+  --breakpoint-lg:540px;
+  --line-height-base:1.6;
+  --line-height-tight:1.25;
+  --line-height-loose:1.8;
 }
 html{scroll-behavior:smooth}
 *{-webkit-tap-highlight-color:transparent}
@@ -46,31 +48,43 @@ a{color:inherit;text-decoration:none}
 a:focus-visible{outline:2px solid var(--primary);outline-offset:4px}
 img{max-width:100%;height:auto}
 .wrap{max-width:1120px;margin:auto;padding:0 24px}
+button:focus-visible{outline:2px solid var(--primary);outline-offset:4px}
+::selection{background:var(--primary);color:var(--bg)}
+/* Nav */
 nav{
-  height:72px;
+  height:64px;
   display:flex;
   align-items:center;
   justify-content:space-between;
-  border-bottom:1px solid var(--line)
+  padding:.5rem 0;
+  border-bottom:1px solid var(--line);
+  position:fixed;
+  width:100%;
+  top:0;
+  background:rgba(10,14,26,0.8);
+  backdrop-filter:blur(10px);
+  z-index:100
 }
 .logo{
-  font-weight:800;
-  letter-spacing:-.03em
+  font-weight:900;
+  letter-spacing:-.02em;
+  font-size:1.25rem
 }
 .logo span{color:var(--primary)}
 .links{
   display:flex;
-  gap:12px
+  gap:1rem;
+  align-items:center
 }
 .link{
   position:relative;
-  padding:8px 16px;
+  padding:.5rem 1rem;
   border-radius:var(--radius-medium);
-  font-size:13px;
+  font-size:.75rem;
   font-weight:600;
   text-transform:uppercase;
-  transition:color .2s ease;
-  overflow:hidden
+  letter-spacing:.05em;
+  transition:color .2s ease,background .2s ease
 }
 .link::before{
   content:'';
@@ -78,59 +92,66 @@ nav{
   inset:0;
   background:linear-gradient(var(--primary),var(--secondary));
   transform:translateX(-100%);
-  transition:transform .3s ease
+  transition:transform .3s ease;
+  border-radius:var(--radius-medium)
 }
 .link:hover::before{transform:translateX(0)}
 .link:hover{color:var(--text)}
 .link:focus-visible{outline:2px solid var(--primary);outline-offset:4px}
-.active{border-bottom:2px solid var(--primary)}
+.active{background:rgba(16,185,129,0.15);border-bottom:2px solid var(--primary)}
+/* Hero */
 .hero{
-  padding:6rem 0 3rem;
-  display:grid;
-  grid-template-columns:1.1fr .9fr;
-  gap:3rem;
-  align-items:center
+  padding:12rem 0 8rem;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  position:relative
 }
-.eyebrow{
+.hero .eyebrow{
   color:var(--primary);
   font-weight:700;
-  font-size:13px;
+  font-size:.875rem;
   text-transform:uppercase;
-  letter-spacing:.14em
+  letter-spacing:.2em;
+  margin-bottom:1rem
 }
-h1{
-  font-size:clamp(2.5rem,6vw,8rem);
+.hero h1{
+  font-size:clamp(3rem,8vw,10rem);
   line-height:var(--line-height-loose);
   letter-spacing:-.03em;
-  margin:1.5rem 0 2.5rem
+  margin:0 0 1.5rem
 }
-h1 em{
+.hero h1 em{
   font-style:normal;
   color:var(--primary);
-  font-size:1.25rem
+  font-size:1.5rem
 }
-.lead{
-  font-size:1.125rem;
+.hero .lead{
+  font-size:1.25rem;
   color:var(--muted);
-  max-width:48ch;
-  margin-bottom:2rem
+  max-width:42ch;
+  margin:0 0 2rem
 }
-.lead span{color:var(--primary);font-weight:500}
-.actions{
+.hero .lead span{color:var(--primary);font-weight:500}
+.hero .actions{
   display:flex;
   gap:1rem;
-  flex-wrap:wrap
+  flex-wrap:wrap;
+  align-items:center
 }
 .btn{
   display:inline-flex;
   align-items:center;
-  gap:0.5rem;
-  padding:.85em 1.5em;
+  gap:.5rem;
+  padding:.85rem 1.5rem;
   border-radius:var(--radius-medium);
-  font-size:13px;
+  font-size:.875rem;
   font-weight:600;
   text-transform:uppercase;
-  transition:background .2s ease,transform .1s ease
+  letter-spacing:.05em;
+  transition:background .2s ease,transform .1s ease;
+  border:1px solid transparent
 }
 .btn.primary{
   background:linear-gradient(var(--primary),var(--secondary));
@@ -140,7 +161,8 @@ h1 em{
 .btn.primary:hover{transform:translateY(-2px)}
 .btn.secondary{
   background:var(--panel);
-  color:var(--text)
+  color:var(--text);
+  border:1px solid var(--line)
 }
 .btn.secondary:focus-visible{outline:2px solid var(--primary);outline-offset:4px}
 .btn.secondary:hover{background:var(--bg)}
@@ -148,77 +170,68 @@ h1 em{
   margin-left:auto;
   display:inline-flex;
   align-items:center;
-  gap:0.5rem;
-  padding:.5em .75em;
-  background:var(--panel);
+  gap:.5rem;
+  padding:.5rem .75rem;
+  background:var(--surface);
   border-radius:var(--radius-small);
-  font-size:12px;
+  font-size:.75rem;
   color:var(--muted);
   line-height:1
 }
 .github-badge svg{width:16;height:16;vertical-align:middle}
-.section{
-  padding:6rem 0
+.hero .shape{
+  position:absolute;
+  right:0;
+  top:50%;
+  transform:translateY(-50%);
+  width:400px;
+  height:400px;
+  background:radial-gradient(var(--primary) 0%, transparent 70%);
+  border-radius:50%;
+  opacity:.15;
+  pointer-events:none
 }
-.section-head{
-  margin-bottom:3rem
+@media(max-width:540px){
+  .hero{flex-direction:column-reverse;gap:4rem;text-align:center}
+  .hero .shape{display:none}
+  .hero h1{font-size:clamp(2.5rem,8vw,6rem)}
+  .hero .lead{font-size:1.125rem}
+  .hero .actions{justify-content:center}
+  nav{padding:.5rem 1rem}
+}
+/* Sections */
+.section{
+  padding:6rem 0;
+  position:relative
+}
+.section .section-head{
+  margin-bottom:4rem
 }
 .section-head .eyebrow{
   color:var(--primary);
   font-weight:700;
-  font-size:13px;
+  font-size:.875rem;
   text-transform:uppercase;
-  letter-spacing:.14em;
-  margin-bottom:.5rem
+  letter-spacing:.2em;
+  margin-bottom:1rem
 }
 .section-head h2{
-  font-size:clamp(2rem,4vw,3.5rem);
+  font-size:clamp(2rem,4vw,3rem);
   line-height:var(--line-height-tight);
   letter-spacing:-.02em;
   margin:0 0 1rem
 }
 .section-head p{
   color:var(--muted);
-  max-width:48ch;
+  max-width:42ch;
   margin:0
-}
-.step{
-  display:flex;
-  align-items:center;
-  gap:1rem;
-  margin-bottom:3rem
-}
-.step .num{
-  flex-shrink:0;
-  width:2rem;
-  height:2rem;
-  border-radius:50%;
-  background:var(--primary);
-  color:var(--bg);
-  font-size:1rem;
-  font-weight:700;
-  display:grid;
-  place-content:center
-}
-.step .details{
-  flex:1
-}
-.step .details strong{
-  font-size:1.25rem;
-  color:var(--text)
-}
-.step .details small{
-  color:var(--muted);
-  font-size:0.875rem;
-  display:block;
-  margin-top:.25rem
 }
 .grid{
   display:grid;
   gap:2rem
 }
-@media(min-width:428px){.grid{grid-template-columns:repeat(2,1fr)}}
-@media(min-width:520px){.grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:420px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:540px){.grid{grid-template-columns:repeat(3,1fr)}}
 .card{
   background:var(--panel);
   border:1px solid var(--line);
@@ -238,38 +251,65 @@ h1 em{
 }
 .cta{
   text-align:center;
-  margin-top:4rem
+  margin:4rem 0
 }
 .cta .eyebrow{
   color:var(--primary);
   margin-bottom:.5rem
 }
 .cta h2{
-  font-size:clamp(2rem,4vw,3.5rem);
+  font-size:clamp(2rem,4vw,3rem);
   line-height:var(--line-height-tight);
   letter-spacing:-.02em;
   margin:0 0 1rem
 }
 .cta p{
   color:var(--muted);
-  max-width:48ch;
+  max-width:42ch;
   margin:0 auto 2rem
 }
 .footer{
   padding:3rem 0;
   border-top:1px solid var(--line);
   color:var(--muted);
-  font-size:.875rem
+  font-size:.875rem;
+  text-align:center
 }
-.footer a{
-  color:var(--primary);
-  text-decoration:underline
+.footer a{color:var(--primary);text-decoration:underline}
+@media(max-width:540px){
+  .section{padding:4rem 0}
 }
-@media(max-width:520px){
-  .hero{grid-template-columns:1fr}
-  .actions{justify-content:center}
-  .link{padding:6px 12px;font-size:12px}
-  .section{padding:3rem 0}
+/* Workflow steps */
+.step{
+  display:flex;
+  align-items:center;
+  gap:.75rem;
+  margin-bottom:2rem
+}
+.step .num{
+  flex-shrink:0;
+  width:1.5rem;
+  height:1.5rem;
+  border-radius:50%;
+  background:var(--primary);
+  color:var(--bg);
+  font-size:.75rem;
+  font-weight:700;
+  display:grid;
+  place-content:center
+}
+.step .details{
+  flex:1
+}
+.step .details strong{
+  font-size:1.125rem;
+  color:var(--text)
+}
+.step .details small{
+  color:var(--muted);
+  font-size:.75rem;
+  display:block;
+  margin-top:.15rem
 }
 </style>
 </head>
@@ -294,11 +334,7 @@ h1 em{
       <a class="btn secondary" href="#roadmap">View Roadmap</a>
     </div>
   </div>
-  <div>
-    <svg viewBox="0 0 200 200" class="hero-shape" aria-hidden="true">
-      <path fill="var(--primary)" d="M100 20 c-50 0-80 30-80 80v40 h160v-40 c0-50-30-80-80-80zM100 140 c-30 0-50 20-50 50v20 h100v-20 c0-30-20-50-50-50z"/>
-    </svg>
-  </div>
+  <div class="shape"></div>
 </section>
 
 <section class="wrap" id="workflow">
@@ -343,7 +379,7 @@ h1 em{
     <div class="card"><h3>Dry-run first</h3><p>Development and scheduled QA use <strong>DRY_RUN=true</strong>. The Meta adapter does not send live requests in dry-run mode.</p></div>
     <div class="card"><h3>Secrets stay out of source</h3><p>OAuth tokens, API keys and refresh tokens belong in environment variables and GitHub Secrets—not config files or commits.</p></div>
     <div class="card"><h3>Moderation before publish</h3><p>A failed policy check blocks publication. Empty content and missing required disclosures are rejected.</p></div>
-    <div class="card"><h3>Explicit approval</h3><p>The publishing service requires a human approval signal before a live publish operation can proceed.</p></div>
+    <div class="card"><h3>Explicit approval</h3><p>The publishing service requires a human approval signal <span class="phase-badge completed">before a live publish operation can proceed</span>.</p></div>
   </div>
 </section>
 
