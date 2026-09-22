@@ -1250,31 +1250,45 @@ html.light nav { background: rgba(248,250,249,0.94) }
         <h3>Publish everywhere, feed performance back in</h3>
         <p>Meta first &mdash; with adapters for LinkedIn, X, TikTok and YouTube behind a clean contract. Performance metrics normalize and flow back into topic scoring, so every post teaches the next one.</p>
       </div>
+
+      <!-- SMM Buttons ── Platform chips with border-glow (reuses .arch-grid + .card) ────────── --> 
       <div class="story-visual" aria-hidden="true">
-        <div class="sv-platforms">
-          <div class="sv-platform live">
+        <div class="sv-platforms arch-grid" style="grid-template-columns: repeat(2, 1fr); gap: .625rem">
+          <div class="sv-platform live card" style="padding: .625rem .875rem; grid-column: auto">
+            <div class="border-glow-layer"></div>
+            <div class="border-glow-inner"></div>
             <div class="sv-platform-dot"></div>
-            Meta
+            <span>Meta</span>
           </div>
-          <div class="sv-platform live">
+          <div class="sv-platform live card" style="padding: .625rem .875rem; grid-column: auto">
+            <div class="border-glow-layer"></div>
+            <div class="border-glow-inner"></div>
             <div class="sv-platform-dot"></div>
-            Instagram
+            <span>Instagram</span>
           </div>
-          <div class="sv-platform wip">
+          <div class="sv-platform wip card" style="padding: .625rem .875rem; grid-column: auto">
+            <div class="border-glow-layer"></div>
+            <div class="border-glow-inner"></div>
             <div class="sv-platform-dot"></div>
-            LinkedIn
+            <span>LinkedIn</span>
           </div>
-          <div class="sv-platform wip">
+          <div class="sv-platform wip card" style="padding: .625rem .875rem; grid-column: auto">
+            <div class="border-glow-layer"></div>
+            <div class="border-glow-inner"></div>
             <div class="sv-platform-dot"></div>
-            X
+            <span>X</span>
           </div>
-          <div class="sv-platform">
+          <div class="sv-platform card" style="padding: .625rem .875rem; grid-column: auto">
+            <div class="border-glow-layer"></div>
+            <div class="border-glow-inner"></div>
             <div class="sv-platform-dot"></div>
-            TikTok
+            <span>TikTok</span>
           </div>
-          <div class="sv-platform">
+          <div class="sv-platform card" style="padding: .625rem .875rem; grid-column: auto">
+            <div class="border-glow-layer"></div>
+            <div class="border-glow-inner"></div>
             <div class="sv-platform-dot"></div>
-            YouTube
+            <span>YouTube</span>
           </div>
         </div>
       </div>
@@ -1393,6 +1407,7 @@ html.light nav { background: rgba(248,250,249,0.94) }
   </div>
 </section>
 
+<!-- ── Security ───────────────────────────────────────────────────────────── -->  
 <!-- ── Security ───────────────────────────────────────────────────────────── -->
 <section class="wrap section" id="security">
   <div class="section-head" data-reveal>
@@ -1400,23 +1415,35 @@ html.light nav { background: rgba(248,250,249,0.94) }
     <h2>Automation with control built in</h2>
     <p>Live publishing is deliberately constrained until platform permissions and API behavior are validated.</p>
   </div>
-  <div class="security-grid">
-    <div class="card" data-reveal>
+
+  <div class="security-grid arch-grid">
+    <article class="card" tabindex="0" role="article" aria-label="Dry-run first" data-reveal style="grid-column: auto">
+      <div class="border-glow-layer" aria-hidden="true"></div>
+      <div class="border-glow-inner" aria-hidden="true"></div>
       <div class="title">Dry-run first</div>
       <p class="desc">Development and scheduled QA use <strong>DRY_RUN=true</strong>. The Meta adapter does not send live requests in dry-run mode.</p>
-    </div>
-    <div class="card" data-reveal data-delay="1">
+    </article>
+
+    <article class="card" tabindex="0" role="article" aria-label="Secrets stay out of source" data-reveal data-delay="1">
+      <div class="border-glow-layer" aria-hidden="true"></div>
+      <div class="border-glow-inner" aria-hidden="true"></div>
       <div class="title">Secrets stay out of source</div>
       <p class="desc">OAuth tokens, API keys and refresh tokens belong in environment variables and GitHub Secrets, not config files or commits.</p>
-    </div>
-    <div class="card" data-reveal data-delay="2">
+    </article>
+
+    <article class="card" tabindex="0" role="article" aria-label="Moderation before publish" data-reveal data-delay="2">
+      <div class="border-glow-layer" aria-hidden="true"></div>
+      <div class="border-glow-inner" aria-hidden="true"></div>
       <div class="title">Moderation before publish</div>
       <p class="desc">A failed policy check blocks publication. Empty content and missing required disclosures are rejected.</p>
-    </div>
-    <div class="card" data-reveal data-delay="3">
+    </article>
+
+    <article class="card" tabindex="0" role="article" aria-label="Explicit approval" data-reveal data-delay="3">
+      <div class="border-glow-layer" aria-hidden="true"></div>
+      <div class="border-glow-inner" aria-hidden="true"></div>
       <div class="title">Explicit approval</div>
       <p class="desc">The publishing service requires a human approval signal <span class="phase-badge completed">before a live publish can proceed</span>.</p>
-    </div>
+    </article>
   </div>
 </section>
 
