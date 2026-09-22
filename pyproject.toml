@@ -22,3 +22,6 @@ target-version = "py311"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.vercel]
+entrypoint = "src/social_media_smm_automation/main.py:app"
