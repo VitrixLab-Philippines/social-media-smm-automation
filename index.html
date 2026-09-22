@@ -1309,49 +1309,86 @@ html.light nav { background: rgba(248,250,249,0.94) }
 </section>
 
 <!-- ── Architecture ───────────────────────────────────────────────────────── -->
+<!-- ── Architecture ───────────────────────────────────────────────────────── -->
+<!-- ── Architecture ───────────────────────────────────────────────────────── -->
 <section class="wrap section" id="architecture">
   <div class="section-head" data-reveal>
     <span class="eyebrow">Platform architecture</span>
     <h2>Automation without a monolith</h2>
-    <p>Each responsibility has a clean boundary, so the planner stays platform-neutral while adapters handle network-specific behavior.</p>
+    <p>Six layers, one story. Each does one job, hands off to the next, and never reaches across boundaries.</p>
   </div>
-  <!-- First card spans full width — AI provider is the foundational layer -->
+
   <div class="arch-grid">
-    <article class="card" tabindex="0" role="article" aria-label="AI provider" data-reveal>
+    <!-- ── 01 · Foundation ─────────────────────────────────────────────── -->
+    <article class="card" tabindex="0" role="article" aria-label="Layer 01 — AI provider" data-reveal>
       <div class="border-glow-layer" aria-hidden="true"></div>
       <div class="border-glow-inner" aria-hidden="true"></div>
-      <div class="title">AI provider</div>
-      <p class="desc">Provider interface for generated content, with a deterministic local stub for development and tests. The planner stays decoupled from any single model.</p>
+      <div class="card-body">
+        <span class="eyebrow">01 · Foundation</span>
+        <h3 class="title">AI provider</h3>
+        <p class="desc">One interface for generated content, with a local stub for dev and tests. Swap the model, keep the pipeline.</p>
+        <span class="cta">Hands drafts to Moderation →</span>
+      </div>
     </article>
-    <article class="card" tabindex="0" role="article" aria-label="Moderation" data-reveal data-delay="1">
+
+    <!-- ── 02 · Guardrail ──────────────────────────────────────────────── -->
+    <article class="card" tabindex="0" role="article" aria-label="Layer 02 — Moderation" data-reveal data-delay="1">
       <div class="border-glow-layer" aria-hidden="true"></div>
       <div class="border-glow-inner" aria-hidden="true"></div>
-      <div class="title">Moderation</div>
-      <p class="desc">Brand rules, prohibited topics, required disclosures and content validation run before publishing.</p>
+      <div class="card-body">
+        <span class="eyebrow">02 · Guardrail</span>
+        <h3 class="title">Moderation</h3>
+        <p class="desc">Brand rules, prohibited topics and required disclosures validated on every draft. Nothing publishes just because a model wrote it.</p>
+        <span class="cta">Escalates clean drafts →</span>
+      </div>
     </article>
-    <article class="card" tabindex="0" role="article" aria-label="Human approval" data-reveal data-delay="2">
+
+    <!-- ── 03 · Gate ───────────────────────────────────────────────────── -->
+    <article class="card" tabindex="0" role="article" aria-label="Layer 03 — Human approval" data-reveal data-delay="2">
       <div class="border-glow-layer" aria-hidden="true"></div>
       <div class="border-glow-inner" aria-hidden="true"></div>
-      <div class="title">Human approval</div>
-      <p class="desc">AI creates drafts; a human explicitly approves the final content before live publishing.</p>
+      <div class="card-body">
+        <span class="eyebrow">03 · Gate</span>
+        <h3 class="title">Human approval</h3>
+        <p class="desc">The line AI does not cross. Drafts pause until a human explicitly approves. No approval, no publish.</p>
+        <span class="cta">Releases approved posts →</span>
+      </div>
     </article>
-    <article class="card" tabindex="0" role="article" aria-label="Platform adapters" data-reveal data-delay="1">
+
+    <!-- ── 04 · Translation ────────────────────────────────────────────── -->
+    <article class="card" tabindex="0" role="article" aria-label="Layer 04 — Platform adapters" data-reveal data-delay="1">
       <div class="border-glow-layer" aria-hidden="true"></div>
       <div class="border-glow-inner" aria-hidden="true"></div>
-      <div class="title">Platform adapters</div>
-      <p class="desc">Meta first, with a defined contract for LinkedIn, X, TikTok and YouTube integrations.</p>
+      <div class="card-body">
+        <span class="eyebrow">04 · Translation</span>
+        <h3 class="title">Platform adapters</h3>
+        <p class="desc">One approved post, many networks. Meta first, with a contract LinkedIn, X, TikTok and YouTube will follow.</p>
+        <span class="cta">Queues native payloads →</span>
+      </div>
     </article>
-    <article class="card" tabindex="0" role="article" aria-label="Scheduling" data-reveal data-delay="2">
+
+    <!-- ── 05 · Timing ─────────────────────────────────────────────────── -->
+    <article class="card" tabindex="0" role="article" aria-label="Layer 05 — Scheduling" data-reveal data-delay="2">
       <div class="border-glow-layer" aria-hidden="true"></div>
       <div class="border-glow-inner" aria-hidden="true"></div>
-      <div class="title">Scheduling</div>
-      <p class="desc">GitHub Actions supports scheduled planning and QA; production publishing can use a durable job runner.</p>
+      <div class="card-body">
+        <span class="eyebrow">05 · Timing</span>
+        <h3 class="title">Scheduling</h3>
+        <p class="desc">GitHub Actions today, durable job runner when volume demands it. One question — when.</p>
+        <span class="cta">Feeds performance signals →</span>
+      </div>
     </article>
-    <article class="card" tabindex="0" role="article" aria-label="Analytics feedback" data-reveal data-delay="3">
+
+    <!-- ── 06 · Loop ───────────────────────────────────────────────────── -->
+    <article class="card" tabindex="0" role="article" aria-label="Layer 06 — Analytics feedback" data-reveal data-delay="3">
       <div class="border-glow-layer" aria-hidden="true"></div>
       <div class="border-glow-inner" aria-hidden="true"></div>
-      <div class="title">Analytics feedback</div>
-      <p class="desc">Normalized performance metrics feed future topic scoring and content planning.</p>
+      <div class="card-body">
+        <span class="eyebrow">06 · Loop</span>
+        <h3 class="title">Analytics feedback</h3>
+        <p class="desc">Metrics flow back into planning. Tomorrow's drafts are informed by today's results. Not a line — a loop.</p>
+        <span class="cta">↺ Returns insight to AI provider</span>
+      </div>
     </article>
   </div>
 </section>
