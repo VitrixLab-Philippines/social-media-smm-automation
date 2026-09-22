@@ -4,7 +4,13 @@
 > This file is the source of truth for all visual decisions on this project.
 > antislop agents: read this before any UI change.
 
+> **Pattern library:** `skills/antislop-ui/patterns/INDEX.md` — proven implementations
+> of every major visual pattern used in this project (hero card, storytelling pairs,
+> highlights strip, border glow, typography system, CTA band, scroll reveal).
+> Start there before writing any new section from scratch.
+
 ---
+
 
 ## Brand Identity
 
