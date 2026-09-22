@@ -7,7 +7,9 @@ name = "social-media-smm-automation"
 version = "0.1.0"
 description = "AI-assisted social media management automation with human approval gates."
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+    "fastapi>=0.115.0",
+]
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0", "ruff>=0.6"]
