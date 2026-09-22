@@ -179,21 +179,8 @@ nav{
   line-height:1
 }
 .github-badge svg{width:16;height:16;vertical-align:middle}
-.hero .shape{
-  position:absolute;
-  right:0;
-  top:50%;
-  transform:translateY(-50%);
-  width:400px;
-  height:400px;
-  background:radial-gradient(var(--primary) 0%, transparent 70%);
-  border-radius:50%;
-  opacity:.15;
-  pointer-events:none
-}
 @media(max-width:540px){
   .hero{flex-direction:column-reverse;gap:4rem;text-align:center}
-  .hero .shape{display:none}
   .hero h1{font-size:clamp(2.5rem,8vw,6rem)}
   .hero .lead{font-size:1.125rem}
   .hero .actions{justify-content:center}
@@ -236,49 +223,46 @@ nav{
   background:var(--panel);
   border:1px solid var(--line);
   border-radius:var(--radius-medium);
-  padding:2rem
+  padding:2rem;
+  position:relative;
+  z-index:1;
+  transition:box-shadow .2s ease,
+            border-color .2s ease,
+            background-color .2s ease
 }
-.card h3{
+.card:focus-visible{outline:2px solid var(--primary);outline-offset:4px}
+.card:hover{
+  box-shadow:0 0 0 1px var(--primary);
+  border-color:var(--primary);
+  background-color:var(--surface)
+}
+.card .title{
   font-size:1.25rem;
   color:var(--text);
   margin:0 0 .5rem
 }
-.card p{
+.card .desc{
   color:var(--muted);
   font-size:.875rem;
   line-height:1.5;
   margin:0
 }
-.cta{
-  text-align:center;
-  margin:4rem 0
+/* Intentional accent glow - one deliberate element per R-13 */
+.card .accent-glow{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  border-radius:calc(var(--radius-medium) - 2px);
+  background:linear-gradient(135deg, var(--primary) 0%, transparent 50%);
+  opacity:0;
+  transition:opacity .2s ease
 }
-.cta .eyebrow{
-  color:var(--primary);
-  margin-bottom:.5rem
-}
-.cta h2{
-  font-size:clamp(2rem,4vw,3rem);
-  line-height:var(--line-height-tight);
-  letter-spacing:-.02em;
-  margin:0 0 1rem
-}
-.cta p{
-  color:var(--muted);
-  max-width:42ch;
-  margin:0 auto 2rem
-}
-.footer{
-  padding:3rem 0;
-  border-top:1px solid var(--line);
-  color:var(--muted);
-  font-size:.875rem;
-  text-align:center
-}
-.footer a{color:var(--primary);text-decoration:underline}
-@media(max-width:540px){
-  .section{padding:4rem 0}
-}
+.card:hover .accent-glow{opacity:0.15}
+.card:focus-visible .accent-glow{opacity:0.3}
+/* Section variations - RHYTHM dial variation per R-05 */
+.section:nth-child(2){padding-top:2rem}
+.section:nth-child(4){padding-top:2rem}
+.section:nth-child(6){padding-top:2rem}
 /* Workflow steps */
 .step{
   display:flex;
@@ -334,7 +318,6 @@ nav{
       <a class="btn secondary" href="#roadmap">View Roadmap</a>
     </div>
   </div>
-  <div class="shape"></div>
 </section>
 
 <section class="wrap" id="workflow">
@@ -360,12 +343,45 @@ nav{
     <p>Each responsibility has a clean boundary, so the planner stays platform-neutral while adapters handle network-specific behavior.</p>
   </div>
   <div class="grid">
-    <div class="card"><h3>AI provider</h3><p>Provider interface for generated content, with a deterministic local stub for development and tests.</p></div>
-    <div class="card"><h3>Moderation</h3><p>Brand rules, prohibited topics, required disclosures and content validation run before publishing.</p></div>
-    <div class="card"><h3>Human approval</h3><p>AI creates drafts; a human explicitly approves the final content <span class="phase-badge completed">before live publishing</span>.</p></div>
-    <div class="card"><h3>Platform adapters</h3><p>Meta first, with contract for LinkedIn, X, TikTok and YouTube integrations.</p></div>
-    <div class="card"><h3>Scheduling</h3><p>GitHub Actions supports scheduled planning and QA; production publishing can use a durable job runner.</p></div>
-    <div class="card"><h3>Analytics feedback</h3><p>Normalized performance metrics feed future topic scoring and content planning.</p></div>
+    <!-- Card with deliberate accent glow (R-13: one focused element) -->
+    <article class="card" tabindex="0" role="button" aria-label="AI provider - focusable, glow on hover/focus">
+      <div class="accent-glow"></div>
+      <div class="title">AI provider</div>
+      <p class="desc">Provider interface for generated content, with a deterministic local stub for development and tests.</p>
+    </article>
+
+    <!-- Card with deliberate accent glow -->
+    <article class="card" tabindex="0" role="button" aria-label="Moderation - focusable">
+      <div class="accent-glow"></div>
+      <div class="title">Moderation</div>
+      <p class="desc">Brand rules, prohibited topics, required disclosures and content validation run before publishing.</p>
+    </article>
+
+    <!-- Card with deliberate accent glow -->
+    <article class="card" tabindex="0" role="button" aria-label="Human approval - focusable">
+      <div class="accent-glow"></div>
+      <div class="title">Human approval</div>
+      <p class="desc">AI creates drafts; a human explicitly approves the final content before live publishing.</p>
+    </article>
+
+    <!-- Card with deliberate accent glow -->
+    <article class="card" tabindex="0" role="button" aria-label="Platform adapters - focusable">
+      <div class="accent-glow"></div>
+      <div class="title">Platform adapters</div>
+      <p class="desc">Meta first, with contract for LinkedIn, X, TikTok and YouTube integrations.</p>
+    </article>
+
+    <!-- Regular card - no extra decoration, content-driven -->
+    <article class="card" tabindex="0" role="button" aria-label="Scheduling - focusable">
+      <div class="title">Scheduling</div>
+      <p class="desc">GitHub Actions supports scheduled planning and QA; production publishing can use a durable job runner.</p>
+    </article>
+
+    <!-- Regular card - no extra decoration, content-driven -->
+    <article class="card" tabindex="0" role="button" aria-label="Analytics feedback - focusable">
+      <div class="title">Analytics feedback</div>
+      <p class="desc">Normalized performance metrics feed future topic scoring and content planning.</p>
+    </article>
   </div>
 </section>
 
