@@ -24,4 +24,4 @@ target-version = "py311"
 where = ["src"]
 
 [tool.vercel]
-entrypoint = "social_media_smm_automation.main:app"
+entrypoint = "smm.main:app"
