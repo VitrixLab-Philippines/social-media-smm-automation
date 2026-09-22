@@ -11,7 +11,7 @@
 a{color:inherit;text-decoration:none}.wrap{max-width:1120px;margin:auto;padding:0 24px}
 nav{height:72px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}
 .logo{font-weight:800;letter-spacing:-.03em}.logo span{color:var(--accent)}.links{display:flex;gap:24px;color:var(--muted);font-size:14px}.links a:hover{color:var(--text)}
-.hero{padding:96px 0 70px;display:grid;grid-template-columns:1.1fr .9fr;gap:55px;align-items:center}
+.hero{padding:80px 0 60px;display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center}
 .eyebrow{color:var(--accent);font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.14em}
 h1{font-size:clamp(44px,6vw,72px);line-height:1.02;letter-spacing:-.055em;margin:15px 0 22px}h1 em{font-style:normal;color:var(--accent)}
 .lead{font-size:19px;color:var(--muted);max-width:680px}.actions{display:flex;gap:12px;margin-top:30px;flex-wrap:wrap}
@@ -33,7 +33,7 @@ footer{border-top:1px solid var(--line);padding:30px 0;color:var(--muted);font-s
 <div>
 <div class="eyebrow">AI workflow automation for social media</div>
 <h1>Turn content operations into an <em>automated workflow.</em></h1>
-<p class="lead">Plan smarter, generate brand-safe drafts, review with a human gate, publish through platform adapters, and feed performance back into the next content cycle.</p>
+<p class="lead">Plan smarter, generate brand-safe drafts, review with a human gate, publish through platform adapters (Meta + expanding), and feed performance back into the next content cycle.</p>
 <div class="actions"><a class="btn primary" href="#workflow">See the workflow</a><a class="btn" href="https://github.com/lexusvp/social-media-smm-automation">View on GitHub</a></div>
 </div>
 <div class="workflow" id="workflow">
@@ -41,7 +41,7 @@ footer{border-top:1px solid var(--line);padding:30px 0;color:var(--muted);font-s
 <div class="step"><div class="num">02</div><div><strong>AI content planning</strong><small>Topics, platforms, formats, angles and CTAs.</small></div></div>
 <div class="step"><div class="num">03</div><div><strong>Generate drafts</strong><small>Hooks, captions, hashtags and creative concepts.</small></div></div>
 <div class="step"><div class="num">04</div><div><strong>Moderate + approve</strong><small>Policy checks followed by explicit human approval.</small></div></div>
-<div class="step"><div class="num">05</div><div><strong>Schedule + publish</strong><small>Meta-first adapter with dry-run safety.</small></div></div>
+<div class="step"><div class="num">05</div><div><strong>Schedule + publish</strong><small>Multi-adapter support with dry-run safety.</small></div></div>
 <div class="step"><div class="num">06</div><div><strong>Measure + improve</strong><small>Analytics become signals for the next cycle.</small></div></div>
 </div>
 </section>
@@ -52,7 +52,7 @@ footer{border-top:1px solid var(--line);padding:30px 0;color:var(--muted);font-s
 <div class="card"><div class="icon">✦</div><h3>AI provider</h3><p>Provider interface for generated content, with a deterministic local stub for development and tests.</p></div>
 <div class="card"><div class="icon">✓</div><h3>Moderation</h3><p>Brand rules, prohibited topics, required disclosures and content validation run before publishing.</p></div>
 <div class="card"><div class="icon">◎</div><h3>Human approval</h3><p>AI creates drafts; a human explicitly approves the final content before live publishing.</p></div>
-<div class="card"><div class="icon">↗</div><h3>Platform adapters</h3><p>Meta first, with a stable contract for future LinkedIn, X, TikTok and YouTube integrations.</p></div>
+<div class="card"><div class="icon">↗</div><h3>Platform adapters</h3><p>Meta first, with contract for LinkedIn, X, TikTok and YouTube integrations.</p></div>
 <div class="card"><div class="icon">◷</div><h3>Scheduling</h3><p>GitHub Actions supports scheduled planning and QA; production publishing can use a durable job runner.</p></div>
 <div class="card"><div class="icon">↻</div><h3>Analytics feedback</h3><p>Normalized performance metrics feed future topic scoring and content planning.</p></div>
 </div>
@@ -70,9 +70,9 @@ footer{border-top:1px solid var(--line);padding:30px 0;color:var(--muted);font-s
 
 <section class="wrap" id="roadmap">
 <div class="cta"><div class="eyebrow">Build sequence</div><h2>Start focused. Expand behind adapters.</h2><p class="lead">Phase 1: Meta / Instagram + Facebook Page — completed<br>
-Phase 2: LinkedIn + X — multi-platform text/post expansion<br>
-Phase 3: TikTok + YouTube — video content and short/long-form<br>
-Phase 4: analytics-driven recommendation loop — performance scoring and topic prioritization</p><div class="actions"><a class="btn primary" href="https://github.com/lexusvp/social-media-smm-automation">Explore the repository</a><a class="btn" href="docs/architecture/ai-automation-architecture.md">Read architecture</a></div></div>
+<span style="color:var(--accent)">Phase 2: LinkedIn + X — multi-platform text/post expansion</span><br>
+<span style="color:var(--accent2)">Phase 3: TikTok + YouTube — video content and short/long-form</span><br>
+<span style="color:var(--muted)">Phase 4: analytics-driven recommendation loop — performance scoring and topic prioritization</span></p><div class="actions"><a class="btn primary" href="https://github.com/lexusvp/social-media-smm-automation">Explore the repository</a><a class="btn" href="docs/architecture/ai-automation-architecture.md">Read architecture</a></div></div>
 </section>
 </main>
 <footer><div class="wrap">SMM Automation · AI-assisted workflow automation · Human approval remains in control.</div></footer>
