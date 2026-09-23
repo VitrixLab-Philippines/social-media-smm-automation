@@ -1,16 +1,12 @@
-from typing import Protocol
+from typing import Optional
 from smm.domain.models import ContentDraft, PublishResult
-
-class PlatformAdapter(Protocol):
-    platform: str
-    def publish(self, draft: ContentDraft, *, dry_run: bool = True) -> PublishResult: ...
 
 class MetaAdapter:
     """Meta publishing boundary. Live API calls are intentionally not implemented yet."""
 
     platform = "meta"
 
-    def __init__(self, access_token: str | None, page_id: str | None):
+    def __init__(self, access_token: Optional[str] = None, page_id: Optional[str] = None):
         self.access_token = access_token
         self.page_id = page_id
 
