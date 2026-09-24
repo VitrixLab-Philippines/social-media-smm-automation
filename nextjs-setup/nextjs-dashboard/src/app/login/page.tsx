@@ -1,95 +1,159 @@
-import Image from "next/image";
+"use client";
 
+import { useState } from "react";
+import Link from "next/link";
+import SiteNav from "@/components/layout/SiteNav";
+
+/**
+ * LoginPage — /login route.
+ *
+ * Simple email + password form matching login.html layout.
+ * On success: stores auth token, redirects to /dashboard.
+ * Demo credentials: admin@smmai.com / admin.
+ *
+ * Design: DESIGN.md — login form uses same tokens (calm ENERGY 1 on auth page).
+ */
 export default function LoginPage() {
-  const [username, setUsername] = React.useState("");
-  const [password, setPassword] = React.useState("");
-  const [error, setError] = React.useState<string | null>(null);
-  const [loggingIn, setLoggingIn] = React.useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setLoggingIn(true);
+    setLoading(true);
     setError(null);
 
     try {
-      const response = await fetch("/api/auth/login", {
+      const res = await fetch("/api/auth/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, password }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       });
 
-      const data = await response.json();
+      const data = await res.json().catch(() => ({}));
 
-      if (!response.ok) {
-        setError(data.message || "Login failed");
-        setLoggingIn(false);
+      if (!res.ok) {
+        setError((data as { message?: string }).message ?? "Login failed");
         return;
       }
 
-      // Store auth token and redirect to dashboard
-      if (data.token) {
-        localStorage.setItem("authToken", data.token);
+      if ((data as { token?: string }).token) {
+        localStorage.setItem(
+          "authToken",
+          (data as { token: string }).token
+        );
       }
-      // Redirect to dashboard
       window.location.href = "/dashboard";
-    } catch (err) {
-      setError("An error occurred. Please try again.");
-      setLoggingIn(false);
+    } catch {
+      setError("Network error — please try again.");
+    } finally {
+      setLoading(false);
     }
-  };
+  }
 
   return (
-    <div className="min-h-screen bg-canvas flex items-center justify-center p-6">
-      <div className="bg-surface rounded-lg shadow-card p-8 max-w-md w-full border border-border-subtle">
-        <h2 className="text-3xl font-bold text-primary text-center mb-6">SMM Automation</h2>
+    <>
+      <SiteNav />
 
-        {error && (
-          <div className="mb-4 p-3 border-l-4 border-negative bg-negative-soft">
-            <p className="text-sm text-secondary">{error}</p>
+      <main
+        id="main-content"
+        style={{ paddingTop: "64px", minHeight: "100vh" }}
+        aria-label="Sign in"
+      >
+        <div className="login-wrap">
+          <div className="login-card">
+            <h2 style={{ marginTop: 0, marginBottom: "1.5rem" }}>
+              Sign in to S M M <span className="ai">AI</span>
+            </h2>
+
+            {error && (
+              <div
+                role="alert"
+                style={{
+                  marginBottom: "1rem",
+                  padding: ".75rem",
+                  borderLeft: "3px solid var(--primary)",
+                  background: "var(--primary-light)",
+                  borderRadius: "var(--radius-small)",
+                  fontSize: "var(--text-sm)",
+                  color: "var(--text)",
+                }}
+              >
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} noValidate>
+              <div className="form-group">
+                <label htmlFor="loginEmail">Email</label>
+                <input
+                  id="loginEmail"
+                  type="email"
+                  name="email"
+                  required
+                  placeholder="you@company.com"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="loginPassword">Password</label>
+                <input
+                  id="loginPassword"
+                  type="password"
+                  name="password"
+                  required
+                  placeholder="••••••••"
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginTop: "1.5rem",
+                  gap: "1rem",
+                }}
+              >
+                <button type="submit" className="btn primary" disabled={loading}>
+                  {loading ? "Signing in…" : "Sign in"}
+                </button>
+                <Link
+                  href="#"
+                  style={{
+                    fontSize: "var(--text-sm)",
+                    color: "var(--muted)",
+                  }}
+                >
+                  Forgot password?
+                </Link>
+              </div>
+
+              <div
+                style={{
+                  marginTop: "2rem",
+                  fontSize: "var(--text-sm)",
+                  color: "var(--muted)",
+                }}
+              >
+                <Link
+                  href="#"
+                  style={{ color: "var(--primary)", textDecoration: "underline" }}
+                >
+                  Create free account
+                </Link>
+              </div>
+            </form>
           </div>
-        )}
-
-        <form onSubmit={handleLogin} className="space-y-4">
-          <div className="space-y-2">
-            <label className="text-sm text-secondary">Username</label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              className="w-full bg-surface border border-border-subtle rounded-md px-3 py-2 text-primary placeholder-secondary focus:outline-none focus:border-accent transition-colors"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm text-secondary">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full bg-surface border border-border-subtle rounded-md px-3 py-2 text-primary placeholder-secondary focus:outline-none focus:border-accent transition-colors"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loggingIn}
-            className="w-full bg-accent text-accent-on hover:bg-accent-strong text-sm font-medium py-2 rounded-md transition-colors"
-          >
-            {loggingIn ? "Logging in..." : "Sign In"}
-          </button>
-        </form>
-
-        <p className="text-center text-sm text-tertiary mt-4">
-          Don't have an account? {" "}
-          <a href="/register" className="underline underline-accent hover:text-accent-strong">
-            Register
-          </a>
-        </p>
-      </div>
-    </div>
+        </div>
+      </main>
+    </>
   );
 }

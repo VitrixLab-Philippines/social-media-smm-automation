@@ -3,11 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "serve -s . -l $PORT",
-    "dev": "sirv . --dev 8080"
+    "dev": "pnpm --dir nextjs-setup/nextjs-dashboard dev",
+    "build": "pnpm --dir nextjs-setup/nextjs-dashboard build",
+    "start": "pnpm --dir nextjs-setup/nextjs-dashboard start",
+    "start:legacy": "serve -s ."
   },
   "dependencies": {
-    "serve": "^14.2.4",
-    "sirv": "^2.0.5"
+    "serve": "^14.2.4"
   }
 }
