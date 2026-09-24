@@ -7,6 +7,8 @@ __pycache__/
 *.so
 
 # Distribution / packaging
+node_modules/
+
 .Python
 build/
 develop-eggs/
@@ -150,6 +152,9 @@ activemq-data/
 # Environments
 .env
 .envrc
+.env.*
+!.env.example
+
 .venv
 env/
 venv/

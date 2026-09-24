@@ -1,5 +1,6 @@
 # src/smm/main.py
-from fastapi import FastAPI, FileResponse
+from fastapi import FastAPI
+from fastapi.responses import FileResponse
 import subprocess
 import json
 

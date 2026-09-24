@@ -1,25 +1,33 @@
-import type { NextRequest } from "next/server"
-import { readFileSync } from "fs"
+import type { NextRequest } from "next/server";
+import { readFileSync, existsSync } from "fs";
+import { resolve } from "path";
+import { NextResponse } from "next/server";
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
-    const graphPath = "/home/citrixlabph/smma/graphify-out/graph.json"
+    // Resolves to smma/graphify-out/graph.json
+    const graphPath = resolve(process.cwd(), "..", "..", "graphify-out", "graph.json");
+
+    if (!existsSync(graphPath)) {
+      return NextResponse.json(
+        { error: "graph.json not found", phases: {}, planProgress: {}, totalNodes: 0, totalLinks: 0 },
+        { status: 404 }
+      );
+    }
 
     // Read the graphify-generated graph using Node.js fs
-    const rawData = readFileSync(graphPath, "utf-8")
-    const data = JSON.parse(rawData)
+    const rawData = readFileSync(graphPath, "utf-8");
+    const data = JSON.parse(rawData);
 
     // Extract phases and plans from the graph
-    const nodes = data.nodes || []
-    const links = data.links || []  // graphify uses "links" not "edges"
-    const hyperedges = data.hyperedges || []
+    const nodes = data.nodes || [];
+    const links = data.links || []; // graphify uses "links" not "edges"
+    const hyperedges = data.hyperedges || [];
 
     // Map graph node IDs to SMM phases and plans
-    // Based on actual node IDs from graphify extraction
     const phaseMap: Record<string, string> = {
       // Content-related nodes
       "src_smm_domain_models_contentdraft": "Content Creation",
-      "src_smm_domain_models_draftstatus": "Content Creation",
       "src_smm_domain_models_publishresult": "Content Creation",
       "enum": "Content Creation",
       "ContentDraft": "Content Creation",
@@ -32,11 +40,9 @@ export async function GET(request: NextRequest) {
       "src_smm_content_planner_contentplanner": "Content Planning",
       "src_smm_content_planner_contentplan": "Content Planning",
       "ContentPlanner": "Content Planning",
-      "src_smm_ai_provider_aiprovider": "Content Planning",
       "src_smm_ai_provider_generationrequest": "Content Planning",
       "GenerationRequest": "Content Planning",
       "src_smm_ai_provider_stubaiprovider": "Content Planning",
-      "GenerationResult": "Content Planning",
 
       // Meta integration nodes
       "src_smm_integrations_adapters_metaadapter": "Meta Integration",
@@ -83,52 +89,52 @@ export async function GET(request: NextRequest) {
       "src_smm_config_get_settings": "Configuration",
       "pkg_smm_wasm": "WASM",
       "pkg_social_media_smm_automation": "Package",
-    }
+    };
 
     // Group nodes by phase
-    const phases: Record<string, { nodes: string[]; edgeCount: number }> = {}
+    const phases: Record<string, { nodes: string[]; edgeCount: number }> = {};
     for (const node of nodes) {
-      const type = node.id || node.label || node.key || String(node)
-      const phase = phaseMap[type] || "Other"
+      const type = node.id || node.label || node.key || String(node);
+      const phase = phaseMap[type] || "Other";
       if (!phases[phase]) {
-        phases[phase] = { nodes: [], edgeCount: 0 }
+        phases[phase] = { nodes: [], edgeCount: 0 };
       }
-      phases[phase].nodes.push(type)
+      phases[phase].nodes.push(type);
     }
 
     // Count links (integrations) per phase
     for (const link of links) {
-      const source = link.source || ""
-      const target = link.target || ""
-      const sourcePhase = phaseMap[source] || "Other"
-      const targetPhase = phaseMap[target] || "Other"
+      const source = link.source || "";
+      const target = link.target || "";
+      const sourcePhase = phaseMap[source] || "Other";
+      const targetPhase = phaseMap[target] || "Other";
       if (sourcePhase !== targetPhase) {
         // Cross-phase link - track integration
-        if (!phases[sourcePhase]) phases[sourcePhase] = { nodes: [], edgeCount: 0 }
-        if (!phases[targetPhase]) phases[targetPhase] = { nodes: [], edgeCount: 0 }
-        phases[sourcePhase].edgeCount += 1
-        phases[targetPhase].edgeCount += 1
+        if (!phases[sourcePhase]) phases[sourcePhase] = { nodes: [], edgeCount: 0 };
+        if (!phases[targetPhase]) phases[targetPhase] = { nodes: [], edgeCount: 0 };
+        phases[sourcePhase].edgeCount += 1;
+        phases[targetPhase].edgeCount += 1;
       } else if (sourcePhase === targetPhase && sourcePhase !== "Other") {
-        phases[sourcePhase].edgeCount += 1
+        phases[sourcePhase].edgeCount += 1;
       }
     }
 
     // Calculate plan progress based on node connectivity
-    const planProgress: Record<string, { completed: number; total: number }> = {}
+    const planProgress: Record<string, { completed: number; total: number }> = {};
     for (const [phase, info] of Object.entries(phases)) {
-      const connectedTo = new Set<string>()
+      const connectedTo = new Set<string>();
       for (const link of links) {
-        const source = link.source || ""
-        const target = link.target || ""
+        const source = link.source || "";
+        const target = link.target || "";
         if (source.includes(phase) || target.includes(phase)) {
-          connectedTo.add(source)
-          connectedTo.add(target)
+          connectedTo.add(source);
+          connectedTo.add(target);
         }
       }
       planProgress[phase] = {
         completed: connectedTo.size,
         total: phases[phase]?.nodes.length || 0,
-      }
+      };
     }
 
     const result = {
@@ -140,16 +146,14 @@ export async function GET(request: NextRequest) {
       totalLinks: data.total_links || links.length,
       totalHyperedges: hyperedges.length,
       extractionTime: new Date().toISOString(),
-    }
+    };
 
-    return new Response(JSON.stringify(result, null, 2), {
-      headers: { "Content-Type": "application/json" },
-    })
+    return NextResponse.json(result);
   } catch (error) {
-    console.error("Graph API error:", error)
-    return new Response(JSON.stringify({ error: "Failed to load graph data" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    })
+    console.error("Graph API error:", error);
+    return NextResponse.json(
+      { error: "Failed to load graph data" },
+      { status: 500 }
+    );
   }
 }
