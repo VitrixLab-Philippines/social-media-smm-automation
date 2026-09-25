@@ -2,7 +2,6 @@
 
 import React, { ReactNode } from "react";
 import Link from "next/link";
-import SiteNav from "@/components/layout/SiteNav";
 import SiteFooter from "@/components/layout/SiteFooter";
 
 import { DashboardViewSection } from "@/components/layout/LayoutControlBar";
@@ -25,12 +24,11 @@ export default function DashboardShell({
     { id: "graph", label: "Architecture Graph", icon: "⎇", badge: "AST" },
     { id: "analytics", label: "Analytics Loop", icon: "📈", badge: "6 Nets" },
     { id: "guardrails", label: "Brand Guardrails", icon: "🛡", badge: "Rules" },
+    { id: "crm", label: "CRM", icon: "📊", badge: "Live" },
   ];
 
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "var(--bg)" }}>
-      <SiteNav />
-
       <div style={{ display: "flex", flex: 1, paddingTop: "64px" }}>
         {/* Controllable Sidebar */}
         {sidebarOpen && (
