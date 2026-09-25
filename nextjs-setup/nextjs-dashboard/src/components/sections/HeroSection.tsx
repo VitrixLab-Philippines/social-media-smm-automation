@@ -12,7 +12,7 @@ export default function HeroSection() {
       <div className="hero-inner">
         <div className="hero-content" data-reveal>
           <span className="eyebrow">
-            Social media AI &mdash; built for control
+            Social media AI, built for control
           </span>
           <h1>
             Scale content.

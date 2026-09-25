@@ -49,7 +49,7 @@ Not: corporate-grey, boring, interchangeable.
 | `--panel` | `#0e1812` | `#ffffff` | Card surfaces |
 | `--surface` | `#0b1310` | `#f0f4f2` | Raised layer |
 | `--text` | `#f2f6f3` | `#0d1a14` | Primary text |
-| `--muted` | `#637669` | `#4a5e52` | Secondary text |
+| `--muted` | `#718579` | `#4a5e52` | Secondary text |
 | `--line` | `#162618` | `#d1e0d6` | Borders |
 | `--primary` | `#059669` | `#047857` | Emerald — brand primary, "AI" in wordmark |
 | `--accent` | `#f59e0b` | — | Amber — roadmap status badges only |

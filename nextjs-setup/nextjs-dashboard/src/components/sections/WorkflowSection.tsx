@@ -26,7 +26,7 @@ export default function WorkflowSection() {
         {/* Pair 1: AI Planning */}
         <div className="story-pair" data-reveal>
           <div className="story-text">
-            <div className="story-num">01 &mdash; Plan &amp; Generate</div>
+            <div className="story-num">01: Plan &amp; Generate</div>
             <h3>AI does the research and drafts the content</h3>
             <p>
               Campaigns, trends, audience signals and briefs feed the planner.
@@ -78,11 +78,11 @@ export default function WorkflowSection() {
             </div>
           </div>
           <div className="story-text">
-            <div className="story-num">02 &mdash; Review &amp; Approve</div>
+            <div className="story-num">02: Review &amp; Approve</div>
             <h3>A human approves before anything goes live</h3>
             <p>
               Policy checks run first. Then an explicit human approval signal is
-              required. Nothing bypasses this gate &mdash; not a scheduled post,
+              required. Nothing bypasses this gate  not a scheduled post,
               not a retry, not an edge case. The gate is the product.
             </p>
           </div>
@@ -91,10 +91,10 @@ export default function WorkflowSection() {
         {/* Pair 3: Multi-platform publish — text left, platform grid right */}
         <div className="story-pair" data-reveal>
           <div className="story-text">
-            <div className="story-num">03 &mdash; Publish &amp; Measure</div>
+            <div className="story-num">03: Publish &amp; Measure</div>
             <h3>Publish everywhere, feed performance back in</h3>
             <p>
-              Meta first &mdash; with adapters for LinkedIn, X, TikTok and
+              Meta first  with adapters for LinkedIn, X, TikTok and
               YouTube behind a clean contract. Performance metrics normalize and
               flow back into topic scoring, so every post teaches the next one.
             </p>

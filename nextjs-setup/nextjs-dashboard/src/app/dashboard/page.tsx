@@ -2,7 +2,9 @@
 
 import React, { useState } from "react";
 import DashboardShell from "@/components/layout/DashboardShell";
+import DashboardHeader from "@/components/layout/DashboardHeader";
 import LayoutControlBar, { DashboardViewSection } from "@/components/layout/LayoutControlBar";
+import SiteFooter from "@/components/layout/SiteFooter";
 import ApprovalQueue from "@/components/crm/ApprovalQueue";
 import AutomationStatusCard from "@/components/crm/AutomationStatusCard";
 import GraphExplorer from "@/components/dashboard/GraphExplorer";
@@ -27,44 +29,62 @@ export default function DashboardPage() {
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
 
   return (
-    <DashboardShell
-      sidebarOpen={sidebarOpen}
-      activeSection={currentSection}
-      onSelectSection={setCurrentSection}
-    >
-      {/* Controllable Layout Toolbar */}
-      <LayoutControlBar
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+      <DashboardHeader
         currentSection={currentSection}
-        onSectionChange={setCurrentSection}
         viewMode={viewMode}
-        onViewModeChange={setViewMode}
         density={density}
-        onDensityChange={setDensity}
         selectedPlatform={selectedPlatform}
-        onPlatformChange={setSelectedPlatform}
         sidebarOpen={sidebarOpen}
-        onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+        onSelectSection={setCurrentSection}
+        onToggleViewMode={setViewMode}
+        onToggleDensity={setDensity}
+        onPlatformChange={setSelectedPlatform}
       />
 
-      {/* Active Section Content */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-        {currentSection === "approval" && (
-          <>
-            <AutomationStatusCard />
-            <ApprovalQueue
-              viewMode={viewMode}
-              density={density}
-              selectedPlatform={selectedPlatform}
-            />
-          </>
-        )}
+      <DashboardShell
+        sidebarOpen={sidebarOpen}
+        activeSection={currentSection}
+        onSelectSection={setCurrentSection}
+      >
+        {/* Controllable Layout Toolbar */}
+        <LayoutControlBar
+          currentSection={currentSection}
+          onSectionChange={setCurrentSection}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          density={density}
+          onDensityChange={setDensity}
+          selectedPlatform={selectedPlatform}
+          onPlatformChange={setSelectedPlatform}
+          sidebarOpen={sidebarOpen}
+          onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+        />
 
-        {currentSection === "graph" && <GraphExplorer />}
+        {/* Active Section Content */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+          {currentSection === "approval" && (
+            <>
+              <AutomationStatusCard />
+              <ApprovalQueue
+                viewMode={viewMode}
+                density={density}
+                selectedPlatform={selectedPlatform}
+              />
+            </>
+          )}
 
-        {currentSection === "analytics" && <AnalyticsCards />}
+          {currentSection === "graph" && <GraphExplorer />}
 
-        {currentSection === "guardrails" && <BrandProfileCard />}
-      </div>
-    </DashboardShell>
+          {currentSection === "analytics" && <AnalyticsCards />}
+
+          {currentSection === "guardrails" && <BrandProfileCard />}
+
+        {currentSection === "crm" && <CRMDashboard />}
+        </div>
+      </DashboardShell>
+
+      <SiteFooter />
+    </div>
   );
 }
