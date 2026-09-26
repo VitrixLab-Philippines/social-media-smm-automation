@@ -25,6 +25,7 @@ export default function ApprovalQueue({
   const [newPlatform, setNewPlatform] = useState<Platform>("instagram");
   const [newText, setNewText] = useState("");
   const [newHashtags, setNewHashtags] = useState("#SMMAI, #Growth");
+  const [toast, setToast] = useState({ show: false, message: "", type: "success" });
 
   useEffect(() => {
     let ignore = false;
@@ -57,6 +58,11 @@ export default function ApprovalQueue({
     };
   }, [activeTab, selectedPlatform, refreshKey]);
 
+  function showToast(message: string, type: "success" | "error") {
+    setToast({ show: true, message, type });
+    setTimeout(() => setToast({ show: false, message: "", type: "success" }), 5000);
+  }
+
   async function handleUpdateStatus(id: string, status: DraftStatus) {
     try {
       const res = await fetch("/api/crm/drafts", {
@@ -66,9 +72,13 @@ export default function ApprovalQueue({
       });
       if (res.ok) {
         setRefreshKey((k) => k + 1);
+        showToast("Status updated successfully", "success");
+      } else {
+        const data = await res.json();
+        showToast("Failed: " + (data.error || "Unknown error"), "error");
       }
     } catch {
-      alert("Failed to update status");
+      showToast("Error updating status. Please try again.", "error");
     }
   }
 
@@ -96,10 +106,14 @@ export default function ApprovalQueue({
         setShowCreateModal(false);
         setNewTopic("");
         setNewText("");
+        setToast({ show: false });
         loadDrafts();
+      } else {
+        const data = await res.json();
+        showToast("Failed: " + (data.error || "Unknown error"), "error");
       }
     } catch {
-      alert("Failed to create draft");
+      showToast("Error creating draft. Please try again.", "error");
     }
   }
 
@@ -116,12 +130,30 @@ export default function ApprovalQueue({
           marginBottom: "1.25rem",
         }}
       >
-        <div>
-          <span className="eyebrow">Human Approval Pipeline</span>
-          <h2 style={{ fontSize: "var(--text-xl)", fontWeight: "var(--weight-black)", color: "var(--text)", margin: 0 }}>
-            Post Review & Approval Gate
-          </h2>
-        </div>
+<div>
+  <span className="eyebrow">Human Approval Pipeline</span>
+  <h2 style={{ fontSize: "var(--text-xl)", fontWeight: "var(--weight-black)", color: "var(--text)", margin: 0 }}>
+    Post Review & Approval Gate
+  </h2>
+</div>
+
+{toast.show && (
+  <div
+    style={{
+      background: toast.type === "success" ? "var(--primary)" : "#ef4444",
+      color: "var(--bg)",
+      padding: "0.75rem 1rem",
+      marginBottom: "1.25rem",
+      borderRadius: "var(--radius-small)",
+      fontSize: "var(--text-xs)",
+      textAlign: "center",
+      margin: "0 1rem",
+      animation: "slideIn 0.3s ease, slideOut 0.3s ease 4.7s forwards",
+    }}
+  >
+    {toast.message}
+  </div>
+)}
 
         <div style={{ display: "flex", gap: "0.5rem" }}>
           <button

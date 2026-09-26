@@ -85,7 +85,6 @@ export default function DashboardPage() {
         </div>
       </DashboardShell>
 
-      <SiteFooter />
     </div>
   );
 }

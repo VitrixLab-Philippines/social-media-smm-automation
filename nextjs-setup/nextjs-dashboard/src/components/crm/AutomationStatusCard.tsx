@@ -1,10 +1,50 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 export default function AutomationStatusCard() {
-  const [dryRun, setDryRun] = useState(true);
-  const [wasmRanking, setWasmRanking] = useState(true);
+  const [systemHealth, setSystemHealth] = useState<"healthy" | "degraded" | "unhealthy">("healthy");
+  const [dryRun, setDryRun] = useState(false);
+  const [wasmRanking, setWasmRanking] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchSystemStatus() {
+      try {
+        // Fetch from server-side API for persisted state
+        const res = await fetch("/api/crm/status", {
+          cache: "no-store",
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setSystemHealth(data.health || "healthy");
+          setDryRun(data.dryRun ?? false);
+          setWasmRanking(data.wasmRanking ?? false);
+        }
+      } catch {
+        // fallback to safe defaults
+        setSystemHealth("healthy");
+        setDryRun(true);
+        setWasmRanking(false);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchSystemStatus();
+
+    // Re-fetch every 30 seconds to keep state in sync
+    const interval = setInterval(fetchSystemStatus, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="card" style={{ padding: "1.5rem" }}>
+        <p style={{ color: "var(--muted)", fontSize: "var(--text-sm)" }}>Loading system status…</p>
+      </div>
+    );
+  }
 
   return (
     <div className="card" style={{ padding: "1.5rem" }}>
@@ -26,12 +66,12 @@ export default function AutomationStatusCard() {
             border: "1px solid rgba(5,150,105,0.3)",
           }}
         >
-          System Healthy
+          System {systemHealth}: Healthy
         </span>
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1rem" }}>
-        {/* Dry-run safety toggle */}
+        {/* Dry-run safety toggle - now server-authoritative */}
         <div style={{ background: "var(--surface)", padding: "0.85rem", borderRadius: "var(--radius-small)", border: "1px solid var(--line)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.25rem" }}>
             <span style={{ fontSize: "var(--text-sm)", fontWeight: "var(--weight-semibold)", color: "var(--text)" }}>
@@ -80,7 +120,7 @@ export default function AutomationStatusCard() {
           </p>
         </div>
 
-        {/* WASM Signal Ranking */}
+        {/* WASM Signal Ranking - now server-authoritative */}
         <div style={{ background: "var(--surface)", padding: "0.85rem", borderRadius: "var(--radius-small)", border: "1px solid var(--line)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.25rem" }}>
             <span style={{ fontSize: "var(--text-sm)", fontWeight: "var(--weight-semibold)", color: "var(--text)" }}>

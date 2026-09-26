@@ -15,6 +15,8 @@ export default function ContentDraftCard({
   onUpdateStatus,
   compact = false,
 }: ContentDraftCardProps) {
+  const [isPublishing, setIsPublishing] = React.useState(false);
+
   const platformColors: Record<string, string> = {
     meta: "#1877F2",
     instagram: "#E4405F",
@@ -22,6 +24,29 @@ export default function ContentDraftCard({
     x: "#718579",
     tiktok: "#00F2FE",
     youtube: "#FF0000",
+  };
+
+  const createPublishJob = async (draftId: string, platform: string) => {
+    setIsPublishing(true);
+    try {
+      const res = await fetch("/api/crm/publish", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ draftId, platform }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setIsPublishing(false);
+        onUpdateStatus(draftId, "published");
+        alert("Publish job submitted successfully");
+      } else {
+        setIsPublishing(false);
+        alert("Failed to submit publish job: " + (data.error || ""));
+      }
+    } catch {
+      setIsPublishing(false);
+      alert("Error submitting publish job");
+    }
   };
 
   const draft = draftData || {
@@ -170,7 +195,7 @@ export default function ContentDraftCard({
                 flex: 1,
                 background: "var(--secondary)",
               }}
-              onClick={() => onUpdateStatus(draft.id, "published")}
+              onClick={() => isPublishing ? null : createPublishJob(draft.id, draft.platform)}
             >
               🚀 Publish to {draft.platform}
             </button>
