@@ -94,7 +94,24 @@
         /* ─── Layout ─────────────────────────────────────────────────────────────── */
         .wrap { max-width: 420px; margin: 3rem auto; padding: 0 2rem }
 
-        /* ─── Form styles ───────────────────────────────────────────────────────── */
+        /* ─── Skip link ─────────────────────────────────────────────────────────────── */
+.skip-link {
+  position: absolute;
+  top: -999px;
+  left: -999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.skip-link:focus {
+  top: .75rem;
+  left: .75rem;
+  width: auto;
+  height: auto;
+  overflow: visible;
+}
+
+/* ─── Form styles ───────────────────────────────────────────────────────── */
         .card {
             background: var(--panel);
             border: 1px solid var(--line);
@@ -106,11 +123,12 @@
 
         .form-group label { display: block; margin-bottom: 0.5rem; color: var(--muted); font-size: var(--text-sm) }
 
-        .form-group input {
-            width: 100%; padding: 0.75rem; background: var(--surface);
-            border: 1px solid var(--line); border-radius: var(--radius-medium);
-            color: var(--text); font-size: var(--text-base); font-family: var(--font)
-        }
+.form-group input {
+  width: 100%; padding: 0.75rem; background: var(--surface);
+  border: 1px solid var(--muted); border-radius: var(--radius-medium);
+  color: var(--text); font-size: var(--text-base); font-family: var(--font)
+}
+.form-group input:focus { outline: 2px solid var(--primary); outline-offset: 4px }
 
         .form-group input:focus { outline: none; border-color: var(--primary) }
 
@@ -149,8 +167,9 @@
 <!-- ─── Skip link ─────────────────────────────────────────────────────────────── -->
 <a class="skip-link" href="#main-content">Skip to main content</a>
 
-<div class="wrap">
-    <div class="card">
+<main id="main-content">
+    <div class="wrap">
+        <div class="card">
         <h2 style="margin-top: 0; margin-bottom: 1.5rem">Sign in to SMMAI</h2>
 
         <form id="loginForm" novalidate>
@@ -174,7 +193,7 @@
             </div>
         </form>
     </div>
-</div>
+</main>
 
 <script>
     // ─── Login form interactivity ────────────────────────────────────────
