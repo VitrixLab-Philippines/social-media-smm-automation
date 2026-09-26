@@ -5,13 +5,13 @@ import { ContentDraft, DraftStatus } from "@/lib/crm";
 import StatusPill from "@/components/ui/StatusPill";
 
 interface ContentDraftCardProps {
-  draft: ContentDraft;
-  onUpdateStatus: (id: string, status: DraftStatus) => void;
+  draft?: ContentDraft;
+  onUpdateStatus?: (id: string, status: DraftStatus) => void;
   compact?: boolean;
 }
 
 export default function ContentDraftCard({
-  draft,
+  draft: draftData,
   onUpdateStatus,
   compact = false,
 }: ContentDraftCardProps) {
@@ -22,6 +22,18 @@ export default function ContentDraftCard({
     x: "#718579",
     tiktok: "#00F2FE",
     youtube: "#FF0000",
+  };
+
+  const draft = draftData || {
+    id: "draft-001",
+    topic: "No draft selected",
+    text: "",
+    platform: "unknown",
+    status: "draft",
+    hashtags: [],
+    engagementScore: 0,
+    author: "System",
+    createdAt: new Date(),
   };
 
   return (

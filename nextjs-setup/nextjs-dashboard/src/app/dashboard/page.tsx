@@ -10,6 +10,7 @@ import AutomationStatusCard from "@/components/crm/AutomationStatusCard";
 import GraphExplorer from "@/components/dashboard/GraphExplorer";
 import AnalyticsCards from "@/components/crm/AnalyticsCards";
 import BrandProfileCard from "@/components/crm/BrandProfileCard";
+import CRMDashboard from "@/components/crm/CRMDashboard";
 
 /**
  * DashboardPage — Controllable CRM and Automation Command Center.
