@@ -115,6 +115,16 @@ strong, b { font-weight: var(--weight-semibold) }
   transition: top .15s ease;
 }
 .skip-link:focus { top: .75rem }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 
 /* ─── Layout ─────────────────────────────────────────────────────────────── */
 .wrap { max-width: 1120px; margin: auto; padding: 0 24px }
@@ -1123,6 +1133,7 @@ html.light nav { background: rgba(248,250,249,0.94) }
         <a class="link" href="#security">Security</a>
         <a class="link" href="#roadmap">Roadmap</a>
         <a class="link" href="login.html">Login</a>
+        <a class="github-badge" href="https://github.com/vitrixLab/social-media-smm-automation" target="_blank" rel="noopener noreferrer">GitHub</a>
       </div>
       <button class="theme-toggle" aria-label="Toggle light/dark theme" title="Toggle theme">
         <span class="theme-icon" aria-hidden="true">☾</span>
@@ -1216,6 +1227,7 @@ html.light nav { background: rgba(248,250,249,0.94) }
         </div><!-- /.dashboard-card -->
       </div><!-- /.dash-float-wrap -->
     </div><!-- /.hero-visual -->
+      <p class="sr-only">28 posts this week. 100% human-reviewed. 0 bypassed gate.</p>
 
   </div><!-- /.hero-inner -->
 </section>
@@ -1469,18 +1481,18 @@ html.light nav { background: rgba(248,250,249,0.94) }
       <p class="desc">OAuth tokens, API keys and refresh tokens belong in environment variables and GitHub Secrets, not config files or commits.</p>
     </article>
 
-    <article class="card" tabindex="0" role="article" aria-label="Moderation before publish" data-reveal data-delay="2">
+    <article class="card" aria-label="Moderation before publish" data-reveal data-delay="2">
       <div class="border-glow-layer" aria-hidden="true"></div>
       <div class="border-glow-inner" aria-hidden="true"></div>
       <div class="title">Moderation before publish</div>
       <p class="desc">A failed policy check blocks publication. Empty content and missing required disclosures are rejected.</p>
     </article>
 
-    <article class="card" tabindex="0" role="article" aria-label="Explicit approval" data-reveal data-delay="3">
+    <article class="card" aria-label="Explicit approval" data-reveal data-delay="3">
       <div class="border-glow-layer" aria-hidden="true"></div>
       <div class="border-glow-inner" aria-hidden="true"></div>
       <div class="title">Explicit approval</div>
-      <p class="desc">The publishing service requires a human approval signal <span class="phase-badge completed">before a live publish can proceed</span>.</p>
+      <p class="desc">The publishing service requires a human approval signal before a live publish can proceed.</p>
     </article>
   </div>
 </section>
@@ -1680,52 +1692,6 @@ html.light nav { background: rgba(248,250,249,0.94) }
   });
 })();
 
-// ─── Login form interactivity ────────────────────────────────────────
-(function() {
-  var loginBtn = document.getElementById('loginBtn');
-  var loginSection = document.getElementById('login');
-  var loginForm = document.getElementById('loginForm');
-
-  if (!loginBtn || !loginSection || !loginForm) return;
-
-  // Toggle login section visibility
-  loginBtn.addEventListener('click', function(e) {
-    e.preventDefault();
-    var isVisible = loginSection.style.display !== 'none';
-    loginSection.style.display = isVisible ? 'none' : 'block';
-    loginSection.style.width = '100%';
-    loginSection.style.maxWidth = '400px';
-    loginSection.style.margin = '2rem auto';
-
-    if (!isVisible) {
-      var emailInput = loginSection.querySelector('input[type="email"]');
-      if (emailInput) emailInput.focus();
-    }
-  });
-
-  // Handle form submission
-  loginForm.addEventListener('submit', function(e) {
-    e.preventDefault();
-    var email = document.getElementById('loginEmail').value;
-    var password = document.getElementById('loginPassword').value;
-
-    if (email.trim() && password.trim()) {
-      loginSection.style.display = 'none';
-      loginBtn.textContent = 'Logout';
-      loginBtn.classList.remove('secondary');
-      loginBtn.classList.add('primary');
-      loginBtn.setAttribute('aria-label', 'Logout from dashboard');
-      window.location.hash = '#dashboard';
-    }
-  });
-
-  // Close login section on Escape key
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape' && loginSection.style.display !== 'none') {
-      loginSection.style.display = 'none';
-      loginBtn.focus();
-    }
-  });
 })();
 </script>
 

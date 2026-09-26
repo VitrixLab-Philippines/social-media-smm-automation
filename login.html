@@ -134,7 +134,7 @@
 
         .btn {
             width: 100%; padding: 0.75rem; background: var(--primary);
-            color: white; border: none; border-radius: var(--radius-medium);
+            color: var(--bg); border: none; border-radius: var(--radius-medium);
             font-size: var(--text-md); font-weight: var(--weight-bold); cursor: pointer;
             margin-top: 0.5rem; transition: background .2s ease
         }
@@ -167,10 +167,33 @@
 <!-- ─── Skip link ─────────────────────────────────────────────────────────────── -->
 <a class="skip-link" href="#main-content">Skip to main content</a>
 
+<header class="login-header" aria-label="Login page header">
+    <div class="wrap">
+        <a class="logo" href="index.html" aria-label="SMMAI home">S M M <span class="ai">AI</span></a>
+    </div>
+</header>
+
 <main id="main-content">
     <div class="wrap">
         <div class="card">
-        <h2 style="margin-top: 0; margin-bottom: 1.5rem">Sign in to SMMAI</h2>
+        <h1 style="margin-top: 0; margin-bottom: 1.5rem">Sign in to SMMAI</h1>
+
+<div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "1.5rem" }}>
+    <button
+        className="theme-toggle"
+        aria-label="Toggle light/dark theme"
+        title="Toggle theme"
+        onClick={() => {
+            const html = document.documentElement;
+            const isLight = html.classList.toggle("light");
+            const icon = document.querySelector('.theme-icon');
+            icon.textContent = isLight ? "☀" : "☾";
+            localStorage.setItem("smma-theme", isLight ? "light" : "dark");
+        }}
+    >
+        <span className="theme-icon" aria-hidden="true">☾</span>
+    </button>
+</div>
 
         <form id="loginForm" novalidate>
             <div class="form-group">
@@ -185,36 +208,30 @@
 
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem">
                 <button type="submit" class="btn">Sign in</button>
-                <a class="btn-secondary" href="#">Forgot password?</a>
-            </div>
-
-            <div class="links">
-                <a href="#">Create free account</a>
+                <span style={{display: "flex", alignItems: "center", gap: "0.5rem"}}>
+                    <span style={{color: "var(--muted)", textDecoration: "none"}}>Forgot password?</span>
+                    <span style={{color: "var(--muted)", textDecoration: "none"}}>Create free account</span>
+                </span>
             </div>
         </form>
     </div>
 </main>
 
 <script>
-    // ─── Login form interactivity ────────────────────────────────────────
+    // ─── Theme toggle — localStorage persistence (DESIGN.md R-21, antislop R-34) ────────────────────
     (function() {
-        var loginForm = document.getElementById('loginForm');
-
-        if (!loginForm) return;
-
-        loginForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            var email = document.getElementById('loginEmail').value;
-            var password = document.getElementById('loginPassword').value;
-
-            // Test credentials: admin / admin
-            if (email.trim() === 'admin@smmai.com' && password.trim() === 'admin') {
-                // Redirect to dashboard (main index with workflow section)
-                window.location.href = 'index.html#workflow';
-            } else {
-                alert('Invalid credentials. Use: admin / admin');
-            }
-        });
+      var btn = document.querySelector('.theme-toggle');
+      var icon = btn.querySelector('.theme-icon');
+      var saved = localStorage.getItem('smma-theme');
+      if (saved === 'light') {
+        document.documentElement.classList.add('light');
+        icon.textContent = '☀';
+      }
+      btn.addEventListener('click', function() {
+        var isLight = document.documentElement.classList.toggle('light');
+        icon.textContent = isLight ? '☀' : '☾';
+        localStorage.setItem('smma-theme', isLight ? 'light' : 'dark');
+      });
     })();
 </script>
 
