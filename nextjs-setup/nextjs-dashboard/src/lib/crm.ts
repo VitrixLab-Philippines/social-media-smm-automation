@@ -96,6 +96,13 @@ export const initialAnalytics: AnalyticsMetric[] = [
   },
 ];
 
+export type DashboardViewSection =
+  | "approval"
+  | "graph"
+  | "analytics"
+  | "guardrails"
+  | "crm";
+
 export const initialDrafts: ContentDraft[] = [
   {
     id: "1",
