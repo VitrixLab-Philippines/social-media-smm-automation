@@ -6,38 +6,44 @@ interface StatusPillProps {
 }
 
 export default function StatusPill({ status }: StatusPillProps) {
-  const config: Record<DraftStatus, { label: string; bg: string; color: string; border: string }> = {
-    pending: {
-      label: "Pending Review",
-      bg: "rgba(245, 158, 11, 0.12)",
-      color: "#f59e0b",
-      border: "rgba(245, 158, 11, 0.3)",
-    },
-    approved: {
-      label: "Approved",
-      bg: "rgba(5, 150, 105, 0.15)",
-      color: "var(--primary)",
-      border: "rgba(5, 150, 105, 0.35)",
-    },
-    draft: {
-      label: "Draft",
-      bg: "rgba(113, 133, 121, 0.12)",
-      color: "var(--muted)",
-      border: "var(--line)",
-    },
-    rejected: {
-      label: "Rejected",
-      bg: "rgba(239, 68, 68, 0.12)",
-      color: "#ef4444",
-      border: "rgba(239, 68, 68, 0.3)",
-    },
-    published: {
-      label: "Published Live",
-      bg: "rgba(37, 99, 235, 0.12)",
-      color: "#60a5fa",
-      border: "rgba(37, 99, 235, 0.3)",
-    },
-  };
+const config: Record<DraftStatus, { label: string; bg: string; color: string; border: string }> = {
+  draft: {
+    label: "Draft",
+    bg: "#f3f4f6",
+    color: "#374151",
+    border: "#d1d5db",
+  },
+  pending: {
+    label: "Pending Review",
+    bg: "rgba(245, 158, 11, 0.12)",
+    color: "#f59e0b",
+    border: "rgba(245, 158, 11, 0.3)",
+  },
+  approved: {
+    label: "Approved",
+    bg: "rgba(5, 150, 105, 0.15)",
+    color: "var(--primary)",
+    border: "rgba(5, 150, 105, 0.35)",
+  },
+  rejected: {
+    label: "Rejected",
+    bg: "rgba(239, 68, 68, 0.12)",
+    color: "#ef4444",
+    border: "rgba(239, 68, 68, 0.3)",
+  },
+  scheduled: {
+    label: "Scheduled",
+    bg: "rgba(239, 68, 68, 0.12)",
+    color: "#f59e0b",
+    border: "rgba(239, 68, 68, 0.3)",
+  },
+  published: {
+    label: "Published Live",
+    bg: "rgba(37, 99, 235, 0.12)",
+    color: "#60a5fa",
+    border: "rgba(37, 99, 235, 0.3)",
+  },
+};
 
   const current = config[status] || config.draft;
 
