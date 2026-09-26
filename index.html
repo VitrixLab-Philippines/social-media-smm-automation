@@ -125,7 +125,7 @@ strong, b { font-weight: var(--weight-semibold) }
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
     border: 0;
-
+  }
 /* ─── Layout ─────────────────────────────────────────────────────────────── */
 .wrap { max-width: 1120px; margin: auto; padding: 0 24px }
 
@@ -166,11 +166,11 @@ html.light nav { background: rgba(248,250,249,0.94) }
   background: var(--muted);
   transition: transform .3s ease, opacity .3s ease;
 }
-.hamburger span:nth-child(1) { transform: translateY(6px) rotate(45deg) }
-.hamburger span:nth-child(3) { transform: translateY(-6px) rotate(-45deg) }
+.hamburger.open span:nth-child(1) { transform: translateY(6px) rotate(45deg) }
+.hamburger.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg) }
 @media (max-width: 400px) {
   .hamburger { display: flex }
-  .nav-links { all: initial; position: relative; }
+  .nav-links { position: relative; }
   .nav-links.open { display: flex }
 }
 
@@ -1105,7 +1105,7 @@ html.light nav { background: rgba(248,250,249,0.94) }
   .nav-links { position: absolute; top: 100%; left: 0; right: 0; background: rgba(7,12,9,0.95); flex-direction: column; padding: 1rem; display: none }
   .nav-links.open { display: flex }
   .nav-links .link { width: 100%; box-sizing: border-box }
-  .nav-links .link.active { all: initial }
+  .nav-links .link.active { }
 }
 </style>
 </head>
@@ -1122,7 +1122,7 @@ html.light nav { background: rgba(248,250,249,0.94) }
   <nav aria-label="Main navigation">
     <div class="wrap nav-inner">
       <a class="logo" href="#" aria-label="SMMAI home">S M M <span class="ai">AI</span></a>
-      <button class="hamburger" aria-label="Open navigation" tabindex="1">
+      <button class="hamburger" aria-label="Open navigation" aria-expanded="false">
         <span></span>
         <span></span>
         <span></span>

@@ -130,8 +130,6 @@
 }
 .form-group input:focus { outline: 2px solid var(--primary); outline-offset: 4px }
 
-        .form-group input:focus { outline: none; border-color: var(--primary) }
-
         .btn {
             width: 100%; padding: 0.75rem; background: var(--primary);
             color: var(--bg); border: none; border-radius: var(--radius-medium);
@@ -178,24 +176,13 @@
         <div class="card">
         <h1 style="margin-top: 0; margin-bottom: 1.5rem">Sign in to SMMAI</h1>
 
-<div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "1.5rem" }}>
-    <button
-        className="theme-toggle"
-        aria-label="Toggle light/dark theme"
-        title="Toggle theme"
-        onClick={() => {
-            const html = document.documentElement;
-            const isLight = html.classList.toggle("light");
-            const icon = document.querySelector('.theme-icon');
-            icon.textContent = isLight ? "☀" : "☾";
-            localStorage.setItem("smma-theme", isLight ? "light" : "dark");
-        }}
-    >
-        <span className="theme-icon" aria-hidden="true">☾</span>
+<div style="display:flex;justify-content:flex-end;margin-bottom:1.5rem">
+    <button class="theme-toggle" aria-label="Toggle light/dark theme" title="Toggle theme">
+        <span class="theme-icon" aria-hidden="true">☾</span>
     </button>
 </div>
 
-        <form id="loginForm" novalidate>
+        <form id="loginForm" novalidate onsubmit="event.preventDefault(); alert('Form submitted');">
             <div class="form-group">
                 <label for="loginEmail">Email</label>
                 <input type="email" id="loginEmail" name="email" required placeholder="you@company.com">
@@ -208,10 +195,10 @@
 
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem">
                 <button type="submit" class="btn">Sign in</button>
-                <span style={{display: "flex", alignItems: "center", gap: "0.5rem"}}>
-                    <span style={{color: "var(--muted)", textDecoration: "none"}}>Forgot password?</span>
-                    <span style={{color: "var(--muted)", textDecoration: "none"}}>Create free account</span>
-                </span>
+                <div style="display: inline-flex; gap: 0.5rem">
+                    <a style="color: var(--muted); text-decoration: none;" href="#">Forgot password?</a>
+                    <a style="color: var(--muted); text-decoration: none;" href="#">Create free account</a>
+                </div>
             </div>
         </form>
     </div>
