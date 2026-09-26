@@ -1,4 +1,23 @@
-export type DraftStatus = "draft" | "approved" | "rejected" | "published";
+// src/lib/crm.ts
+
+export type Platform =
+  | "meta"
+  | "linkedin"
+  | "twitter"
+  | "x"
+  | "facebook"
+  | "instagram"
+  | "tiktok"
+  | "youtube"
+  | (string & {}); // allows custom strings while still giving autocomplete
+
+export type DraftStatus =
+  | "draft"
+  | "pending"
+  | "approved"
+  | "rejected"
+  | "scheduled"
+  | "published";
 
 export interface BrandProfile {
   name: string;
@@ -11,12 +30,38 @@ export interface BrandProfile {
 export interface ContentDraft {
   id: string;
   topic: string;
-  platform: string;
+  platform: Platform;
   text: string;
   hashtags: string[];
   status: DraftStatus;
-  metadata: Record<string, unknown>;
-  createdAt: string;
+  metadata?: Record<string, unknown>;
+  createdAt: string | Date;
+  // Optional fields used by the UI
+  engagementScore?: number;
+  author?: string;
+  scheduledAt?: string | Date;
+  publishedAt?: string | Date;
+}
+
+export interface AnalyticsMetric {
+  platform: string;
+  impressions: number;
+  engagements: number;
+  clicks: number;
+  followersGained: number;
+  // Optional extras used by AnalyticsCards
+  change?: number;
+  rate?: number;
+}
+
+export interface Client {
+  id: string;
+  name: string;
+  email: string;
+  approved: boolean;
+  posts: { count: number; lastPost: Date | string };
+  revenue: number;
+  lastActivity: string;
 }
 
 export const initialBrandProfile: BrandProfile = {
@@ -27,7 +72,7 @@ export const initialBrandProfile: BrandProfile = {
   requiredDisclosures: [],
 };
 
-export const initialClients = [
+export const initialClients: Client[] = [
   {
     id: "1",
     name: "Acme Corp",
@@ -39,13 +84,15 @@ export const initialClients = [
   },
 ];
 
-export const initialAnalytics = [
+export const initialAnalytics: AnalyticsMetric[] = [
   {
     platform: "meta",
     impressions: 100,
     engagements: 12,
     clicks: 5,
     followersGained: 3,
+    change: 0,
+    rate: 0,
   },
 ];
 
@@ -56,7 +103,7 @@ export const initialDrafts: ContentDraft[] = [
     platform: "meta",
     text: "Get started with social media management automation.",
     hashtags: ["#content", "#automation"],
-    status: "published" as DraftStatus,
+    status: "published",
     metadata: {},
     createdAt: new Date().toISOString(),
   },
