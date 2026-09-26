@@ -4,12 +4,12 @@ import React, { ReactNode } from "react";
 import Link from "next/link";
 import SiteFooter from "@/components/layout/SiteFooter";
 
-import { DashboardViewSection } from "@/components/layout/LayoutControlBar";
+import { DashboardViewSection } from "@/lib/crm";
 
 interface DashboardShellProps {
   children: ReactNode;
   sidebarOpen: boolean;
-  activeSection: string;
+  activeSection: DashboardViewSection;
   onSelectSection: (section: DashboardViewSection) => void;
 }
 
@@ -20,11 +20,11 @@ export default function DashboardShell({
   onSelectSection,
 }: DashboardShellProps) {
   const navItems = [
-    { id: "approval", label: "Approval Gate", icon: "✓", badge: "Live" },
-    { id: "graph", label: "Architecture Graph", icon: "⎇", badge: "AST" },
-    { id: "analytics", label: "Analytics Loop", icon: "📈", badge: "6 Nets" },
-    { id: "guardrails", label: "Brand Guardrails", icon: "🛡", badge: "Rules" },
-    { id: "crm", label: "CRM", icon: "📊", badge: "Live" },
+    { id: "approval" as const, label: "Approval Gate", icon: "✓", badge: "Live" },
+    { id: "graph" as const, label: "Architecture Graph", icon: "⎇", badge: "AST" },
+    { id: "analytics" as const, label: "Analytics Loop", icon: "📈", badge: "6 Nets" },
+    { id: "guardrails" as const, label: "Brand Guardrails", icon: "🛡", badge: "Rules" },
+    { id: "crm" as const, label: "CRM", icon: "📊", badge: "Live" },
   ];
 
   return (

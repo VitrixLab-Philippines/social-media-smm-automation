@@ -58,6 +58,21 @@ export default function ApprovalQueue({
     };
   }, [activeTab, selectedPlatform, refreshKey]);
 
+  const loadDrafts = useCallback(async () => {
+    try {
+      const res = await fetch("/api/crm/drafts");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setDrafts(Array.isArray(data) ? data : data.drafts ?? []);
+    } catch {
+      setToast({ show: true, message: "Failed to load drafts", type: "error" });
+    }
+  }, []);
+
+  useEffect(() => {
+    loadDrafts();
+  }, [loadDrafts]);
+
   function showToast(message: string, type: "success" | "error") {
     setToast({ show: true, message, type });
     setTimeout(() => setToast({ show: false, message: "", type: "success" }), 5000);
@@ -106,7 +121,7 @@ export default function ApprovalQueue({
         setShowCreateModal(false);
         setNewTopic("");
         setNewText("");
-        setToast({ show: false });
+        setToast({ show: false, message: "", type: "" });
         loadDrafts();
       } else {
         const data = await res.json();

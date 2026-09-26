@@ -6,13 +6,21 @@ import StatusPill from "@/components/ui/StatusPill";
 
 interface ContentDraftCardProps {
   draft?: ContentDraft;
+  onApprove?: (id: string) => void;
+  onReject?: (id: string) => void;
+  onPublish?: (id: string, platform: string) => void;
+  onEdit?: (id: string) => void;
   onUpdateStatus?: (id: string, status: DraftStatus) => void;
   compact?: boolean;
 }
 
 export default function ContentDraftCard({
   draft: draftData,
-  onUpdateStatus,
+  onApprove = () => {},
+  onReject = () => {},
+  onPublish = () => {},
+  onEdit = () => {},
+  onUpdateStatus = () => {},
   compact = false,
 }: ContentDraftCardProps) {
   const [isPublishing, setIsPublishing] = React.useState(false);
@@ -171,14 +179,14 @@ export default function ContentDraftCard({
             <button
               className="btn primary"
               style={{ padding: "0.45rem 0.85rem", fontSize: "var(--text-xs)", flex: 1 }}
-              onClick={() => onUpdateStatus(draft.id, "approved")}
+              onClick={() => onApprove(draft.id)}
             >
               ✓ Approve Post
             </button>
             <button
               className="btn secondary"
               style={{ padding: "0.45rem 0.85rem", fontSize: "var(--text-xs)" }}
-              onClick={() => onUpdateStatus(draft.id, "rejected")}
+              onClick={() => onReject(draft.id)}
             >
               ✕ Reject
             </button>
@@ -195,14 +203,14 @@ export default function ContentDraftCard({
                 flex: 1,
                 background: "var(--secondary)",
               }}
-              onClick={() => isPublishing ? null : createPublishJob(draft.id, draft.platform)}
+              onClick={() => isPublishing ? null : onPublish(draft.id, draft.platform)}
             >
               🚀 Publish to {draft.platform}
             </button>
             <button
               className="btn secondary"
               style={{ padding: "0.45rem 0.85rem", fontSize: "var(--text-xs)" }}
-              onClick={() => onUpdateStatus(draft.id, "draft")}
+onClick={() => onEdit(draft.id)}
             >
               Move to Draft
             </button>
