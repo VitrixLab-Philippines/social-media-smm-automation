@@ -32,7 +32,7 @@ export default function DashboardPage() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-      <DashboardHeader
+<DashboardHeader
         currentSection={currentSection}
         viewMode={viewMode}
         density={density}
@@ -42,7 +42,8 @@ export default function DashboardPage() {
         onToggleViewMode={setViewMode}
         onToggleDensity={setDensity}
         onPlatformChange={setSelectedPlatform}
-      />
+        onToggleSidebar={() => setSidebarOpen((v) => !v)}
+/>
 
       <DashboardShell
         sidebarOpen={sidebarOpen}
