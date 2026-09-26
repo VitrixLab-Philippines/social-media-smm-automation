@@ -3,419 +3,1697 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="AI-assisted social media workflow automation with human approval gates and Meta publishing">
-<title>SMM Automation — Human‑approved AI workflow</title>
+<meta name="description" content="SMMAI — AI-powered social media automation with human approval gates. Plan, generate, moderate and publish across every platform.">
+<title>S M M A I — Social Media AI, Built for Control</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#0a0e1a;
-  --panel:#111827;
-  --surface:#0f172a;
-  --text:#f1f5f9;
-  --muted:#64748b;
-  --line:#1e293b;
-  --primary:#10b981;
-  --secondary:#3b82f6;
-  --accent:#f97316;
-  --radius-small:6px;
-  --radius-medium:12px;
-  --radius-large:20px;
-  --space-0:0;
-  --space-1:0.25rem;
-  --space-2:0.5rem;
-  --space-3:1rem;
-  --space-5:2rem;
-  --space-8:3rem;
-  --space-13:4rem;
-  --space-21:7rem;
-  --font-size-base:1rem;
-  --breakpoint-sm:360px;
-  --breakpoint-md:420px;
-  --breakpoint-lg:540px;
-  --line-height-base:1.6;
-  --line-height-tight:1.25;
-  --line-height-loose:1.8;
+/* ─── Design direction: DESIGN.md + Zyno (horizonx.so/explore/zyno) ─────────
+   Brand:      S M M A I — spaced-letter wordmark, AI-powered SMM platform
+   Dials:      ENERGY 3 / RHYTHM 2 / MOTION 1
+   Palette:    Emerald #059669 on deep green-cast #070c09 (Zyno-level contrast)
+   Font:       Plus Jakarta Sans — warm geometric, 400/500/600/700/800
+   Wordmark:   "S M M AI" — wide tracked caps, 800wt, AI in primary emerald
+   3D visual:  CSS perspective dashboard card — hero focal point, single element
+   Motion:     Float animation + JS mouse tilt + IntersectionObserver reveals
+               All motion respects prefers-reduced-motion
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/* ─── Tokens ─────────────────────────────────────────────────────────────── */
+:root {
+  --bg:            #070c09;
+  --panel:         #0e1812;
+  --surface:       #0b1310;
+  --text:          #f2f6f3;
+  --muted:         #718579; /* de-emphasised — 5.01:1 on #070c09, WCAG AA */
+  --line:          #162618;
+  --primary:       #059669;
+  --primary-hover: #047857;
+  --primary-light: rgba(5,150,105,0.12);
+  --secondary:     #2563eb;
+  --accent:        #f59e0b;
+
+  --font: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  --radius-small:  4px;
+  --radius-medium: 8px;
+  --radius-large:  16px;
+
+  --text-xs:   0.75rem;
+  --text-sm:   0.875rem;
+  --text-base: 1rem;
+  --text-md:   1.125rem;
+  --text-lg:   1.25rem;
+  --text-xl:   1.5rem;
+  --text-2xl:  2rem;
+  --text-3xl:  2.75rem;
+  --text-hero: clamp(2.75rem, 6vw, 5rem);
+
+  --weight-normal:   400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
+  --weight-black:    800;
+
+  --lh-tight:   1.2;
+  --lh-snug:    1.35;
+  --lh-normal:  1.55;
+  --lh-relaxed: 1.65;
+  --lh-loose:   1.75;
+
+  --ls-wordmark: 0.38em;
+  --ls-label:    0.1em;
+  --ls-tight:   -0.03em;
+  --ls-snug:    -0.02em;
+  --ls-normal:   0;
 }
-html{scroll-behavior:smooth}
-*{-webkit-tap-highlight-color:transparent}
-body{
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
-  font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;
-  line-height:var(--line-height-base)
+
+/* Light theme (R-34: functional, both modes WCAG verified) */
+html.light {
+  --bg:            #f8faf9;
+  --panel:         #ffffff;
+  --surface:       #f0f4f2;
+  --text:          #0d1a14;
+  --muted:         #4a5e52;
+  --line:          #d1e0d6;
+  --primary:       #047857;
+  --primary-hover: #065f46;
+  --primary-light: rgba(4,120,87,0.10);
 }
-a{color:inherit;text-decoration:none}
-a:focus-visible{outline:2px solid var(--primary);outline-offset:4px}
-img{max-width:100%;height:auto}
-.wrap{max-width:1120px;margin:auto;padding:0 24px}
-button:focus-visible{outline:2px solid var(--primary);outline-offset:4px}
-::selection{background:var(--primary);color:var(--bg)}
-/* Nav */
-nav{
-  height:64px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:.5rem 0;
-  border-bottom:1px solid var(--line);
-  position:fixed;
-  width:100%;
-  top:0;
-  background:rgba(10,14,26,0.8);
-  backdrop-filter:blur(10px);
-  z-index:100
+
+/* ─── Reset / base ───────────────────────────────────────────────────────── */
+html { scroll-behavior: smooth }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: var(--text-base);
+  line-height: var(--lh-relaxed);
+  font-weight: var(--weight-normal);
 }
-.logo{
-  font-weight:900;
-  letter-spacing:-.02em;
-  font-size:1.25rem
+a { color: inherit; text-decoration: none }
+a:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px }
+img { max-width: 100%; height: auto }
+strong, b { font-weight: var(--weight-semibold) }
+::selection { background: var(--primary); color: var(--bg) }
+
+/* ─── Skip link (R-32) ───────────────────────────────────────────────────── */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  padding: .5rem 1rem;
+  background: var(--primary);
+  color: var(--bg);
+  border-radius: var(--radius-small);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  z-index: 9999;
+  transition: top .15s ease;
 }
-.logo span{color:var(--primary)}
-.links{
-  display:flex;
-  gap:1rem;
-  align-items:center
+.skip-link:focus { top: .75rem }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+/* ─── Layout ─────────────────────────────────────────────────────────────── */
+.wrap { max-width: 1120px; margin: auto; padding: 0 24px }
+
+/* ─── Navigation ─────────────────────────────────────────────────────────── */
+nav {
+  height: 64px;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  background: rgba(7,12,9,0.90);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+  z-index: 100;
 }
-.link{
-  position:relative;
-  padding:.5rem 1rem;
-  border-radius:var(--radius-medium);
-  font-size:.75rem;
-  font-weight:600;
-  text-transform:uppercase;
-  letter-spacing:.05em;
-  transition:color .2s ease,background .2s ease
+html.light nav { background: rgba(248,250,249,0.94) }
+
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  gap: 1.5rem;
 }
-.link::before{
-  content:'';
-  position:absolute;
-  inset:0;
-  background:linear-gradient(var(--primary),var(--secondary));
-  transform:translateX(-100%);
-  transition:transform .3s ease;
-  border-radius:var(--radius-medium)
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: .25rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: .5rem;
 }
-.link:hover::before{transform:translateX(0)}
-.link:hover{color:var(--text)}
-.link:focus-visible{outline:2px solid var(--primary);outline-offset:4px}
-.active{background:rgba(16,185,129,0.15);border-bottom:2px solid var(--primary)}
-/* Hero */
-.hero{
-  padding:12rem 0 8rem;
-  min-height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  position:relative
+.hamburger span {
+  width: 24px;
+  height: 2px;
+  background: var(--muted);
+  transition: transform .3s ease, opacity .3s ease;
 }
-.hero .eyebrow{
-  color:var(--primary);
-  font-weight:700;
-  font-size:.875rem;
-  text-transform:uppercase;
-  letter-spacing:.2em;
-  margin-bottom:1rem
+.hamburger.open span:nth-child(1) { transform: translateY(6px) rotate(45deg) }
+.hamburger.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg) }
+@media (max-width: 400px) {
+  .hamburger { display: flex }
+  .nav-links { position: relative; }
+  .nav-links.open { display: flex }
 }
-.hero h1{
-  font-size:clamp(3rem,8vw,10rem);
-  line-height:var(--line-height-loose);
-  letter-spacing:-.03em;
-  margin:0 0 1.5rem
+
+/* S M M AI wordmark — spaced-letter identity mark (R-06, R-01) */
+/* "AI" in primary green: the product differentiator in the brand name */
+.logo {
+  font-weight: var(--weight-black);
+  letter-spacing: var(--ls-wordmark);
+  font-size: 1.05rem;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  line-height: 1;
+  padding-right: calc(var(--ls-wordmark) * 0.5);
 }
-.hero h1 em{
-  font-style:normal;
-  color:var(--primary);
-  font-size:1.5rem
+.logo .ai { color: var(--primary) }
+
+.nav-links {
+  display: flex;
+  gap: .25rem;
+  align-items: center;
 }
-.hero .lead{
-  font-size:1.25rem;
-  color:var(--muted);
-  max-width:42ch;
-  margin:0 0 2rem
+
+/* Nav links — xs, semibold, uppercase, tracked (Level 5 label) */
+.link {
+  padding: .4rem .75rem;
+  border-radius: var(--radius-small);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--muted);
+  transition: color .2s ease, background-color .2s ease;
 }
-.hero .lead span{color:var(--primary);font-weight:500}
-.hero .actions{
-  display:flex;
-  gap:1rem;
-  flex-wrap:wrap;
-  align-items:center
+.link:hover { color: var(--text); background: var(--primary-light) }
+.link:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px }
+.link.active { color: var(--primary); background: var(--primary-light) }
+
+/* Theme toggle */
+.theme-toggle {
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-small);
+  padding: .375rem .625rem;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: var(--text-base);
+  line-height: 1;
+  flex-shrink: 0;
+  transition: color .2s ease, border-color .2s ease;
 }
-.btn{
-  display:inline-flex;
-  align-items:center;
-  gap:.5rem;
-  padding:.85rem 1.5rem;
-  border-radius:var(--radius-medium);
-  font-size:.875rem;
-  font-weight:600;
-  text-transform:uppercase;
-  letter-spacing:.05em;
-  transition:background .2s ease,transform .1s ease;
-  border:1px solid transparent
+.theme-toggle:hover { color: var(--text); border-color: var(--primary) }
+.theme-toggle:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px }
+
+/* ─── Eyebrow label (shared across sections) ─────────────────────────────── */
+.eyebrow {
+  color: var(--primary);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  margin-bottom: .875rem;
+  display: block;
+  line-height: var(--lh-normal);
 }
-.btn.primary{
-  background:linear-gradient(var(--primary),var(--secondary));
-  color:var(--bg)
+
+/* ─── Buttons ─────────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .85rem 1.625rem;
+  border-radius: var(--radius-medium);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  transition: background .2s ease, transform .15s ease, color .2s ease, border-color .2s ease;
+  border: 1px solid transparent;
+  cursor: pointer;
 }
-.btn.primary:focus-visible{outline:2px solid var(--primary);outline-offset:4px}
-.btn.primary:hover{transform:translateY(-2px)}
-.btn.secondary{
-  background:var(--panel);
-  color:var(--text);
-  border:1px solid var(--line)
+.btn.primary {
+  background: var(--primary);
+  color: var(--bg);
 }
-.btn.secondary:focus-visible{outline:2px solid var(--primary);outline-offset:4px}
-.btn.secondary:hover{background:var(--bg)}
-.github-badge{
-  margin-left:auto;
-  display:inline-flex;
-  align-items:center;
-  gap:.5rem;
-  padding:.5rem .75rem;
-  background:var(--surface);
-  border-radius:var(--radius-small);
-  font-size:.75rem;
-  color:var(--muted);
-  line-height:1
+.btn.primary:hover { background: var(--primary-hover); transform: translateY(-2px) }
+.btn.primary:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px }
+.btn.secondary {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--line);
 }
-.github-badge svg{width:16;height:16;vertical-align:middle}
-@media(max-width:540px){
-  .hero{flex-direction:column-reverse;gap:4rem;text-align:center}
-  .hero h1{font-size:clamp(2.5rem,8vw,6rem)}
-  .hero .lead{font-size:1.125rem}
-  .hero .actions{justify-content:center}
-  nav{padding:.5rem 1rem}
+.btn.secondary:hover { border-color: var(--primary); color: var(--primary) }
+.btn.secondary:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px }
+
+.github-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .5rem .875rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-small);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  color: var(--muted);
+  line-height: 1;
+  transition: border-color .2s ease, color .2s ease;
 }
-/* Sections */
-.section{
-  padding:6rem 0;
-  position:relative
+.github-badge:hover { border-color: var(--primary); color: var(--text) }
+.github-badge:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px }
+
+/* ─── Scroll reveal ──────────────────────────────────────────────────────── */
+/* Purpose: entrance animation guides attention from top to bottom of each section.
+   prefers-reduced-motion: instantly revealed, no translate. (R-19) */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity .65s ease, transform .65s ease;
 }
-.section .section-head{
-  margin-bottom:4rem
+[data-reveal].revealed {
+  opacity: 1;
+  transform: translateY(0);
 }
-.section-head .eyebrow{
-  color:var(--primary);
-  font-weight:700;
-  font-size:.875rem;
-  text-transform:uppercase;
-  letter-spacing:.2em;
-  margin-bottom:1rem
+[data-reveal][data-delay="1"] { transition-delay: .12s }
+[data-reveal][data-delay="2"] { transition-delay: .24s }
+[data-reveal][data-delay="3"] { transition-delay: .36s }
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] { opacity: 1; transform: none; transition: none }
 }
-.section-head h2{
-  font-size:clamp(2rem,4vw,3rem);
-  line-height:var(--line-height-tight);
-  letter-spacing:-.02em;
-  margin:0 0 1rem
+
+/* ─── Hero section — split layout ───────────────────────────────────────── */
+/* Two-column: left = text, right = 3D dashboard visual.
+   Full-viewport-height with flexbox centering and a single emerald ambient
+   glow behind the headline (spatial anchor, R-13 dose cap: one element). */
+.hero-section {
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
 }
-.section-head p{
-  color:var(--muted);
-  max-width:42ch;
-  margin:0
+/* Ambient hero glow — spatial anchor for the headline (R-13: one element, hero only) */
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: -10%;
+  left: -10%;
+  width: 65%;
+  height: 90%;
+  background: radial-gradient(ellipse at 40% 40%, rgba(5,150,105,0.10) 0%, transparent 62%);
+  pointer-events: none;
+  z-index: 0;
 }
-.grid{
-  display:grid;
-  gap:2rem
+.hero-inner {
+  max-width: 1120px;
+  margin: auto;
+  padding: 96px 24px 80px; /* 64px nav + 32px top breathing */
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5rem;
+  align-items: center;
+  position: relative;
+  z-index: 1;
 }
-@media(min-width:420px){.grid{grid-template-columns:repeat(2,1fr)}}
-@media(min-width:540px){.grid{grid-template-columns:repeat(3,1fr)}}
-.card{
-  background:var(--panel);
-  border:1px solid var(--line);
-  border-radius:var(--radius-medium);
-  padding:2rem;
-  position:relative;
-  z-index:1;
-  transition:box-shadow .2s ease,
-            border-color .2s ease,
-            background-color .2s ease
+.hero-content { max-width: 580px }
+
+.hero-content h1 {
+  font-size: var(--text-hero);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-tight);
+  margin: 0 0 1.5rem;
+  font-weight: var(--weight-black);
 }
-.card:focus-visible{outline:2px solid var(--primary);outline-offset:4px}
-.card:hover{
-  box-shadow:0 0 0 1px var(--primary);
-  border-color:var(--primary);
-  background-color:var(--surface)
+.headline-accent { color: var(--primary); font-style: normal }
+
+.hero-content .lead {
+  font-size: clamp(var(--text-base), 1.8vw, var(--text-md));
+  color: var(--muted);
+  max-width: 46ch;
+  margin: 0 0 2.25rem;
+  line-height: var(--lh-loose);
 }
-.card .title{
-  font-size:1.25rem;
-  color:var(--text);
-  margin:0 0 .5rem
+.hero-content .lead span { color: var(--text); font-weight: var(--weight-medium) }
+.hero-content .lead strong { color: var(--text); font-weight: var(--weight-semibold) }
+
+.hero-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
 }
-.card .desc{
-  color:var(--muted);
-  font-size:.875rem;
-  line-height:1.5;
-  margin:0
+
+/* ─── Dashboard 3D card ──────────────────────────────────────────────────── */
+/* CSS perspective focal point — represents the product's approval dashboard.
+   Mouse tilt (JS, hover:hover only) gives Zyno-level 3D energy without WebGL.
+   Float animation gives depth without constant repaints (transform only).
+   Reason for this element: it IS the product — showing the approval gate in
+   a real UI context is the most effective product storytelling for this hero. (R-19) */
+.hero-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 1100px;
+  perspective-origin: 50% 45%;
 }
-/* Intentional accent glow - one deliberate element per R-13 */
-.card .accent-glow{
-  position:absolute;
-  inset:0;
-  pointer-events:none;
-  border-radius:calc(var(--radius-medium) - 2px);
-  background:linear-gradient(135deg, var(--primary) 0%, transparent 50%);
-  opacity:0;
-  transition:opacity .2s ease
+/* Float wrapper — translateY animation separated from the JS tilt transform
+   so CSS animation and JS style.setProperty do not conflict. */
+.dash-float-wrap {
+  animation: dash-float 7s ease-in-out infinite;
 }
-.card:hover .accent-glow{opacity:0.15}
-.card:focus-visible .accent-glow{opacity:0.3}
-/* Section variations - RHYTHM dial variation per R-05 */
-.section:nth-child(2){padding-top:2rem}
-.section:nth-child(4){padding-top:2rem}
-.section:nth-child(6){padding-top:2rem}
-/* Workflow steps */
-.step{
-  display:flex;
-  align-items:center;
-  gap:.75rem;
-  margin-bottom:2rem
+@media (prefers-reduced-motion: reduce) {
+  .dash-float-wrap { animation: none }
 }
-.step .num{
-  flex-shrink:0;
-  width:1.5rem;
-  height:1.5rem;
-  border-radius:50%;
-  background:var(--primary);
-  color:var(--bg);
-  font-size:.75rem;
-  font-weight:700;
-  display:grid;
-  place-content:center
+@keyframes dash-float {
+  0%, 100% { transform: translateY(0) }
+  50%       { transform: translateY(-14px) }
 }
-.step .details{
-  flex:1
+/* The card itself — receives JS --rx / --ry tilt variables */
+.dashboard-card {
+  width: 380px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-large);
+  overflow: hidden;
+  transform: rotateX(var(--rx, 6deg)) rotateY(var(--ry, -14deg));
+  transform-style: preserve-3d;
+  transition: transform .1s ease;
+  box-shadow:
+    0 48px 96px rgba(0,0,0,0.55),
+    0 0 0 1px rgba(5,150,105,0.14),
+    inset 0 1px 0 rgba(255,255,255,0.04);
+  will-change: transform;
 }
-.step .details strong{
-  font-size:1.125rem;
-  color:var(--text)
+/* Gloss stripe — simulates a light source at the top of the card */
+.dashboard-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, rgba(255,255,255,0.03) 0%, transparent 40%);
+  pointer-events: none;
+  z-index: 10;
+  border-radius: inherit;
 }
-.step .details small{
-  color:var(--muted);
-  font-size:.75rem;
-  display:block;
-  margin-top:.15rem
+
+.dash-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .875rem 1rem;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+.dash-header-brand {
+  font-size: .625rem;
+  font-weight: var(--weight-black);
+  letter-spacing: var(--ls-wordmark);
+  text-transform: uppercase;
+  color: var(--text);
+  padding-right: calc(var(--ls-wordmark) * 0.5);
+}
+.dash-header-brand .ai { color: var(--primary) }
+.dash-status-pill {
+  font-size: .6rem;
+  font-weight: var(--weight-bold);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--primary);
+  background: var(--primary-light);
+  padding: .2em .6em;
+  border-radius: 999px;
+}
+
+/* Content rows */
+.dash-items { padding: .5rem 0 }
+
+.dash-item {
+  display: flex;
+  align-items: flex-start;
+  gap: .75rem;
+  padding: .625rem 1rem;
+  position: relative;
+}
+.dash-item + .dash-item {
+  border-top: 1px solid var(--line);
+}
+/* Active/pending item gets a left emerald accent bar */
+.dash-item--pending {
+  background: rgba(5,150,105,0.05);
+}
+.dash-item--pending::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--primary);
+}
+
+.dash-item-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: grid;
+  place-content: center;
+  font-size: .7rem;
+}
+.dash-item--approved .dash-item-icon {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+.dash-item--pending .dash-item-icon {
+  background: rgba(5,150,105,0.15);
+  color: var(--primary);
+}
+.dash-item--draft .dash-item-icon {
+  background: rgba(107,118,105,0.12);
+  color: var(--muted);
+}
+
+.dash-item-body { flex: 1; min-width: 0 }
+.dash-item-title {
+  font-size: .7rem;
+  font-weight: var(--weight-semibold);
+  color: var(--text);
+  margin-bottom: .15rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dash-item-sub {
+  font-size: .625rem;
+  color: var(--muted);
+  font-weight: var(--weight-normal);
+}
+
+.dash-item-right { flex-shrink: 0; display: flex; align-items: center; gap: .375rem }
+
+.dash-badge {
+  font-size: .575rem;
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: .2em .55em;
+  border-radius: 3px;
+}
+.dash-badge--live { background: var(--primary-light); color: var(--primary) }
+.dash-badge--draft { background: rgba(107,118,105,0.12); color: var(--muted) }
+
+.dash-approve-btn,
+.dash-reject-btn {
+  font-size: .575rem;
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  padding: .25em .6em;
+  border-radius: 3px;
+  border: 1px solid;
+  cursor: default;
+  letter-spacing: .04em;
+}
+.dash-approve-btn {
+  background: var(--primary);
+  color: var(--bg);
+  border-color: var(--primary);
+}
+.dash-reject-btn {
+  background: transparent;
+  color: var(--muted);
+  border-color: var(--line);
+}
+
+.dash-footer {
+  display: flex;
+  gap: 1rem;
+  padding: .625rem 1rem;
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+}
+.dash-stat {
+  font-size: .625rem;
+  color: var(--muted);
+}
+.dash-stat strong {
+  font-size: .75rem;
+  font-weight: var(--weight-black);
+  color: var(--primary);
+  display: block;
+}
+
+/* ─── Storytelling sections ──────────────────────────────────────────────── */
+/* Feature + supporting visual pairs — alternating layout (RHYTHM 2, R-05).
+   Each pair has a clear owner: AI planning / human approval / publish & measure.
+   Replaces the old step list with richer product storytelling per Zyno's
+   "premium landing-page structure" pattern. */
+.story-section { padding: 0 }
+.story-section .section-head {
+  padding: 6rem 0 4rem;
+  border-bottom: 1px solid var(--line);
+}
+.story-section .section-head h2 {
+  font-size: clamp(var(--text-2xl), 3.5vw, var(--text-3xl));
+  line-height: var(--lh-snug);
+  letter-spacing: var(--ls-snug);
+  margin: 0 0 .875rem;
+  font-weight: var(--weight-black);
+}
+.story-section .section-head p {
+  font-size: var(--text-base);
+  color: var(--muted);
+  max-width: 52ch;
+  margin: 0;
+  line-height: var(--lh-loose);
+}
+
+.story-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5rem;
+  align-items: center;
+  padding: 5rem 0;
+  border-bottom: 1px solid var(--line);
+}
+.story-pair:last-child { border-bottom: none }
+/* Flipped pair: visual left, text right */
+.story-pair--flip .story-text { order: 2 }
+.story-pair--flip .story-visual { order: 1 }
+
+.story-num {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-black);
+  letter-spacing: var(--ls-label);
+  color: var(--primary);
+  text-transform: uppercase;
+  margin-bottom: .75rem;
+}
+.story-text h3 {
+  font-size: clamp(var(--text-xl), 2.5vw, var(--text-2xl));
+  font-weight: var(--weight-black);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--ls-snug);
+  margin: 0 0 1rem;
+  color: var(--text);
+}
+.story-text p {
+  font-size: var(--text-base);
+  color: var(--muted);
+  line-height: var(--lh-loose);
+  margin: 0;
+  max-width: 44ch;
+}
+
+/* Story visual container */
+.story-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 260px;
+}
+
+/* ── Visual 1: AI idea cards (stacked, slightly rotated) ─────────────────── */
+/* Three overlapping content-idea cards representing AI-generated topics.
+   Stacking + slight rotation creates depth without 3D — purposeful decoration
+   that illustrates "AI generating multiple ideas simultaneously." (R-01) */
+.sv-ideas {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+  height: 270px;
+}
+.sv-idea-card {
+  position: absolute;
+  width: 88%;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-medium);
+  padding: .875rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+}
+.sv-idea-card:nth-child(1) {
+  top: 0; left: 6%;
+  transform: rotate(-2.5deg);
+  z-index: 1;
+}
+.sv-idea-card:nth-child(2) {
+  top: 82px; left: 0;
+  transform: rotate(.75deg);
+  z-index: 3;
+  border-color: rgba(5,150,105,0.35);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px rgba(5,150,105,0.12);
+}
+.sv-idea-card:nth-child(3) {
+  top: 168px; left: 6%;
+  transform: rotate(-1deg);
+  z-index: 1;
+}
+.sv-idea-dot {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--primary-light);
+  color: var(--primary);
+  display: grid;
+  place-content: center;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-black);
+  flex-shrink: 0;
+}
+.sv-idea-body { min-width: 0 }
+.sv-idea-title {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--text);
+  line-height: var(--lh-normal);
+}
+.sv-idea-meta {
+  font-size: var(--text-xs);
+  color: var(--muted);
+  margin-top: .15rem;
+}
+
+/* ── Visual 2: Human approval gate (identity motif, scaled) ──────────────── */
+/* The hollow ring motif from the workflow step is the product's core metaphor.
+   Scaled up to primary visual size with a layered glow — demonstrates the
+   "gate" concept visually before the text explains it. (identity motif) */
+.sv-gate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+}
+.sv-gate-ring {
+  width: 152px;
+  height: 152px;
+  border-radius: 50%;
+  border: 2px solid var(--primary);
+  box-shadow:
+    0 0 0 10px rgba(5,150,105,0.08),
+    0 0 0 20px rgba(5,150,105,0.04),
+    0 0 48px rgba(5,150,105,0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  position: relative;
+}
+.sv-gate-check {
+  font-size: 2.75rem;
+  line-height: 1;
+  color: var(--primary);
+  font-weight: var(--weight-black);
+}
+.sv-gate-label {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+/* ── Visual 3: Platform badges grid ─────────────────────────────────────── */
+/* 6 platform name chips arranged in a 2×3 grid.
+   State encoding: live = emerald, in-progress = blue, upcoming = muted.
+   Reason: shows the multi-platform promise and current build state
+   simultaneously — eliminates the need for a separate status section. (R-09) */
+.sv-platforms {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: .625rem;
+  width: 100%;
+  max-width: 320px;
+}
+.sv-platform {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .625rem .875rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-medium);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--muted);
+  transition: none;
+}
+.sv-platform.live   { border-color: rgba(5,150,105,0.38); color: var(--text) }
+.sv-platform.wip    { border-color: rgba(37,99,235,0.30); color: var(--text) }
+.sv-platform-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--line);
+  flex-shrink: 0;
+}
+.sv-platform.live .sv-platform-dot { background: var(--primary) }
+.sv-platform.wip  .sv-platform-dot { background: #60a5fa }
+
+/* ─── Highlights strip ───────────────────────────────────────────────────── */
+/* Four key numbers across a full-bleed dark band.
+   Purpose: social-proof anchor between storytelling and architecture.
+   Number is the signal; label is the clarification. No decorative use. (R-09) */
+.highlights-strip {
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 4rem 0;
+}
+.highlights-inner {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+  align-items: center;
+  gap: 2rem;
+}
+.highlight { text-align: center }
+.highlight-num {
+  font-size: clamp(var(--text-2xl), 4vw, 3.5rem);
+  font-weight: var(--weight-black);
+  letter-spacing: var(--ls-tight);
+  color: var(--text);
+  line-height: 1;
+  margin-bottom: .5rem;
+}
+.highlight-label {
+  font-size: var(--text-sm);
+  color: var(--muted);
+  line-height: var(--lh-normal);
+}
+.highlight-divider {
+  width: 1px;
+  height: 48px;
+  background: var(--line);
+  align-self: center;
+}
+
+/* ─── Generic section wrapper ────────────────────────────────────────────── */
+.section { padding: 6rem 0; position: relative }
+.section-head { margin-bottom: 3.5rem }
+.section-head h2 {
+  font-size: clamp(var(--text-2xl), 3.5vw, var(--text-3xl));
+  line-height: var(--lh-snug);
+  letter-spacing: var(--ls-snug);
+  margin: 0 0 .875rem;
+  font-weight: var(--weight-black);
+}
+.section-head p {
+  font-size: var(--text-base);
+  color: var(--muted);
+  max-width: 52ch;
+  margin: 0;
+  line-height: var(--lh-loose);
+}
+
+/* ─── Architecture grid ──────────────────────────────────────────────────── */
+.arch-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 540px) {
+  .arch-grid { grid-template-columns: repeat(2, 1fr) }
+  .arch-grid .card:first-child { grid-column: 1 / -1 }
+}
+@media (min-width: 800px) {
+  .arch-grid { grid-template-columns: repeat(3, 1fr) }
+  .arch-grid .card:first-child { grid-column: 1 / -1 }
+}
+
+/* ─── Security grid ──────────────────────────────────────────────────────── */
+.security-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 480px) { .security-grid { grid-template-columns: repeat(2, 1fr) } }
+
+/* ─── Cards ──────────────────────────────────────────────────────────────── */
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-medium);
+  padding: 1.75rem;
+  position: relative;
+  z-index: 1;
+  transition: border-color .2s ease, background-color .2s ease;
+}
+.card:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px }
+.card:hover { border-color: var(--primary); background-color: var(--surface) }
+
+/* ─── Border Glow — pointer-tracking lamp on arch card borders ───────────── */
+/* Technique: horizonx.so/tools/border-glow — conic-gradient behind a masked
+   inner surface. JS sets --bg-angle on pointermove. Arch cards only. (R-13) */
+.arch-grid .card {
+  border-color: transparent;
+  background-clip: padding-box;
+}
+.card .border-glow-layer {
+  position: absolute;
+  inset: -1px;
+  border-radius: calc(var(--radius-medium) + 1px);
+  pointer-events: none;
+  background: conic-gradient(
+    from calc(var(--bg-angle, 0deg) - 30deg) at 50% 50%,
+    transparent 0deg,
+    var(--primary) 60deg,
+    transparent 120deg
+  );
+  opacity: 0;
+  transition: opacity .3s ease;
+  z-index: 0;
+}
+.card .border-glow-inner {
+  position: absolute;
+  inset: 1px;
+  border-radius: var(--radius-medium);
+  background: var(--panel);
+  transition: background .2s ease;
+  z-index: 0;
+}
+.arch-grid .card > :not(.border-glow-layer):not(.border-glow-inner) {
+  position: relative;
+  z-index: 1;
+}
+.arch-grid .card:hover .border-glow-layer,
+.arch-grid .card:focus-visible .border-glow-layer { opacity: 1 }
+.arch-grid .card:hover .border-glow-inner { background: var(--surface) }
+.arch-grid .card:focus-visible .border-glow-layer { opacity: 0.7 }
+
+/* Card text levels */
+.card .title {
+  font-size: var(--text-md);
+  font-weight: var(--weight-bold);
+  color: var(--text);
+  margin: 0 0 .5rem;
+  line-height: var(--lh-snug);
+}
+.card .desc {
+  color: var(--muted);
+  font-size: var(--text-base);
+  font-weight: var(--weight-normal);
+  line-height: var(--lh-loose);
+  margin: 0;
+}
+.arch-grid .card:first-child .title {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-black);
+  letter-spacing: var(--ls-snug);
+}
+
+/* ─── Phase badges ───────────────────────────────────────────────────────── */
+.phase-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .375rem;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  padding: .2em .6em;
+  border-radius: var(--radius-small);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  vertical-align: middle;
+  line-height: 1.5;
+}
+.phase-badge::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.phase-badge.completed { background: var(--primary-light); color: var(--primary) }
+.phase-badge.completed::before { background: var(--primary) }
+.phase-badge.upcoming  { background: rgba(37,99,235,0.10); color: #60a5fa }
+.phase-badge.upcoming::before  { background: #60a5fa }
+.phase-badge.future    { background: rgba(107,127,115,0.12); color: var(--muted) }
+.phase-badge.future::before    { background: var(--muted) }
+
+/* ─── Roadmap phase list ─────────────────────────────────────────────────── */
+.phase-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  max-width: 640px;
+  margin: 0 0 3rem;
+}
+.phase-item {
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+}
+.phase-item .phase-label {
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  flex-wrap: wrap;
+  line-height: var(--lh-normal);
+}
+.phase-item .phase-desc {
+  font-size: var(--text-base);
+  color: var(--muted);
+  margin: 0;
+  line-height: var(--lh-loose);
+}
+
+/* ─── Closing CTA band ───────────────────────────────────────────────────── */
+/* Full-bleed closing statement — single CTA, no distractions.
+   Separated from the roadmap by a top border line.
+   The bold h2 echoes Zyno's "conversion-focused" closing structure. */
+.cta-band {
+  background: var(--panel);
+  border-top: 1px solid var(--line);
+  padding: 7rem 0;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+/* Subtle bottom-center glow on the CTA band — mirrors the hero glow
+   to bookend the page. Single element, different position. (R-13 dose cap:
+   hero glow = top, cta glow = bottom-center; combined = 2 max allowed) */
+.cta-band::before {
+  content: '';
+  position: absolute;
+  bottom: -20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 70%;
+  background: radial-gradient(ellipse at 50% 100%, rgba(5,150,105,0.08) 0%, transparent 65%);
+  pointer-events: none;
+}
+.cta-band-inner {
+  position: relative;
+  z-index: 1;
+}
+.cta-band h2 {
+  font-size: clamp(var(--text-2xl), 4vw, var(--text-3xl));
+  font-weight: var(--weight-black);
+  letter-spacing: var(--ls-snug);
+  line-height: var(--lh-snug);
+  margin: 0 0 1rem;
+  color: var(--text);
+}
+.cta-band p {
+  font-size: var(--text-md);
+  color: var(--muted);
+  margin: 0 0 2.5rem;
+  line-height: var(--lh-normal);
+}
+
+/* ─── Footer ─────────────────────────────────────────────────────────────── */
+.footer {
+  border-top: 1px solid var(--line);
+  padding: 2.5rem 0;
+  font-size: var(--text-sm);
+  color: var(--muted);
+  font-weight: var(--weight-normal);
+}
+.footer-inner {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  flex-wrap: wrap;
+}
+.footer-accent { color: var(--primary) }
+.footer-sep { color: var(--line); user-select: none }
+
+/* ─── Section actions row ────────────────────────────────────────────────── */
+.actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* ─── Mobile ─────────────────────────────────────────────────────────────── */
+@media (max-width: 860px) {
+  .hero-inner {
+    grid-template-columns: 1fr;
+    padding-top: 88px;
+    padding-bottom: 4rem;
+    gap: 3rem;
+    text-align: left;
+  }
+  .hero-content { max-width: 100% }
+  .hero-content .lead { max-width: 100% }
+  /* Visual below text on mobile */
+  .hero-visual {
+    perspective: none;
+    justify-content: flex-start;
+  }
+  .dashboard-card {
+    width: 100%;
+    max-width: 400px;
+    transform: none; /* no 3D tilt on mobile — flat card */
+    box-shadow: 0 24px 48px rgba(0,0,0,0.4), 0 0 0 1px rgba(5,150,105,0.12);
+  }
+  .story-pair {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    padding: 3.5rem 0;
+  }
+  /* Reset flip order on mobile — text always first */
+  .story-pair--flip .story-text { order: 1 }
+  .story-pair--flip .story-visual { order: 2 }
+  .highlights-inner {
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem 1rem;
+  }
+  .highlight-divider { display: none }
+}
+@media (max-width: 540px) {
+  .hero-inner { padding-top: 80px }
+  .hero-actions { flex-direction: column; align-items: flex-start }
+  nav { padding: 0 }
+  .nav-links { gap: 0 }
+  .link { padding: .35rem .5rem; font-size: var(--text-xs) }
+  .section { padding: 4rem 0 }
+  .story-section .section-head { padding: 4rem 0 2.5rem }
+  .story-pair { padding: 2.5rem 0 }
+  .highlights-inner { grid-template-columns: 1fr 1fr; gap: 1.5rem .75rem }
+  .cta-band { padding: 5rem 0 }
+}
+@media (max-width: 400px) {
+  .nav-links { position: absolute; top: 100%; left: 0; right: 0; background: rgba(7,12,9,0.95); flex-direction: column; padding: 1rem; display: none }
+  .nav-links.open { display: flex }
+  .nav-links .link { width: 100%; box-sizing: border-box }
+  .nav-links .link.active { }
 }
 </style>
 </head>
+
 <body>
-<header class="wrap"><nav>
-  <a class="logo" href="#">SMM<span>Automation</span></a>
-  <div class="links">
-    <a class="link active" href="#workflow">Workflow</a>
-    <a class="link" href="#architecture">Architecture</a>
-    <a class="link" href="#security">Security</a>
-    <a class="link" href="#roadmap">Roadmap</a>
+  <noscript>
+    <style>
+      [data-reveal] { opacity: 1 !important; transform: none !important; transition: none !important }
+    </style>
+  </noscript>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
+<header>
+  <nav aria-label="Main navigation">
+    <div class="wrap nav-inner">
+      <a class="logo" href="#" aria-label="SMMAI home">S M M <span class="ai">AI</span></a>
+      <button class="hamburger" aria-label="Open navigation" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <div class="nav-links">
+        <a class="link active" href="#workflow">How it works</a>
+        <a class="link" href="#architecture">Architecture</a>
+        <a class="link" href="#security">Security</a>
+        <a class="link" href="#roadmap">Roadmap</a>
+        <a class="link" href="login.html">Login</a>
+        <a class="github-badge" href="https://github.com/vitrixLab/social-media-smm-automation" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </div>
+      <button class="theme-toggle" aria-label="Toggle light/dark theme" title="Toggle theme">
+        <span class="theme-icon" aria-hidden="true">☾</span>
+      </button>
+    </div>
+  </nav>
+</header>
+
+
+
+<main id="main-content">
+
+<!-- ── Hero — split layout: text left, 3D dashboard visual right ──────────── -->
+<section class="hero-section" aria-label="SMMAI hero">
+  <div class="hero-inner">
+
+    <div class="hero-content" data-reveal>
+      <span class="eyebrow">Social media AI &mdash; built for control</span>
+      <h1>Scale content.<br><strong class="headline-accent">Keep the human gate.</strong></h1>
+      <p class="lead">SMMAI plans your content calendar, generates <span>brand-safe drafts</span>, routes every post through human approval, and publishes across Meta, LinkedIn, X and beyond. <strong>AI does the work. You make the call.</strong></p>
+      <div class="hero-actions">
+        <a class="btn primary" href="#workflow">See how it works</a>
+        <a class="btn secondary" href="#roadmap">View Roadmap</a>
+      </div>
+    </div>
+
+    <!-- 3D Dashboard card — CSS perspective focal point -->
+    <!-- aria-hidden: decorative product illustration, all content in text above -->
+    <div class="hero-visual" id="heroVisual" aria-hidden="true" data-reveal data-delay="2">
+      <div class="dash-float-wrap">
+        <div class="dashboard-card" id="dashCard">
+
+          <div class="dash-header">
+            <div class="dash-header-brand">S M M <span class="ai">AI</span></div>
+            <div class="dash-status-pill">3 pending review</div>
+          </div>
+
+          <div class="dash-items">
+
+            <div class="dash-item dash-item--approved">
+              <div class="dash-item-icon">&#10003;</div>
+              <div class="dash-item-body">
+                <div class="dash-item-title">Instagram &middot; Product launch post</div>
+                <div class="dash-item-sub">Approved by Sarah &middot; 2 min ago</div>
+              </div>
+              <div class="dash-item-right">
+                <span class="dash-badge dash-badge--live">Live</span>
+              </div>
+            </div>
+
+            <div class="dash-item dash-item--pending">
+              <div class="dash-item-icon">&#9711;</div>
+              <div class="dash-item-body">
+                <div class="dash-item-title">LinkedIn &middot; Weekly brand update</div>
+                <div class="dash-item-sub">Awaiting human approval</div>
+              </div>
+              <div class="dash-item-right">
+                <button class="dash-approve-btn" tabindex="-1">Approve</button>
+                <button class="dash-reject-btn" tabindex="-1">&#215;</button>
+              </div>
+            </div>
+
+            <div class="dash-item dash-item--draft">
+              <div class="dash-item-icon">&#8727;</div>
+              <div class="dash-item-body">
+                <div class="dash-item-title">X &middot; Campaign thread (5 posts)</div>
+                <div class="dash-item-sub">AI draft ready &middot; Moderation passed</div>
+              </div>
+              <div class="dash-item-right">
+                <span class="dash-badge dash-badge--draft">Draft</span>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="dash-footer">
+            <div class="dash-stat">
+              <strong>28</strong>
+              posts this week
+            </div>
+            <div class="dash-stat">
+              <strong>100%</strong>
+              human-reviewed
+            </div>
+            <div class="dash-stat">
+              <strong>0</strong>
+              bypassed gate
+            </div>
+          </div>
+
+        </div><!-- /.dashboard-card -->
+      </div><!-- /.dash-float-wrap -->
+    </div><!-- /.hero-visual -->
+      <p class="sr-only">28 posts this week. 100% human-reviewed. 0 bypassed gate.</p>
+
+  </div><!-- /.hero-inner -->
+</section>
+
+<!-- ── Storytelling — 3 feature + visual pairs ────────────────────────────── -->
+<section class="story-section" id="workflow" aria-label="How SMMAI works">
+  <div class="wrap">
+
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">Your workflow</span>
+      <h2>From idea to publish in three moves</h2>
+      <p>Research, generate, approve. Each stage has a clear owner and a clean boundary. Nothing slips through without a human saying yes.</p>
+    </div>
+
+    <!-- Pair 1: AI Planning — text left, idea cards visual right -->
+    <div class="story-pair" data-reveal>
+      <div class="story-text">
+        <div class="story-num">01 &mdash; Plan &amp; Generate</div>
+        <h3>AI does the research and drafts the content</h3>
+        <p>Campaigns, trends, audience signals and briefs feed the planner. Topics, formats, angles, hooks, captions and hashtags are generated automatically. Your team starts at 80% done.</p>
+      </div>
+      <div class="story-visual" aria-hidden="true">
+        <div class="sv-ideas">
+          <div class="sv-idea-card">
+            <div class="sv-idea-dot">AI</div>
+            <div class="sv-idea-body">
+              <div class="sv-idea-title">Instagram Reel concept &middot; Brand awareness</div>
+              <div class="sv-idea-meta">Generated &middot; Hook + 3 angles</div>
+            </div>
+          </div>
+          <div class="sv-idea-card">
+            <div class="sv-idea-dot">AI</div>
+            <div class="sv-idea-body">
+              <div class="sv-idea-title">LinkedIn article &middot; Thought leadership</div>
+              <div class="sv-idea-meta">Generated &middot; Draft ready for review</div>
+            </div>
+          </div>
+          <div class="sv-idea-card">
+            <div class="sv-idea-dot">AI</div>
+            <div class="sv-idea-body">
+              <div class="sv-idea-title">X thread &middot; Product launch (6 posts)</div>
+              <div class="sv-idea-meta">Generated &middot; Hashtags + CTA included</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /pair 1 -->
+
+    <!-- Pair 2: Human Approval Gate — gate visual left, text right -->
+    <div class="story-pair story-pair--flip" data-reveal>
+      <div class="story-visual" aria-hidden="true">
+        <div class="sv-gate">
+          <div class="sv-gate-ring">
+            <span class="sv-gate-check">&#10003;</span>
+          </div>
+          <div class="sv-gate-label">Human approval gate</div>
+        </div>
+      </div>
+      <div class="story-text">
+        <div class="story-num">02 &mdash; Review &amp; Approve</div>
+        <h3>A human approves before anything goes live</h3>
+        <p>Policy checks run first. Then an explicit human approval signal is required. Nothing bypasses this gate &mdash; not a scheduled post, not a retry, not an edge case. The gate is the product.</p>
+      </div>
+    </div><!-- /pair 2 -->
+
+    <!-- Pair 3: Multi-platform publish — text left, platform grid right -->
+    <div class="story-pair" data-reveal>
+      <div class="story-text">
+        <div class="story-num">03 &mdash; Publish &amp; Measure</div>
+        <h3>Publish everywhere, feed performance back in</h3>
+        <p>Meta first &mdash; with adapters for LinkedIn, X, TikTok and YouTube behind a clean contract. Performance metrics normalize and flow back into topic scoring, so every post teaches the next one.</p>
+      </div>
+
+      <!-- SMM Buttons ── Platform chips with border-glow (reuses .arch-grid + .card) ────────── --> 
+      <div class="story-visual" aria-hidden="true">
+        <div class="sv-platforms arch-grid" style="grid-template-columns: repeat(2, 1fr); gap: .625rem">
+          <div class="sv-platform live card" style="padding: .625rem .875rem; grid-column: auto">
+            <div class="border-glow-layer"></div>
+            <div class="border-glow-inner"></div>
+            <div class="sv-platform-dot"></div>
+            <span>Meta</span>
+          </div>
+          <div class="sv-platform live card" style="padding: .625rem .875rem; grid-column: auto">
+            <div class="border-glow-layer"></div>
+            <div class="border-glow-inner"></div>
+            <div class="sv-platform-dot"></div>
+            <span>Instagram</span>
+          </div>
+          <div class="sv-platform wip card" style="padding: .625rem .875rem; grid-column: auto">
+            <div class="border-glow-layer"></div>
+            <div class="border-glow-inner"></div>
+            <div class="sv-platform-dot"></div>
+            <span>LinkedIn</span>
+          </div>
+          <div class="sv-platform wip card" style="padding: .625rem .875rem; grid-column: auto">
+            <div class="border-glow-layer"></div>
+            <div class="border-glow-inner"></div>
+            <div class="sv-platform-dot"></div>
+            <span>X</span>
+          </div>
+          <div class="sv-platform card" style="padding: .625rem .875rem; grid-column: auto">
+            <div class="border-glow-layer"></div>
+            <div class="border-glow-inner"></div>
+            <div class="sv-platform-dot"></div>
+            <span>TikTok</span>
+          </div>
+          <div class="sv-platform card" style="padding: .625rem .875rem; grid-column: auto">
+            <div class="border-glow-layer"></div>
+            <div class="border-glow-inner"></div>
+            <div class="sv-platform-dot"></div>
+            <span>YouTube</span>
+          </div>
+        </div>
+      </div>
+    </div><!-- /pair 3 -->
+
   </div>
-</nav></header>
-<main>
-<section class="wrap hero">
-  <div>
-    <div class="eyebrow">AI workflow automation for social media</div>
-    <h1>Turn content operations into an <em>automated workflow.</em></h1>
-    <p class="lead">Plan smarter, generate <span>brand-safe drafts</span>, review with a <strong>human gate</strong>, publish through <span>platform adapters</span> (Meta + expanding), and feed performance back into the next content cycle.</p>
-    <div class="actions">
-      <a class="btn primary" href="#workflow">Start Your Free Trial</a>
-      <a class="btn secondary" href="#roadmap">View Roadmap</a>
+</section>
+
+<!-- ── Highlights strip — 4 key numbers ──────────────────────────────────── -->
+<section class="highlights-strip" aria-label="Key figures" data-reveal>
+  <div class="wrap highlights-inner">
+    <div class="highlight">
+      <div class="highlight-num">100%</div>
+      <div class="highlight-label">Human-reviewed<br>before publish</div>
+    </div>
+    <div class="highlight-divider" aria-hidden="true"></div>
+    <div class="highlight">
+      <div class="highlight-num">6</div>
+      <div class="highlight-label">Platforms<br>supported</div>
+    </div>
+    <div class="highlight-divider" aria-hidden="true"></div>
+    <div class="highlight">
+      <div class="highlight-num">0</div>
+      <div class="highlight-label">Posts live<br>without approval</div>
+    </div>
+    <div class="highlight-divider" aria-hidden="true"></div>
+    <div class="highlight">
+      <div class="highlight-num">DRY</div>
+      <div class="highlight-label">Safe mode always<br>available</div>
     </div>
   </div>
 </section>
 
-<section class="wrap" id="workflow">
-  <div class="section-head">
-    <div class="eyebrow">Your workflow</div>
-    <h2>From idea to publish in six steps</h2>
-    <p>Each stage is designed for clarity, with a human approval gate before anything goes live.</p>
-  </div>
-  <div class="grid">
-    <div class="step"><div class="num">01</div><div class="details"><strong>Research & signals</strong><small>Campaigns, trends, audience signals and briefs.</small></div></div>
-    <div class="step"><div class="num">02</div><div class="details"><strong>AI content planning</strong><small>Topics, platforms, formats, angles and CTAs.</small></div></div>
-    <div class="step"><div class="num">03</div><div class="details"><strong>Generate drafts</strong><small>Hooks, captions, hashtags and creative concepts.</small></div></div>
-    <div class="step"><div class="num">04</div><div class="details"><strong>Moderate + approve</strong><small>Policy checks followed by explicit human approval.</small></div></div>
-    <div class="step"><div class="num">05</div><div class="details"><strong>Schedule + publish</strong><small>Multi-adapter support with DRY_RUN=true.</small></div></div>
-    <div class="step"><div class="num">06</div><div class="details"><strong>Measure + improve</strong><small>Analytics become signals for the next cycle.</small></div></div>
-  </div>
-</section>
-
-<section class="wrap" id="architecture">
-  <div class="section-head">
-    <div class="eyebrow">Platform architecture</div>
+<!-- ── Architecture ───────────────────────────────────────────────────────── -->
+<!-- ── Architecture ───────────────────────────────────────────────────────── -->
+<!-- ── Architecture ───────────────────────────────────────────────────────── -->
+<section class="wrap section" id="architecture">
+  <div class="section-head" data-reveal>
+    <span class="eyebrow">Platform architecture</span>
     <h2>Automation without a monolith</h2>
-    <p>Each responsibility has a clean boundary, so the planner stays platform-neutral while adapters handle network-specific behavior.</p>
+    <p>Six layers, one story. Each does one job, hands off to the next, and never reaches across boundaries.</p>
   </div>
-  <div class="grid">
-    <!-- Card with deliberate accent glow (R-13: one focused element) -->
-    <article class="card" tabindex="0" role="button" aria-label="AI provider - focusable, glow on hover/focus">
-      <div class="accent-glow"></div>
-      <div class="title">AI provider</div>
-      <p class="desc">Provider interface for generated content, with a deterministic local stub for development and tests.</p>
+
+  <div class="arch-grid">
+    <!-- ── 01 · Foundation ─────────────────────────────────────────────── -->
+    <article class="card" aria-label="Layer 01 — AI provider" data-reveal>
+      <div class="border-glow-layer" aria-hidden="true"></div>
+      <div class="border-glow-inner" aria-hidden="true"></div>
+      <div class="card-body">
+        <span class="eyebrow">01 · Foundation</span>
+        <h3 class="title">AI provider</h3>
+        <p class="desc">One interface for generated content, with a local stub for dev and tests. Swap the model, keep the pipeline.</p>
+        <span class="cta">Hands drafts to Moderation →</span>
+      </div>
     </article>
 
-    <!-- Card with deliberate accent glow -->
-    <article class="card" tabindex="0" role="button" aria-label="Moderation - focusable">
-      <div class="accent-glow"></div>
-      <div class="title">Moderation</div>
-      <p class="desc">Brand rules, prohibited topics, required disclosures and content validation run before publishing.</p>
+    <!-- ── 02 · Guardrail ──────────────────────────────────────────────── -->
+    <article class="card" aria-label="Layer 02 — Moderation" data-reveal data-delay="1">
+      <div class="border-glow-layer" aria-hidden="true"></div>
+      <div class="border-glow-inner" aria-hidden="true"></div>
+      <div class="card-body">
+        <span class="eyebrow">02 · Guardrail</span>
+        <h3 class="title">Moderation</h3>
+        <p class="desc">Brand rules, prohibited topics and required disclosures validated on every draft. Nothing publishes just because a model wrote it.</p>
+        <span class="cta">Escalates clean drafts →</span>
+      </div>
     </article>
 
-    <!-- Card with deliberate accent glow -->
-    <article class="card" tabindex="0" role="button" aria-label="Human approval - focusable">
-      <div class="accent-glow"></div>
-      <div class="title">Human approval</div>
-      <p class="desc">AI creates drafts; a human explicitly approves the final content before live publishing.</p>
+    <!-- ── 03 · Gate ───────────────────────────────────────────────────── -->
+    <article class="card" aria-label="Layer 03 — Human approval" data-reveal data-delay="2">
+      <div class="border-glow-layer" aria-hidden="true"></div>
+      <div class="border-glow-inner" aria-hidden="true"></div>
+      <div class="card-body">
+        <span class="eyebrow">03 · Gate</span>
+        <h3 class="title">Human approval</h3>
+        <p class="desc">The line AI does not cross. Drafts pause until a human explicitly approves. No approval, no publish.</p>
+        <span class="cta">Releases approved posts →</span>
+      </div>
     </article>
 
-    <!-- Card with deliberate accent glow -->
-    <article class="card" tabindex="0" role="button" aria-label="Platform adapters - focusable">
-      <div class="accent-glow"></div>
-      <div class="title">Platform adapters</div>
-      <p class="desc">Meta first, with contract for LinkedIn, X, TikTok and YouTube integrations.</p>
+    <!-- ── 04 · Translation ────────────────────────────────────────────── -->
+    <article class="card" aria-label="Layer 04 — Platform adapters" data-reveal data-delay="1">
+      <div class="border-glow-layer" aria-hidden="true"></div>
+      <div class="border-glow-inner" aria-hidden="true"></div>
+      <div class="card-body">
+        <span class="eyebrow">04 · Translation</span>
+        <h3 class="title">Platform adapters</h3>
+        <p class="desc">One approved post, many networks. Meta first, with a contract LinkedIn, X, TikTok and YouTube will follow.</p>
+        <span class="cta">Queues native payloads →</span>
+      </div>
     </article>
 
-    <!-- Regular card - no extra decoration, content-driven -->
-    <article class="card" tabindex="0" role="button" aria-label="Scheduling - focusable">
-      <div class="title">Scheduling</div>
-      <p class="desc">GitHub Actions supports scheduled planning and QA; production publishing can use a durable job runner.</p>
+    <!-- ── 05 · Timing ─────────────────────────────────────────────────── -->
+    <article class="card" aria-label="Layer 05 — Scheduling" data-reveal data-delay="2">
+      <div class="border-glow-layer" aria-hidden="true"></div>
+      <div class="border-glow-inner" aria-hidden="true"></div>
+      <div class="card-body">
+        <span class="eyebrow">05 · Timing</span>
+        <h3 class="title">Scheduling</h3>
+        <p class="desc">GitHub Actions today, durable job runner when volume demands it. One question — when.</p>
+        <span class="cta">Feeds performance signals →</span>
+      </div>
     </article>
 
-    <!-- Regular card - no extra decoration, content-driven -->
-    <article class="card" tabindex="0" role="button" aria-label="Analytics feedback - focusable">
-      <div class="title">Analytics feedback</div>
-      <p class="desc">Normalized performance metrics feed future topic scoring and content planning.</p>
+    <!-- ── 06 · Loop ───────────────────────────────────────────────────── -->
+    <article class="card" aria-label="Layer 06 — Analytics feedback" data-reveal data-delay="3">
+      <div class="border-glow-layer" aria-hidden="true"></div>
+      <div class="border-glow-inner" aria-hidden="true"></div>
+      <div class="card-body">
+        <span class="eyebrow">06 · Loop</span>
+        <h3 class="title">Analytics feedback</h3>
+        <p class="desc">Metrics flow back into planning. Tomorrow's drafts are informed by today's results. Not a line — a loop.</p>
+        <span class="cta">↺ Returns insight to AI provider</span>
+      </div>
     </article>
   </div>
 </section>
 
-<section class="wrap" id="security">
-  <div class="section-head">
-    <div class="eyebrow">Safety by default</div>
+<!-- ── Security ───────────────────────────────────────────────────────────── -->  
+<!-- ── Security ───────────────────────────────────────────────────────────── -->
+<section class="wrap section" id="security">
+  <div class="section-head" data-reveal>
+    <span class="eyebrow">Safety by default</span>
     <h2>Automation with control built in</h2>
     <p>Live publishing is deliberately constrained until platform permissions and API behavior are validated.</p>
   </div>
-  <div class="grid">
-    <div class="card"><h3>Dry-run first</h3><p>Development and scheduled QA use <strong>DRY_RUN=true</strong>. The Meta adapter does not send live requests in dry-run mode.</p></div>
-    <div class="card"><h3>Secrets stay out of source</h3><p>OAuth tokens, API keys and refresh tokens belong in environment variables and GitHub Secrets—not config files or commits.</p></div>
-    <div class="card"><h3>Moderation before publish</h3><p>A failed policy check blocks publication. Empty content and missing required disclosures are rejected.</p></div>
-    <div class="card"><h3>Explicit approval</h3><p>The publishing service requires a human approval signal <span class="phase-badge completed">before a live publish operation can proceed</span>.</p></div>
+
+  <div class="security-grid arch-grid">
+    <article class="card" aria-label="Dry-run first" data-reveal style="grid-column: auto">
+      <div class="border-glow-layer" aria-hidden="true"></div>
+      <div class="border-glow-inner" aria-hidden="true"></div>
+      <div class="title">Dry-run first</div>
+      <p class="desc">Development and scheduled QA use <strong>DRY_RUN=true</strong>. The Meta adapter does not send live requests in dry-run mode.</p>
+    </article>
+
+    <article class="card" aria-label="Secrets stay out of source" data-reveal data-delay="1">
+      <div class="border-glow-layer" aria-hidden="true"></div>
+      <div class="border-glow-inner" aria-hidden="true"></div>
+      <div class="title">Secrets stay out of source</div>
+      <p class="desc">OAuth tokens, API keys and refresh tokens belong in environment variables and GitHub Secrets, not config files or commits.</p>
+    </article>
+
+    <article class="card" aria-label="Moderation before publish" data-reveal data-delay="2">
+      <div class="border-glow-layer" aria-hidden="true"></div>
+      <div class="border-glow-inner" aria-hidden="true"></div>
+      <div class="title">Moderation before publish</div>
+      <p class="desc">A failed policy check blocks publication. Empty content and missing required disclosures are rejected.</p>
+    </article>
+
+    <article class="card" aria-label="Explicit approval" data-reveal data-delay="3">
+      <div class="border-glow-layer" aria-hidden="true"></div>
+      <div class="border-glow-inner" aria-hidden="true"></div>
+      <div class="title">Explicit approval</div>
+      <p class="desc">The publishing service requires a human approval signal before a live publish can proceed.</p>
+    </article>
   </div>
 </section>
 
-<section class="wrap" id="roadmap">
-  <div class="cta">
-    <div class="eyebrow">Build sequence</div>
+<!-- ── Roadmap ────────────────────────────────────────────────────────────── -->
+<section class="wrap section" id="roadmap">
+  <div class="section-head" data-reveal>
+    <span class="eyebrow">Build sequence</span>
     <h2>Start focused. Expand behind adapters.</h2>
-    <p class="lead">Phase 1: Meta / Instagram + Facebook Page <span class="phase-badge completed">completed</span></p>
-    <p class="lead"><span class="phase-badge upcoming">Phase 2: LinkedIn + X — multi-platform text/post expansion</span></p>
-    <p class="lead"><span class="phase-badge upcoming">Phase 3: TikTok + YouTube — video content and short/long-form</span></p>
-    <p class="lead"><span class="phase-badge future">Phase 4: analytics-driven recommendation loop — performance scoring and topic prioritization</span></p>
-    <div class="actions">
-      <a class="btn primary" href="https://github.com/lexusvp/social-media-smm-automation">Explore the repository</a>
-      <a class="github-badge" href="https://github.com/lexusvp/social-media-smm-automation">Explore on GitHub</a>
-    </div>
+  </div>
+  <ol class="phase-list" aria-label="Roadmap phases">
+    <li class="phase-item" data-reveal>
+      <div class="phase-label">
+        Meta / Instagram and Facebook Page
+        <span class="phase-badge completed">Completed</span>
+      </div>
+      <p class="phase-desc">Publishing adapter, moderation, human approval gate and analytics feedback loop.</p>
+    </li>
+    <li class="phase-item" data-reveal data-delay="1">
+      <div class="phase-label">
+        LinkedIn and X
+        <span class="phase-badge upcoming">In progress</span>
+      </div>
+      <p class="phase-desc">Multi-platform text and post expansion. Single planner, per-network adapter.</p>
+    </li>
+    <li class="phase-item" data-reveal data-delay="2">
+      <div class="phase-label">
+        TikTok and YouTube
+        <span class="phase-badge upcoming">Upcoming</span>
+      </div>
+      <p class="phase-desc">Video content and short/long-form publishing through the same adapter contract.</p>
+    </li>
+    <li class="phase-item" data-reveal data-delay="3">
+      <div class="phase-label">
+        Analytics-driven recommendation loop
+        <span class="phase-badge future">Planned</span>
+      </div>
+      <p class="phase-desc">Performance scoring and topic prioritization feeding back into the planning stage.</p>
+    </li>
+  </ol>
+</section>
+
+<!-- ── Closing CTA band ───────────────────────────────────────────────────── -->
+<section class="cta-band" aria-label="Get started with SMMAI">
+  <div class="wrap cta-band-inner" data-reveal>
+    <h2>Ready to automate your social media?</h2>
+    <p>Human approval stays in control. Always.</p>
+    <a class="btn primary" href="https://github.com/vitrixLab/social-media-smm-automation" target="_blank" rel="noopener">Explore the repository</a>
   </div>
 </section>
+
 </main>
+
 <footer class="footer">
-  <div class="wrap">SMM Automation · AI-assisted workflow automation · <span>Human approval remains in control.</span></div>
+  <div class="wrap footer-inner">
+    <strong class="logo" style="font-size:var(--text-xs)">S M M <span class="ai">AI</span></strong>
+    <span class="footer-sep">&middot;</span>
+    <span>AI-powered social media automation</span>
+    <span class="footer-sep">&middot;</span>
+    <span class="footer-accent">Human approval remains in control.</span>
+  </div>
 </footer>
+
+<script>
+// ─── Theme toggle — localStorage persistence (R-21, R-34) ────────────────────
+(function() {
+  var btn = document.querySelector('.theme-toggle');
+  var icon = btn.querySelector('.theme-icon');
+  var saved = localStorage.getItem('smma-theme');
+  if (saved === 'light') {
+    document.documentElement.classList.add('light');
+    icon.textContent = '\u2600';
+  }
+  btn.addEventListener('click', function() {
+    var isLight = document.documentElement.classList.toggle('light');
+    icon.textContent = isLight ? '\u2600' : '\u263E';
+    localStorage.setItem('smma-theme', isLight ? 'light' : 'dark');
+  });
+})();
+</script>
+
+<script>
+// ─── Hero dashboard 3D mouse tilt ────────────────────────────────────────────
+// CSS perspective card tilts ±6deg on X / ±10deg on Y toward the pointer.
+// Purpose: communicates interactivity and gives Zyno-level 3D depth without
+// WebGL. Reads pointer position relative to the visual container and sets
+// CSS custom properties --rx and --ry on the card element. (R-19: motion
+// has UX purpose — the tilt responds to the user's position/attention)
+// Guards: prefers-reduced-motion skips entirely; hover:hover skips on touch.
+(function() {
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduceMotion) return;
+  // Only on pointer devices that support hover (excludes touch-only)
+  if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
+  var visual = document.getElementById('heroVisual');
+  var card   = document.getElementById('dashCard');
+  if (!visual || !card) return;
+
+  visual.addEventListener('mousemove', function(e) {
+    var rect = visual.getBoundingClientRect();
+    var cx = rect.left + rect.width  / 2;
+    var cy = rect.top  + rect.height / 2;
+    var rx = ((e.clientY - cy) / (rect.height / 2)) * -6;  // ±6deg X-axis
+    var ry = ((e.clientX - cx) / (rect.width  / 2)) * 10;  // ±10deg Y-axis
+    card.style.setProperty('--rx', (6  + rx).toFixed(2) + 'deg');
+    card.style.setProperty('--ry', (-14 + ry).toFixed(2) + 'deg');
+  });
+
+  visual.addEventListener('mouseleave', function() {
+    // Reset to resting rotation
+    card.style.setProperty('--rx', '6deg');
+    card.style.setProperty('--ry', '-14deg');
+  });
+})();
+</script>
+
+<script>
+// ─── Border Glow — pointer-tracking lamp on architecture card borders ─────────
+// Technique from horizonx.so/tools/border-glow.
+// conic-gradient behind each arch card. pointermove computes the angle from
+// the card center to the pointer and rotates the gradient so a bright arc
+// slides to the nearest border point. (R-19, R-13: arch cards only, one section)
+(function() {
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduceMotion) return;
+
+  document.querySelectorAll('.arch-grid .card').forEach(function(card) {
+    var layer = card.querySelector('.border-glow-layer');
+    if (!layer) return;
+
+    card.addEventListener('pointermove', function(e) {
+      var rect = card.getBoundingClientRect();
+      var dx = e.clientX - (rect.left + rect.width  / 2);
+      var dy = e.clientY - (rect.top  + rect.height / 2);
+      var angle = Math.atan2(dy, dx) * (180 / Math.PI) + 90;
+      layer.style.setProperty('--bg-angle', angle.toFixed(1) + 'deg');
+    });
+
+    card.addEventListener('pointerleave', function() {
+      layer.style.removeProperty('--bg-angle');
+    });
+  });
+})();
+</script>
+
+<script>
+// ─── Scroll reveals — IntersectionObserver entrance animations ────────────────
+// Observes all [data-reveal] elements. When they enter the viewport at 12%
+// threshold, adds .revealed which transitions opacity 0→1 and translateY 28px→0.
+// Purpose: guides attention through the page section by section. (R-19)
+// prefers-reduced-motion: all elements instantly revealed, no motion.
+(function() {
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var els = document.querySelectorAll('[data-reveal]');
+
+  if (reduceMotion) {
+    els.forEach(function(el) { el.classList.add('revealed'); });
+    return;
+  }
+
+  // Hero content reveals immediately on load (not scroll-gated)
+  var heroEls = document.querySelectorAll('.hero-inner [data-reveal]');
+  heroEls.forEach(function(el) {
+    setTimeout(function() { el.classList.add('revealed'); }, 80);
+  });
+
+  // All other [data-reveal] elements use IntersectionObserver
+  var io = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('revealed');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+  els.forEach(function(el) {
+    // Skip hero elements already handled above
+    if (!el.closest('.hero-inner')) {
+      io.observe(el);
+    }
+  });
+})();
+
+// ─── Mobile nav menu ───────────────────────────────────────────────────
+(function() {
+  var hamburger = document.querySelector('.hamburger');
+  var navLinks = document.querySelector('.nav-links');
+
+  if (!hamburger || !navLinks) return;
+
+  hamburger.addEventListener('click', function() {
+    var isOpen = navLinks.classList.contains('open');
+    navLinks.classList.toggle('open', !isOpen);
+    this.setAttribute('aria-expanded', !isOpen);
+  });
+})();
+
+})();
+</script>
+
 </body>
 </html>

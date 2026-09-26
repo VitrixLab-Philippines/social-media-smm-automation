@@ -1,0 +1,112 @@
+/*
+  Analytics Dashboard UI — design tokens
+  Dark is the default surface. Light is a full token swap via [data-theme="light"],
+  not a filter/invert. Copy this file verbatim, or map these values into your
+  own system (Tailwind theme.extend, CSS-in-JS theme object, etc). Do not
+  invent new hex values when building components from this skill.
+*/
+
+:root {
+  /* ---- Color: dark (default) ---- */
+  --bg-canvas: #0a0a0a;
+  --bg-surface: #141414;
+  --bg-surface-raised: #1c1c1c;
+  --border-subtle: #262626;
+  --border-strong: #333333;
+
+  --text-primary: #fafafa;
+  --text-secondary: #a3a3a3;
+  --text-tertiary: #737373;
+
+  --accent: #ff6a1a;         /* primary orange — used sparingly */
+  --accent-strong: #ff8a3d;  /* hover / highlight */
+  --accent-soft: rgba(255, 106, 26, 0.14); /* chip fills, low-opacity bars */
+  --accent-on: #0a0a0a;      /* text/icon colour drawn on a solid accent fill */
+
+  --positive: #22c55e;
+  --positive-soft: rgba(34, 197, 94, 0.14);
+  --negative: #f43f5e;
+  --negative-soft: rgba(244, 63, 94, 0.14);
+
+  /* ---- Type ---- */
+  --font-sans: "Inter", -apple-system, "Segoe UI", system-ui, sans-serif;
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-base: 15px;
+  --text-lg: 18px;
+  --text-2xl: 28px;
+  --text-3xl: 36px;
+  --lh-tight: 1.1;
+  --lh-normal: 1.5;
+  --tracking-tight: -0.01em;
+
+  /* ---- Space (4px base unit) ---- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;  /* default card padding */
+  --space-8: 32px;
+  --space-10: 40px; /* default page gutter */
+  --space-12: 48px;
+
+  /* ---- Radius (one per nesting depth — never mix within a depth) ---- */
+  --radius-lg: 20px;  /* cards */
+  --radius-md: 12px;  /* inner blocks, buttons, inputs */
+  --radius-sm: 8px;   /* chips, small pills */
+  --radius-full: 999px; /* avatars, pagination dots, toggle */
+
+  /* ---- Elevation (structural, not decorative) ---- */
+  --shadow-card: 0 1px 0 0 rgba(255, 255, 255, 0.04) inset,
+                 0 20px 40px -24px rgba(0, 0, 0, 0.6);
+  --shadow-pop:  0 1px 0 0 rgba(255, 255, 255, 0.05) inset,
+                 0 24px 48px -20px rgba(0, 0, 0, 0.7);
+
+  /* ---- Motion ---- */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast: 120ms;
+  --dur-med: 200ms;
+}
+
+[data-theme="light"] {
+  --bg-canvas: #ffffff;
+  --bg-surface: #ffffff;
+  --bg-surface-raised: #f5f5f4;
+  --border-subtle: #e7e5e4;
+  --border-strong: #d6d3d1;
+
+  --text-primary: #111111;
+  --text-secondary: #6b6b6b;
+  --text-tertiary: #9a9a9a;
+
+  --accent: #f2600a;
+  --accent-strong: #d9540a;
+  --accent-soft: rgba(242, 96, 10, 0.1);
+  --accent-on: #ffffff;
+
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04),
+                 0 20px 40px -28px rgba(0, 0, 0, 0.14);
+  --shadow-pop:  0 2px 4px rgba(0, 0, 0, 0.05),
+                 0 24px 48px -24px rgba(0, 0, 0, 0.18);
+}
+
+/* Respect system preference when no explicit data-theme is set */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg-canvas: #ffffff;
+    --bg-surface: #ffffff;
+    --bg-surface-raised: #f5f5f4;
+    --border-subtle: #e7e5e4;
+    --border-strong: #d6d3d1;
+    --text-primary: #111111;
+    --text-secondary: #6b6b6b;
+    --text-tertiary: #9a9a9a;
+    --accent: #f2600a;
+    --accent-strong: #d9540a;
+    --accent-soft: rgba(242, 96, 10, 0.1);
+    --accent-on: #ffffff;
+    --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04), 0 20px 40px -28px rgba(0, 0, 0, 0.14);
+    --shadow-pop: 0 2px 4px rgba(0, 0, 0, 0.05), 0 24px 48px -24px rgba(0, 0, 0, 0.18);
+  }
+}
