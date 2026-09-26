@@ -1,5 +1,1 @@
-{
-  "buildCommand": "cd nextjs-setup/nextjs-dashboard && pnpm build",
-  "installCommand": "pnpm install -r",
-  "outputDirectory": "nextjs-setup/nextjs-dashboard/.next"
-}
+
