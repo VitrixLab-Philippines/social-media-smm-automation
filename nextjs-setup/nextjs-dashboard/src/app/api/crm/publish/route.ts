@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ContentDraft, DraftStatus } from "@/lib/crm";
 
-// In-memory store for publish jobs
-const publishJobs: Record<string, {
+type Job = {
   id: string;
   draftId: string;
   platform: string;
@@ -10,7 +9,10 @@ const publishJobs: Record<string, {
   createdAt: string;
   completedAt?: string;
   error?: string;
-}[]> = [];
+};
+
+// In-memory store for publish jobs
+const publishJobs: Record<string, Job[]> = {};
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,23 +27,24 @@ export async function POST(request: NextRequest) {
     }
 
     const jobId = `publish-${Date.now().toString().slice(-4)}`;
-    const job = {
-      id: jobId,
-      draftId,
-      platform,
+    const job: Job = {
+      id: crypto.randomUUID(),
+      draftId: String(draftId),
+      platform: String(platform),
       status: "pending",
       createdAt: new Date().toISOString(),
     };
 
-    publishJobs[jobId] = [job];
+    publishJobs[jobId] = publishJobs[jobId] ?? [];
+    publishJobs[jobId].push(job);
 
     // Simulate async publish job - in production this would call external API
     setTimeout(() => {
       // Simulate successful publish
-      const index = publishJobs.findIndex((j) => j.id === jobId);
-      if (index !== -1) {
-        publishJobs[index][0].status = "succeeded";
-        publishJobs[index][0].completedAt = new Date().toISOString();
+      const job = publishJobs[jobId]?.find((j) => j.id === jobId);
+      if (job) {
+        job.status = "succeeded";
+        job.completedAt = new Date().toISOString();
       }
     }, 1500);
 

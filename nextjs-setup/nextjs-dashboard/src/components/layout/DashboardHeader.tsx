@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { DashboardViewSection } from "@/lib/crm";
 
 /** DashboardHeader — top app bar for Dashboard page.
  *  Distinct from Landing Page's SiteNav: compact, section-aware,
@@ -23,7 +24,7 @@ export default function DashboardHeader({
   density: "spacious" | "compact";
   selectedPlatform: string;
   sidebarOpen: boolean;
-  onSelectSection: (section: string) => void;
+  onSelectSection: (section: DashboardViewSection) => void;
   onToggleViewMode: (mode: "grid" | "list") => void;
   onToggleDensity: (density: "spacious" | "compact") => void;
   onPlatformChange: (platform: string) => void;
@@ -95,7 +96,7 @@ export default function DashboardHeader({
 
       <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
         <button
-          onClick={onToggleViewMode}
+          onClick={() => onToggleViewMode("grid")}
           style={{
             padding: "0.25rem 0.5rem",
             background: viewMode === "grid" ? "var(--primary-light)" : "transparent",
@@ -106,10 +107,24 @@ export default function DashboardHeader({
             cursor: "pointer",
           }}
         >
-          {viewMode}
+          Grid
         </button>
         <button
-          onClick={onToggleDensity}
+          onClick={() => onToggleViewMode("list")}
+          style={{
+            padding: "0.3rem 0.6rem",
+            background: viewMode === "list" ? "var(--primary-light)" : "var(--surface)",
+            color: viewMode === "list" ? "var(--primary)" : "var(--muted)",
+            border: "none",
+            fontSize: "var(--text-xs)",
+            cursor: "pointer",
+          }}
+          title="List row layout"
+        >
+          List
+        </button>
+        <button
+          onClick={() => onToggleDensity("spacious")}
           style={{
             padding: "0.25rem 0.5rem",
             background: density === "spacious" ? "var(--primary-light)" : "transparent",
@@ -120,7 +135,21 @@ export default function DashboardHeader({
             cursor: "pointer",
           }}
         >
-          {density}
+          Spacious
+        </button>
+        <button
+          onClick={() => onToggleDensity("compact")}
+          style={{
+            padding: "0.25rem 0.5rem",
+            background: density === "compact" ? "var(--primary-light)" : "transparent",
+            borderRadius: "var(--radius-small)",
+            border: "1px solid var(--line)",
+            color: density === "compact" ? "var(--primary)" : "var(--muted)",
+            fontSize: "var(--text-xs)",
+            cursor: "pointer",
+          }}
+        >
+          Compact
         </button>
         <Link
           href="#"

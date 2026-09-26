@@ -3,7 +3,8 @@
 import React, { useState } from "react";
 import DashboardShell from "@/components/layout/DashboardShell";
 import DashboardHeader from "@/components/layout/DashboardHeader";
-import LayoutControlBar, { DashboardViewSection } from "@/components/layout/LayoutControlBar";
+import LayoutControlBar from "@/components/layout/LayoutControlBar";
+import { DashboardViewSection } from "@/lib/crm";
 import SiteFooter from "@/components/layout/SiteFooter";
 import ApprovalQueue from "@/components/crm/ApprovalQueue";
 import AutomationStatusCard from "@/components/crm/AutomationStatusCard";
