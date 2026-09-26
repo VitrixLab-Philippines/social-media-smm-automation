@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Optional
 from smm.ai.provider import AIProvider, GenerationRequest, GenerationResult
 from smm.domain.models import BrandProfile, ContentDraft
 
@@ -7,7 +8,7 @@ class ContentPlan:
     topic: str
     platforms: tuple[str, ...]
     content_type: str
-    cta: str | None = None
+    cta: Optional[str] = None
 
 class ContentPlanner:
     def __init__(self, provider: AIProvider):

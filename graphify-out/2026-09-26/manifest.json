@@ -1,0 +1,692 @@
+{
+  "nextjs-setup/nextjs-dashboard/eslint.config.mjs": {
+    "mtime": 1790264232.2705896,
+    "seen": 1790361056.4633772,
+    "ast_hash": "dfa1f5f6a7037bf39dc510f30b180002",
+    "semantic_hash": "dfa1f5f6a7037bf39dc510f30b180002"
+  },
+  "nextjs-setup/nextjs-dashboard/next.config.ts": {
+    "mtime": 1790264232.2705896,
+    "seen": 1790361056.4633832,
+    "ast_hash": "269c414be7f67b30f505aace194ab393",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/package.json": {
+    "mtime": 1790264232.2765896,
+    "seen": 1790361056.4633882,
+    "ast_hash": "874fca49022695b870435f35b6e217e7",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/postcss.config.mjs": {
+    "mtime": 1790264232.2775898,
+    "seen": 1790361056.4633927,
+    "ast_hash": "239f3ebf717465dc636818a1a619398d",
+    "semantic_hash": "239f3ebf717465dc636818a1a619398d"
+  },
+  "nextjs-setup/nextjs-dashboard/src/app/dashboard/page.tsx": {
+    "mtime": 1790366826.8954418,
+    "seen": 1790366854.896711,
+    "ast_hash": "1349240c8e53118df085cf0eacb277fa",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/src/app/layout.tsx": {
+    "mtime": 1790264232.29659,
+    "seen": 1790361056.4634147,
+    "ast_hash": "587c6301c03fbe5b5cd3ad6f1db8713e",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/src/app/login/page.tsx": {
+    "mtime": 1790264232.29959,
+    "seen": 1790361056.463418,
+    "ast_hash": "5a5502499f716efefcb28fce04efec1b",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/src/app/page.tsx": {
+    "mtime": 1790365797.6228611,
+    "seen": 1790366854.8967247,
+    "ast_hash": "817c1e5beadebe9d678c0a50b62b68d7",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/tsconfig.json": {
+    "mtime": 1790264232.3375907,
+    "seen": 1790361056.4634771,
+    "ast_hash": "ee17fd1c97c735e9f3564e3f5251f125",
+    "semantic_hash": "ee17fd1c97c735e9f3564e3f5251f125"
+  },
+  "package.json": {
+    "mtime": 1790264232.3385906,
+    "seen": 1790361056.4634798,
+    "ast_hash": "f9913e17bb90d216468b4208a5ab7cca",
+    "semantic_hash": ""
+  },
+  "pyproject.toml": {
+    "mtime": 1790264232.3425906,
+    "seen": 1790361056.4634824,
+    "ast_hash": "07ae394f1100dd008105b11aeba31602",
+    "semantic_hash": "07ae394f1100dd008105b11aeba31602"
+  },
+  "skills/antislop-human/contrast-check.py": {
+    "mtime": 1790264232.3615909,
+    "seen": 1790361056.4634852,
+    "ast_hash": "a9c5624aded16c49676356559a991574",
+    "semantic_hash": "a9c5624aded16c49676356559a991574"
+  },
+  "skills/antislop-human/contrast-mcp.py": {
+    "mtime": 1790264232.365591,
+    "seen": 1790361056.463488,
+    "ast_hash": "225d935cd351c401e915013022769fcb",
+    "semantic_hash": "225d935cd351c401e915013022769fcb"
+  },
+  "src/smm/__init__.py": {
+    "mtime": 1790264232.4715924,
+    "seen": 1790361056.4634907,
+    "ast_hash": "6a61f5ee9ff2df5a2266d013727886a2",
+    "semantic_hash": "6a61f5ee9ff2df5a2266d013727886a2"
+  },
+  "src/smm/ai/prompts.py": {
+    "mtime": 1790264232.4715924,
+    "seen": 1790361056.4634938,
+    "ast_hash": "4402ecc77e438cbb3722e0bf333b7ebf",
+    "semantic_hash": "4402ecc77e438cbb3722e0bf333b7ebf"
+  },
+  "src/smm/ai/provider.py": {
+    "mtime": 1790264232.4725926,
+    "seen": 1790361056.4634964,
+    "ast_hash": "4ec3e5a6502fb2a85f85f4a0edde693e",
+    "semantic_hash": "4ec3e5a6502fb2a85f85f4a0edde693e"
+  },
+  "src/smm/analytics/feedback.py": {
+    "mtime": 1790264232.4735925,
+    "seen": 1790361056.463499,
+    "ast_hash": "990ebc17969cddbcc2264df527dcb325",
+    "semantic_hash": "990ebc17969cddbcc2264df527dcb325"
+  },
+  "src/smm/cli.py": {
+    "mtime": 1790264232.4745924,
+    "seen": 1790361056.463502,
+    "ast_hash": "df8bdcc48c86753db09060141a746dbf",
+    "semantic_hash": "df8bdcc48c86753db09060141a746dbf"
+  },
+  "src/smm/config.py": {
+    "mtime": 1790264232.4745924,
+    "seen": 1790361056.4635043,
+    "ast_hash": "3ba2ed774fae83642ee0f8299ba7b963",
+    "semantic_hash": "3ba2ed774fae83642ee0f8299ba7b963"
+  },
+  "src/smm/content/planner.py": {
+    "mtime": 1790264232.4755926,
+    "seen": 1790361056.4635072,
+    "ast_hash": "f520957898d083607eb96f0489df2c96",
+    "semantic_hash": "f520957898d083607eb96f0489df2c96"
+  },
+  "src/smm/domain/models.py": {
+    "mtime": 1790264232.4765925,
+    "seen": 1790361056.46351,
+    "ast_hash": "4a86cf4b1b77785f65dee74e1f40524a",
+    "semantic_hash": "4a86cf4b1b77785f65dee74e1f40524a"
+  },
+  "src/smm/integrations/adapters.py": {
+    "mtime": 1790264232.4805927,
+    "seen": 1790361056.463513,
+    "ast_hash": "85b36130a8c3c412e72576f13991af1c",
+    "semantic_hash": "85b36130a8c3c412e72576f13991af1c"
+  },
+  "src/smm/main.py": {
+    "mtime": 1790264232.4815927,
+    "seen": 1790361056.4635158,
+    "ast_hash": "8104693e891b1b4ad1921d03e8c7eb5c",
+    "semantic_hash": ""
+  },
+  "src/smm/moderation/policy.py": {
+    "mtime": 1790264232.4825926,
+    "seen": 1790361056.4635181,
+    "ast_hash": "78c8ec257ba6ae7aee03924ae603ce4d",
+    "semantic_hash": "78c8ec257ba6ae7aee03924ae603ce4d"
+  },
+  "src/smm/publishing/ports.py": {
+    "mtime": 1790264232.4835927,
+    "seen": 1790361056.463521,
+    "ast_hash": "18e1076f40bdd250e7030b29c1ff855d",
+    "semantic_hash": "18e1076f40bdd250e7030b29c1ff855d"
+  },
+  "src/smm/publishing/service.py": {
+    "mtime": 1790264232.4865928,
+    "seen": 1790361056.463524,
+    "ast_hash": "02fd3ff56a50b15c33e070e25392437f",
+    "semantic_hash": "02fd3ff56a50b15c33e070e25392437f"
+  },
+  "src/smm/research/signals.py": {
+    "mtime": 1790264232.4875927,
+    "seen": 1790361056.4635267,
+    "ast_hash": "8c4ee191accdf4bb4808d7c628690513",
+    "semantic_hash": "8c4ee191accdf4bb4808d7c628690513"
+  },
+  "src/smm/wasm/Cargo.toml": {
+    "mtime": 1790264232.4955928,
+    "seen": 1790361056.4635298,
+    "ast_hash": "49690db0707af070ed4b8cc281ee1817",
+    "semantic_hash": "49690db0707af070ed4b8cc281ee1817"
+  },
+  "src/smm/wasm/build.rs": {
+    "mtime": 1790264232.497593,
+    "seen": 1790361056.4635327,
+    "ast_hash": "a45378b2b9789934654586cde45b7232",
+    "semantic_hash": "a45378b2b9789934654586cde45b7232"
+  },
+  "src/smm/wasm/feedback.py": {
+    "mtime": 1790264232.4985929,
+    "seen": 1790361056.4635353,
+    "ast_hash": "990ebc17969cddbcc2264df527dcb325",
+    "semantic_hash": "990ebc17969cddbcc2264df527dcb325"
+  },
+  "src/smm/wasm/signals.py": {
+    "mtime": 1790264232.4985929,
+    "seen": 1790361056.4635382,
+    "ast_hash": "8c4ee191accdf4bb4808d7c628690513",
+    "semantic_hash": "8c4ee191accdf4bb4808d7c628690513"
+  },
+  "src/smm/wasm/src/main.rs": {
+    "mtime": 1790264232.4985929,
+    "seen": 1790361056.4635408,
+    "ast_hash": "4f8aa76c19f0860bad349daf421876d1",
+    "semantic_hash": "4f8aa76c19f0860bad349daf421876d1"
+  },
+  "src/smm/wasm/waspy_test/Cargo.toml": {
+    "mtime": 1790264232.4985929,
+    "seen": 1790361056.4635441,
+    "ast_hash": "c4acb6c8713079f39d995a80d8e13814",
+    "semantic_hash": "c4acb6c8713079f39d995a80d8e13814"
+  },
+  "src/smm/wasm/waspy_test/src/lib.rs": {
+    "mtime": 1790264232.499593,
+    "seen": 1790361056.4635475,
+    "ast_hash": "3121fbb0f903d343fd1df80d7749340c",
+    "semantic_hash": "3121fbb0f903d343fd1df80d7749340c"
+  },
+  "src/smm/workflows/daily.py": {
+    "mtime": 1790264232.499593,
+    "seen": 1790361056.4635499,
+    "ast_hash": "5ee6377254afb8f5bc2392000c337302",
+    "semantic_hash": "5ee6377254afb8f5bc2392000c337302"
+  },
+  "tests/test_analytics.py": {
+    "mtime": 1790264232.500593,
+    "seen": 1790361056.4635532,
+    "ast_hash": "f4f195e1eac28017ab4f0050992ae5d2",
+    "semantic_hash": "f4f195e1eac28017ab4f0050992ae5d2"
+  },
+  "tests/test_meta_adapter.py": {
+    "mtime": 1790264232.504593,
+    "seen": 1790361056.4635584,
+    "ast_hash": "e8ac8ff4a9afa950837f4104c05a4e8c",
+    "semantic_hash": "e8ac8ff4a9afa950837f4104c05a4e8c"
+  },
+  "tests/test_moderation.py": {
+    "mtime": 1790264232.504593,
+    "seen": 1790361056.4635882,
+    "ast_hash": "39a1496618747155d2e74f682d8f4ff4",
+    "semantic_hash": "39a1496618747155d2e74f682d8f4ff4"
+  },
+  "tests/test_planner.py": {
+    "mtime": 1790264232.504593,
+    "seen": 1790361056.463595,
+    "ast_hash": "92666c68333182a2ff964bde60fb6efd",
+    "semantic_hash": "92666c68333182a2ff964bde60fb6efd"
+  },
+  "tests/test_publishing.py": {
+    "mtime": 1790264232.504593,
+    "seen": 1790361056.4635978,
+    "ast_hash": "eca31f99794502ab18bacc3bb7f9425e",
+    "semantic_hash": "eca31f99794502ab18bacc3bb7f9425e"
+  },
+  "vercel.json": {
+    "mtime": 1790264232.506593,
+    "seen": 1790361056.4636006,
+    "ast_hash": "54041d90b9f0575b7d85a3d616134502",
+    "semantic_hash": "54041d90b9f0575b7d85a3d616134502"
+  },
+  ".ox/settings.local.json": {
+    "mtime": 1790264232.0755868,
+    "seen": 1790361056.4633563,
+    "ast_hash": "ff1b869927489812d67534e3e2d1090f",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/src/app/api/auth/login/route.ts": {
+    "mtime": 1790264232.2835898,
+    "seen": 1790361056.4633958,
+    "ast_hash": "fcf6b4e4af5b11493f7600b4d29c0d89",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/src/app/api/crm/brand/route.ts": {
+    "mtime": 1790264232.2835898,
+    "seen": 1790361056.4634037,
+    "ast_hash": "a275d950aa5b3ed17ac4e90f3bf90ee8",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/src/app/api/crm/drafts/route.ts": {
+    "mtime": 1790264232.28559,
+    "seen": 1790361056.4634058,
+    "ast_hash": "0d890ee5eb1548602306b747e4160b55",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/src/app/api/graph/route.ts": {
+    "mtime": 1790264232.2865899,
+    "seen": 1790361056.4634082,
+    "ast_hash": "0e7aa14ac7795d57210a477003dc3459",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/src/components/crm/AnalyticsCards.tsx": {
+    "mtime": 1790264232.30159,
+    "seen": 1790361056.4634233,
+    "ast_hash": "9170767b6d7e054b70f1d6d1d1619184",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/src/components/crm/ApprovalQueue.tsx": {
+    "mtime": 1790264232.30359,
+    "seen": 1790361056.463426,
+    "ast_hash": "3fa797d9445f6fbd78cc02feb1b139e3",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/src/components/crm/AutomationStatusCard.tsx": {
+    "mtime": 1790264232.3055902,
+    "seen": 1790361056.4634278,
+    "ast_hash": "fdb272a190f6ce78fae85719bd30fc5b",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/src/components/crm/BrandProfileCard.tsx": {
+    "mtime": 1790264232.3075902,
+    "seen": 1790361056.4634304,
+    "ast_hash": "83e492a335f5483872759225e34f59b1",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/src/components/crm/ClientManagement.tsx": {
+    "mtime": 1790356049.1478157,
+    "seen": 1790361056.4634328,
+    "ast_hash": "23ce37a7faae84a1b9d94e084c573fb2",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/src/components/crm/ContentDraftCard.tsx": {
+    "mtime": 1790264232.3105903,
+    "seen": 1790361056.463435,
+    "ast_hash": "211cf1c581269b5c01b22325c2d2231e",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/src/components/dashboard/DashboardCard.tsx": {
+    "mtime": 1790264232.3155904,
+    "seen": 1790361056.4634373,
+    "ast_hash": "f9cd511c0c4a0d282cabb49c1ed6351f",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/src/components/dashboard/GraphExplorer.tsx": {
+    "mtime": 1790264232.3195903,
+    "seen": 1790361056.4634397,
+    "ast_hash": "42c2e8d534f3d7ee5070b37924cd5cca",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/src/components/layout/DashboardShell.tsx": {
+    "mtime": 1790366748.0085206,
+    "seen": 1790366854.8967903,
+    "ast_hash": "07b201a10c2aac58b4747cec0e27d017",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/src/components/layout/LayoutControlBar.tsx": {
+    "mtime": 1790264232.3255904,
+    "seen": 1790361056.4634435,
+    "ast_hash": "11172d0a3a96f2a62d875801ccbf152c",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/src/components/layout/SiteFooter.tsx": {
+    "mtime": 1790264232.3255904,
+    "seen": 1790361056.463445,
+    "ast_hash": "e882e668471a42a79f819ac0971576ab",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/src/components/layout/SiteNav.tsx": {
+    "mtime": 1790264232.3265905,
+    "seen": 1790361056.4634473,
+    "ast_hash": "b258be5b2162ea55168c268e48afafcd",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/src/components/sections/ArchitectureSection.tsx": {
+    "mtime": 1790264232.3265905,
+    "seen": 1790361056.4634492,
+    "ast_hash": "4bfadf56514ed86fbb1b79ebd2d8e405",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/src/components/sections/CtaBand.tsx": {
+    "mtime": 1790264232.3275905,
+    "seen": 1790361056.4634514,
+    "ast_hash": "0fb6844b7bcdf5a6cea48788a4afe604",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/src/components/sections/HeroSection.tsx": {
+    "mtime": 1790264232.3275905,
+    "seen": 1790361056.4634535,
+    "ast_hash": "85a9b2c11a69d8c0f1923812b2d6829d",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/src/components/sections/HighlightsStrip.tsx": {
+    "mtime": 1790264232.3275905,
+    "seen": 1790361056.4634554,
+    "ast_hash": "9052057f9f4bb2c22ce74eab093934de",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/src/components/sections/RoadmapSection.tsx": {
+    "mtime": 1790264232.3275905,
+    "seen": 1790361056.4634576,
+    "ast_hash": "d1c5f96449a24e4a8874ee2eca5b1b08",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/src/components/sections/SecuritySection.tsx": {
+    "mtime": 1790264232.3295906,
+    "seen": 1790361056.4634595,
+    "ast_hash": "287564173bf7c0ca085af536b8c80d98",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/src/components/sections/WorkflowSection.tsx": {
+    "mtime": 1790264232.3325906,
+    "seen": 1790361056.4634619,
+    "ast_hash": "b8563c28ae7164eb692f4b7eff56a527",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/src/components/ui/ArchCard.tsx": {
+    "mtime": 1790264232.3345904,
+    "seen": 1790361056.4634643,
+    "ast_hash": "6c4e453520e86c07b8960fe917e25e66",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/src/components/ui/Button.tsx": {
+    "mtime": 1790264232.3355906,
+    "seen": 1790361056.4634664,
+    "ast_hash": "f38197a19255e4cc91e6747ecf182ba0",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/src/components/ui/PhaseBadge.tsx": {
+    "mtime": 1790264232.3355906,
+    "seen": 1790361056.4634693,
+    "ast_hash": "597a1e2ed2c509bfeeff8b285af47fd3",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/src/components/ui/StatusPill.tsx": {
+    "mtime": 1790264232.3365905,
+    "seen": 1790361056.4634714,
+    "ast_hash": "830bb2b1bf4d2d1cbeaa173ed7f00445",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/src/hooks/useScrollReveal.ts": {
+    "mtime": 1790264232.3365905,
+    "seen": 1790361056.4634733,
+    "ast_hash": "21585b341f57d8e37c20a0f7852109ea",
+    "semantic_hash": ""
+  },
+  "tests/test_imports.py": {
+    "mtime": 1790353964.1656926,
+    "seen": 1790361056.4635553,
+    "ast_hash": "cbbb6fed05d1064a29b3b10aa5b3fb12",
+    "semantic_hash": ""
+  },
+  ".github/workflows/ci.yml": {
+    "mtime": 1790264232.0645866,
+    "seen": 1790361056.4636028,
+    "ast_hash": "41c73980eccc8705fac8a1021035c416",
+    "semantic_hash": ""
+  },
+  ".github/workflows/daily-dry-run.yml": {
+    "mtime": 1790264232.0655868,
+    "seen": 1790361056.463605,
+    "ast_hash": "27c6c83af140d0295a02572ca91990ee",
+    "semantic_hash": ""
+  },
+  "AGENTS.md": {
+    "mtime": 1790264232.076587,
+    "seen": 1790361056.4636066,
+    "ast_hash": "8d49590257eee513628cb066f3f0a4b1",
+    "semantic_hash": ""
+  },
+  "DESIGN.md": {
+    "mtime": 1790264232.080587,
+    "seen": 1790361056.4636085,
+    "ast_hash": "8f0dac30f99f75409e9d540cb40b7d21",
+    "semantic_hash": ""
+  },
+  "New Text Document.txt": {
+    "mtime": 1790264232.0845869,
+    "seen": 1790361056.4636106,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": ""
+  },
+  "PYTHON_TO_WASM_MIGRATION_PLAN.md": {
+    "mtime": 1790264232.1015873,
+    "seen": 1790361056.463613,
+    "ast_hash": "9846cce01ea214ab2740e03ad139bef7",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1790264232.1015873,
+    "seen": 1790361056.4636157,
+    "ast_hash": "b01b57f18ba08198798e53e8fc6c3773",
+    "semantic_hash": ""
+  },
+  "antislop.md": {
+    "mtime": 1790264232.1115873,
+    "seen": 1790361056.463618,
+    "ast_hash": "693c309b62e8f514b7913af02b7870e2",
+    "semantic_hash": ""
+  },
+  "dashboard-skill/analytics-dashboard-ui/SKILL.md": {
+    "mtime": 1790264232.1125875,
+    "seen": 1790361056.463621,
+    "ast_hash": "01311302eee8114f361d8416a0fdaff6",
+    "semantic_hash": ""
+  },
+  "dashboard-skill/analytics-dashboard-ui/examples/preview.html": {
+    "mtime": 1790264232.1135874,
+    "seen": 1790361056.4636238,
+    "ast_hash": "706ffa604195a6ccb206946ff49cbf30",
+    "semantic_hash": ""
+  },
+  "dashboard-skill/analytics-dashboard-ui/references/component-specs.md": {
+    "mtime": 1790264232.1135874,
+    "seen": 1790361056.4636257,
+    "ast_hash": "bff2cd9accaaedb8659989cb7c87a155",
+    "semantic_hash": ""
+  },
+  "docs/architecture/ai-automation-architecture.md": {
+    "mtime": 1790264232.1145873,
+    "seen": 1790361056.4636283,
+    "ast_hash": "7eae966ddbba99a934a61cd721703875",
+    "semantic_hash": ""
+  },
+  "docs/architecture/mvp-implementation.md": {
+    "mtime": 1790264232.1145873,
+    "seen": 1790361056.4636304,
+    "ast_hash": "dc7d5a2e385147c6c75287bfff9393c0",
+    "semantic_hash": ""
+  },
+  "docs/architecture/phase2-linkedin-x.md": {
+    "mtime": 1790264232.1145873,
+    "seen": 1790361056.4636323,
+    "ast_hash": "025d6467c8b4207cc3bfd1df88c8f41b",
+    "semantic_hash": ""
+  },
+  "docs/architecture/phase3-tiktok-youtube.md": {
+    "mtime": 1790264232.1155875,
+    "seen": 1790361056.4636345,
+    "ast_hash": "3af0beaf18fc1982f5dd99fa621cda43",
+    "semantic_hash": ""
+  },
+  "docs/architecture/phase4-analytics-loop.md": {
+    "mtime": 1790264232.1155875,
+    "seen": 1790361056.4636402,
+    "ast_hash": "847c1496763b8935faf1bd464169b0ec",
+    "semantic_hash": ""
+  },
+  "index.html": {
+    "mtime": 1790264232.2585895,
+    "seen": 1790361056.4636421,
+    "ast_hash": "52c043dd466005d87f9af5c9b587ab67",
+    "semantic_hash": ""
+  },
+  "links.md": {
+    "mtime": 1790264232.2615895,
+    "seen": 1790361056.4636445,
+    "ast_hash": "62445dd2f8faa1f4473bf2d64619d2ec",
+    "semantic_hash": ""
+  },
+  "login.html": {
+    "mtime": 1790264232.2665896,
+    "seen": 1790361056.4636462,
+    "ast_hash": "b86707178704aad4611507ee1f293afa",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/AGENTS.md": {
+    "mtime": 1790264232.2685895,
+    "seen": 1790361056.463648,
+    "ast_hash": "01e8142356e15c3404e0d84c48187cd0",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/CLAUDE.md": {
+    "mtime": 1790264232.2695897,
+    "seen": 1790361056.46365,
+    "ast_hash": "5c27369b226fcf2be8a6cfe52224e767",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/README.md": {
+    "mtime": 1790264232.2695897,
+    "seen": 1790361056.463652,
+    "ast_hash": "f15aaa42d5d299d091b1171097ea56ad",
+    "semantic_hash": ""
+  },
+  "skills/antislop-code/SKILL.md": {
+    "mtime": 1790264232.3465908,
+    "seen": 1790361056.4636538,
+    "ast_hash": "5b8df92fc122a1655c8d3d947bbbbe3b",
+    "semantic_hash": ""
+  },
+  "skills/antislop-copywriting/SKILL.md": {
+    "mtime": 1790264232.3525908,
+    "seen": 1790361056.463656,
+    "ast_hash": "01dfeeb1dab06d811abb77a91f179b5e",
+    "semantic_hash": ""
+  },
+  "skills/antislop-human/SKILL.md": {
+    "mtime": 1790264232.357591,
+    "seen": 1790361056.463658,
+    "ast_hash": "e2217bed0a0012ee0d879c65c39267b9",
+    "semantic_hash": ""
+  },
+  "skills/antislop-layoutmobile/SKILL.md": {
+    "mtime": 1790264232.368591,
+    "seen": 1790361056.4636602,
+    "ast_hash": "0519c5ea825aa9215a403f13bf45a6cf",
+    "semantic_hash": ""
+  },
+  "skills/antislop-ui/SKILL.md": {
+    "mtime": 1790264232.3735912,
+    "seen": 1790361056.4636624,
+    "ast_hash": "f410af8c21cb87aa1eb7459385ded8c6",
+    "semantic_hash": ""
+  },
+  "skills/antislop-ui/patterns/INDEX.md": {
+    "mtime": 1790264232.3775911,
+    "seen": 1790361056.4636638,
+    "ast_hash": "f7ab65b5d8f889e310be8d2c161e970f",
+    "semantic_hash": ""
+  },
+  "skills/antislop-ui/patterns/border-glow.md": {
+    "mtime": 1790264232.3795912,
+    "seen": 1790361056.463666,
+    "ast_hash": "eb8e79ad0fc08b1cc5108d374b4222b2",
+    "semantic_hash": ""
+  },
+  "skills/antislop-ui/patterns/css-visuals.md": {
+    "mtime": 1790264232.3825912,
+    "seen": 1790361056.4636679,
+    "ast_hash": "5d7fc01ffb99eacf28e2835cee24bc9c",
+    "semantic_hash": ""
+  },
+  "skills/antislop-ui/patterns/cta-band.md": {
+    "mtime": 1790264232.3875914,
+    "seen": 1790361056.46367,
+    "ast_hash": "bbc7d363dfaf4071f91a2b350201819a",
+    "semantic_hash": ""
+  },
+  "skills/antislop-ui/patterns/hero-dashboard-card.md": {
+    "mtime": 1790264232.3915913,
+    "seen": 1790361056.4636724,
+    "ast_hash": "8077a7e3d55b4ef0e743242a4d0df74c",
+    "semantic_hash": ""
+  },
+  "skills/antislop-ui/patterns/highlights-strip.md": {
+    "mtime": 1790264232.4045916,
+    "seen": 1790361056.4636743,
+    "ast_hash": "3582d1fc1f50d86e587d7cb136aba57f",
+    "semantic_hash": ""
+  },
+  "skills/antislop-ui/patterns/scroll-reveal.md": {
+    "mtime": 1790264232.4195917,
+    "seen": 1790361056.4636765,
+    "ast_hash": "1099422dc8db133c934dba73fbe26e30",
+    "semantic_hash": ""
+  },
+  "skills/antislop-ui/patterns/storytelling-pairs.md": {
+    "mtime": 1790264232.441592,
+    "seen": 1790361056.4636784,
+    "ast_hash": "801b08949f4c6c96c3a5d8fe6fd5e810",
+    "semantic_hash": ""
+  },
+  "skills/antislop-ui/patterns/typography.md": {
+    "mtime": 1790264232.4445922,
+    "seen": 1790361056.4636805,
+    "ast_hash": "983506649fe8b7e7b731ae2ae8132640",
+    "semantic_hash": ""
+  },
+  "skills/antislop/SKILL.md": {
+    "mtime": 1790264232.4665926,
+    "seen": 1790361056.4636827,
+    "ast_hash": "d1328f500e082181fd8fc83998eafa2c",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/public/file.svg": {
+    "mtime": 1790264232.2775898,
+    "seen": 1790361056.4636846,
+    "ast_hash": "d09f95206c3fa0bb9bd9fefabfd0ea71",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/public/globe.svg": {
+    "mtime": 1790264232.2775898,
+    "seen": 1790361056.4636862,
+    "ast_hash": "2aaafa6a49b6563925fe440891e32717",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/public/next.svg": {
+    "mtime": 1790264232.2775898,
+    "seen": 1790361056.4636881,
+    "ast_hash": "8e061864f388b47f33a1c3780831193e",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/public/vercel.svg": {
+    "mtime": 1790264232.2775898,
+    "seen": 1790361056.46369,
+    "ast_hash": "c0af2f507b369b085b35ef4bbe3bcf1e",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/public/window.svg": {
+    "mtime": 1790264232.2815897,
+    "seen": 1790361056.4636917,
+    "ast_hash": "a2760511c65806022ad20adf74370ff3",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/src/components/crm/CRMDashboard.tsx": {
+    "mtime": 1790366793.1627758,
+    "seen": 1790366854.8967648,
+    "ast_hash": "58cf5bd05c037c71451568cec7132eee",
+    "semantic_hash": ""
+  },
+  "nextjs-setup/nextjs-dashboard/src/components/layout/DashboardHeader.tsx": {
+    "mtime": 1790365819.6970923,
+    "seen": 1790366854.896786,
+    "ast_hash": "e74b1d6ea7d21e5bd40c04d917de327a",
+    "semantic_hash": ""
+  }
+}

@@ -14,6 +14,9 @@ allowed-tools: Read Write Edit Glob Grep
 - Load together with `antislop.md` whenever the task is UI or visual work. The core holds the mechanism (the purpose test, the three tiers, the Delivery Gate); this skill holds UI-specific depth.
 - Every entry has the same shape: **Tell** (the pattern), **Why** (why it reads as slop), **Fix** (what to do instead), with the governing core rule cited as R-XX.
 - The Delivery Gate in the core remains the gate. The "UI Skill Checklist" at the end of this file is the UI-specific supplement to run alongside it.
+- **Proven patterns** are in `patterns/` next to this file. Reference them when building hero sections, product storytelling, highlights strips, and 3D/motion elements. They are battle-tested implementations, not templates: adapt them, do not copy-paste.
+
+---
 
 ## Visual & Color
 
@@ -47,6 +50,7 @@ allowed-tools: Read Write Edit Glob Grep
 - **Tell:** glow on cards, buttons, icons, badges, backgrounds, and borders simultaneously.
 - **Why:** glow is an attention amplifier. Applied everywhere it amplifies nothing, and it is one of the fastest ways to look "made by AI".
 - **Fix:** reserve glow for a maximum of 1-2 important elements as a focus accent (R-13). Everything else stays matte.
+- **Allowed two-glow pattern (proven):** hero ambient glow (spatial anchor behind the h1) + closing CTA band glow (bookend at page bottom). Both documented, different positions, same purpose — bracketing the page. More than two glows on a single page fails R-13.
 
 ### Background Grid
 
@@ -78,6 +82,8 @@ allowed-tools: Read Write Edit Glob Grep
 - **Why:** this is the "safe" result of over-filtering without direction. It is not slop, but it is not design either: it is a void where a design should be.
 - **Fix:** this is a direction problem, not a filter problem. Add `DESIGN.md` or resolve the Design Read (core Part 3), then raise the liveliness dials. The fix is never more bans; it is state the purpose and add energy.
 
+---
+
 ## Layout & Components
 
 ### Monotonous Template Layout
@@ -85,6 +91,7 @@ allowed-tools: Read Write Edit Glob Grep
 - **Tell:** hero, subtitle, 2 CTAs, screenshot, feature grid, testimonials, FAQ, CTA, footer, in that order, every time.
 - **Why:** the order is the training-data default, not the product's narrative. Sections appear because the template has them, not because the content needs them.
 - **Fix:** build the structure around actual content needs (R-05, C-3). If the product has no testimonials, there is no testimonials section. Section order follows the product's story. Match the RHYTHM dial: if it is 3, sections visibly vary.
+- **Premium landing structure (proven):** hero → storytelling pairs (feature + visual, alternating) → highlights strip → social-proof/architecture → closing CTA band. Tested against Zyno (HorizonX) reference; conversion-focused without the template defaults.
 
 ### Copy-Paste Feature Cards
 
@@ -96,50 +103,47 @@ allowed-tools: Read Write Edit Glob Grep
 
 - **Tell:** a section made of a mosaic of differently-sized cards, some spanning two columns or two rows, filling the space like a tiled dashboard.
 - **Why:** it is the default "app-like" landing layout of the last few years, so it signals nothing about the product. When every section could be a bento, the layout is a template, not a decision.
-- **Fix:** use a bento grid only when the content genuinely has elements of different sizes to show (R-05). If every cell is roughly the same, a simple grid or list is more honest. The RHYTHM dial decides whether sections vary at all.
+- **Fix:** use a bento grid only when the content genuinely has elements of different sizes to show (R-05). If every cell is roughly the same, a simple grid or list is more honest.
 
 ### Uniform Spacing
 
 - **Tell:** padding, margin, and gaps are identical across every section.
 - **Why:** rhythm is a tool, and a single spacing value removes it. Sections stop relating to each other; the page reads as one flat strip.
-- **Fix:** use whitespace as structure (core Part 3) and vary it with the RHYTHM dial. Establish a spacing scale, then use different levels to separate and connect. Uniform rhythm is a deliberate choice only when the dial says so (R-05).
+- **Fix:** use whitespace as structure (core Part 3) and vary it with the RHYTHM dial. Establish a spacing scale, then use different levels to separate and connect.
 
 ### "How It Works" Always 3 Steps
 
 - **Tell:** round icon + number 1, 2, 3 + short text, always three steps, always the same shape.
 - **Why:** the product's real process is rarely a tidy three-step list. The template forces the process into its shape, not the other way around.
-- **Fix:** present the process as it actually is (R-05). Three steps with round icons is fine if that is genuinely the process; otherwise use whatever shape the real workflow takes, including two steps or five.
+- **Fix:** present the process as it actually is (R-05). Three steps with round icons is fine if that is genuinely the process; otherwise use whatever shape the real workflow takes.
+- **Storytelling pair alternative (proven):** replace a step list with text+visual alternating pairs. Each pair = number + h3 + paragraph (text side) + CSS illustration (visual side). Alternates layout direction (`--flip` class) for RHYTHM 2. See `patterns/storytelling-pairs.md`.
 
 ### "Trusted By" Logo Bar
 
 - **Tell:** a row of generic company logos directly below the hero.
 - **Why:** it is a trust claim with no evidence: generic logos, no real customers named, no proof of use.
 - **Fix:** only show real, verifiable logos (R-18, R-36, C-5). If the product has no such customers yet, do not fabricate a logo bar. Real social proof beats a generic one every time.
+- **Highlights strip alternative (proven):** show 3-4 real product metrics (100% human-reviewed, 0 posts bypassed approval, etc.) in a full-bleed band with a divider between each number. No invented numbers; no green deltas. See `patterns/highlights-strip.md`.
 
 ### "Most Popular" Pricing Card
 
 - **Tell:** the middle pricing tier always highlighted with a capsule badge.
-- **Why:** it is the default pattern, which means it is not a decision. When every pricing section does it, the highlighted tier stops meaning anything.
+- **Why:** it is the default pattern, which means it is not a decision.
 - **Fix:** highlight the tier that actually serves the product's goals, and write why (R-31). If no tier deserves emphasis, highlight none.
-- **Three columns is part of the tell:** pricing shown as three tiers whatever the real structure, the middle one highlighted. That shape is the default, so it is not a decision (R-05). Use as many tiers as the product really has, and highlight the one that serves it.
-
-### Demo Without a Product
-
-- **Tell:** the page sells a product that is never shown working: no real demo, no Terms of Service, no Privacy Policy, just promises.
-- **Why:** it is a demo wearing a product's clothes. Every claim is trust with nothing behind it, and the missing legal pages are the quiet tell that nothing real exists yet.
-- **Fix:** show the real product working, or say honestly that it is not shipped yet (R-38, C-5). If the page asks for signups or payment, the Terms of Service and Privacy Policy must exist. An honest "coming soon" beats a convincing demo.
 
 ### 4-Column Template Footer
 
 - **Tell:** Product / Company / Resources / Legal columns with no variation.
 - **Why:** the columns exist because templates have them, not because the site has that many link groups.
-- **Fix:** structure the footer around what the product actually links to (R-05). A single column of links can be more useful than four half-empty ones.
+- **Fix:** structure the footer around what the product actually links to (R-05). A single row with the wordmark, a tagline, and the identity accent is cleaner than four half-empty columns.
 
 ### Uniform Section Rhythm
 
 - **Tell:** every section is centered title + subtitle + identical card grid, with no variation.
 - **Why:** identical composition makes sections blur together, and the page feels repetitive and flat.
-- **Fix:** vary composition with the RHYTHM dial (R-05). Alternate text-heavy and visual sections, asymmetric and symmetric layouts. A page where every section follows the same template is a page designed by a template.
+- **Fix:** vary composition with the RHYTHM dial (R-05). Alternate text-heavy and visual sections, asymmetric and symmetric layouts.
+
+---
 
 ## Decorative Elements
 
@@ -147,165 +151,334 @@ allowed-tools: Read Write Edit Glob Grep
 
 - **Tell:** sparkle, star, magic, lightning, diamond, cube, robot, or AI orb as feature icons.
 - **Why:** these glyphs are the generic vocabulary of "AI product". They communicate nothing about the specific feature.
-- **Fix:** use icons genuinely relevant to the content, with the relevance written down when the glyph is generic (R-04). If no appropriate icon exists, use none. The feature label does the work.
+- **Fix:** use icons genuinely relevant to the content, with the relevance written down when the glyph is generic (R-04). If no appropriate icon exists, use none.
 
 ### Lucide Icons
 
-- **Tell:** every icon comes from the same thin-stroke, rounded-corner library (Lucide or a visual clone), so all icons share one recognizable look.
-- **Why:** a single default icon library makes every AI site's icons identical, so the icons stop telling you anything about the product. The glyphs may be relevant; the uniform library look is the tell.
-- **Fix:** the icon set is a visual choice, not a default (R-04). Pick icons for relevance first; then decide whether the library's weight and stroke suit the product's character. Two icons that look "same-ish" can still read as yours if the set is a decision, not an import.
+- **Tell:** every icon comes from the same thin-stroke, rounded-corner library (Lucide or a visual clone).
+- **Why:** a single default icon library makes every AI site's icons identical.
+- **Fix:** the icon set is a visual choice, not a default (R-04). Pick icons for relevance first.
 
 ### Emoji as Decoration
 
-- **Tell:** literal emoji scattered through the copy, headings, badges, and buttons: 🚀 in a headline, ✅ beside every feature bullet, 🔥 on a CTA, 📈 above a chart title.
-- **Why:** emoji is the loudest shorthand for "this was generated, not written". In a UI it competes with the content for attention and flattens the product's voice into the same cheerful default as every other AI site.
-- **Fix:** remove emoji from UI text. If a concept needs a mark, use a real, relevant icon with the reason written down (R-04), or no mark at all. The copy carries the meaning; the emoji adds nothing.
+- **Tell:** literal emoji scattered through the copy, headings, badges, and buttons.
+- **Why:** emoji is the loudest shorthand for "this was generated, not written". It flattens the product's voice.
+- **Fix:** remove emoji from UI text. If a concept needs a mark, use a real, relevant icon with the reason written down (R-04), or no mark at all.
+- **Exception (proven):** HTML entities like `&#10003;` (✓), `&#9711;` (○), `&#8727;` (✦) used as functional state indicators in a product mockup card are not decorative emoji — they carry status meaning in a dashboard context. Always use `aria-hidden` on the container.
 
 ### Small Arrows on Every Button
 
 - **Tell:** `→` or `↗` placed on almost every button as pure decoration.
-- **Why:** the arrow becomes a pattern, not a signal. When every CTA has one, none of them point anywhere specific.
-- **Fix:** arrows are not the default identity for buttons (R-08). Keep them for the action that genuinely benefits from a direction cue, sized proportionally, with the purpose written down.
+- **Why:** the arrow becomes a pattern, not a signal.
+- **Fix:** arrows are not the default identity for buttons (R-08). Keep them for the action that genuinely benefits from a direction cue.
 
 ### Colored Left Stripe
 
 - **Tell:** a thin colored vertical bar on the left edge of cards, list rows, or section headers, used as decoration.
-- **Why:** the stripe adds color without adding meaning. It is the cheapest way to make a card "look designed", so it appears everywhere and says nothing.
-- **Fix:** the stripe is decoration; it must carry information or go (R-01, R-31). A left edge that marks real state (active, warning, new) is a signal. A stripe that exists to look designed is a default.
+- **Why:** the stripe adds color without adding meaning.
+- **Fix:** the stripe is decoration; it must carry information or go (R-01, R-31).
+- **Exception (proven):** a 2px left border in the brand primary on the active/pending item in a dashboard approval list is a state indicator, not decoration. It marks "this row requires action now." Written reason: status encoding in an approval UI. Used once per context.
 
 ### AI Capsule Badges
 
 - **Tell:** pill shape, thin border, glow, small dot, uppercase, containing "AI Powered", "Beta", "New".
-- **Why:** the capsule-plus-glow-plus-dot combination is a self-referential badge that says "made by AI, about being made by AI". It adds noise, not information.
-- **Fix:** badges only when functionally needed, with the need written down, and never the full combination (R-09). A real status label is fine; a decorative "AI Powered" pill is not.
+- **Why:** the capsule-plus-glow-plus-dot combination is self-referential noise.
+- **Fix:** badges only when functionally needed, with the need written down, and never the full combination (R-09).
 
 ### Eyebrow Badge Above the Headline
 
-- **Tell:** a small pill sitting directly above the H1, often with a dot and a thin border, holding a category label ("Aplikasi Tagihan UKM", "The platform for teams") that the headline beneath it already says.
-- **Why:** the badge duplicates the headline, so it adds a line of reading without adding a fact. It lands in the same spot on every generated page, which is why it reads as a template rather than a decision. When it carries a dot as well, it borrows status-indicator language for a label that marks no state.
-- **Fix:** cut it and let the headline do the work. If the label carries information the headline does not, fold it into the headline or the subheadline, where it reads as content instead of ornament. A badge above the fold needs a written reason like any other badge (R-09), and a dot inside it needs a real state to mark (R-31).
+- **Tell:** a small pill sitting directly above the H1 holding a category label the headline already says.
+- **Fix:** cut it and let the headline do the work. If the label carries information the headline does not, use a plain text eyebrow span (uppercase, tracked, no border, no dot). See the proven eyebrow pattern in `patterns/typography.md`.
 
 ### Decorative Status Dot
 
-- **Tell:** a small colored dot beside a heading, eyebrow, nav item, or label, usually glowing and pulsing on a loop, that marks nothing. It borrows the visual language of a live or recording indicator for a page where nothing is live.
-- **Why:** the dot is an attention grab with nothing behind it: a glow plus an endless pulse is a double bid for the eye over a fact that does not exist. It reads as AI because generated pages reach for system-status vocabulary as decoration, and the same dot lands in the same place on every one of them.
-- **Fix:** a dot must mark a real state (active, live, recording, warning). If it does, keep one dot, drop the glow, and drop the endless pulse (R-19). If it marks nothing, remove it: a heading needs no indicator to be a heading (R-31).
+- **Tell:** a small colored dot beside a heading that marks nothing, often glowing and pulsing on a loop.
+- **Fix:** a dot must mark a real state (active, live, recording, warning). If it marks nothing, remove it (R-31).
 
 ### Generic AI Typography
 
-- **Tell:** large monospace headings, or uppercase labels with extreme letter-spacing ("HOW IT WORKS", "FEATURES").
+- **Tell:** large monospace headings, or uppercase labels with extreme letter-spacing.
 - **Why:** monospace-as-aesthetic and wide-tracked uppercase are shorthand for "technical and modern" without doing any real typographic work.
-- **Fix:** choose typeface from brand character, not the model's default pick, and write the reason (R-06). Typography must improve readability and reflect the product. A type choice with a reason beats a trend every time.
-- **The default roster:** Inter, Geist, and Space Grotesk for sans; Geist Mono, JetBrains Mono, and Fira Code for mono. None are banned; each is valid with a brand reason. The tell is the font that shows up because it was the default, not because it fits (R-06).
+- **Fix:** choose typeface from brand character, not the model's default pick, and write the reason (R-06).
+- **Wordmark exception (proven):** a spaced-letter brand mark (e.g. `S M M AI` at `letter-spacing: 0.38em`, 800 weight, uppercase) is a deliberate identity decision, not generic AI typography, when: (1) it is applied to the brand name only, not section headings; (2) it has a documented reason in `DESIGN.md`; (3) the brand differentiator ("AI") is colored in primary. Compensate trailing space with `padding-right: calc(ls * 0.5)`.
 
 ### Fake Terminal Window
 
-- **Tell:** a styled terminal window with traffic-light dots, a prompt line, and typed-out commands, used as the hero or feature visual.
-- **Why:** it is the generic "this is a developer tool" costume. The window is decoration; the real product rarely looks like that. It reads as a placeholder for a real screenshot.
-- **Fix:** if the product is genuinely a terminal or CLI, a real, working screenshot is evidence. Otherwise show the actual product UI, not a costume (R-06, C-5). Monospace as aesthetic is already covered by R-06; a fake terminal is that pattern as a component.
+- **Tell:** a styled terminal with traffic-light dots and typed-out commands as the hero visual.
+- **Fix:** show the actual product UI, not a costume (R-06, C-5).
+- **Product-accurate mockup alternative (proven):** a CSS dashboard card showing real product states (approved/pending/rejected in an approval flow). The card is the hero focal point, demonstrates the core product value prop, and is marked `aria-hidden` since all information is in the text. See `patterns/hero-dashboard-card.md`.
 
 ### Illustrations With No Connection
 
-- **Tell:** Undraw, Storyset, or generic 3D blob characters with no real connection to the product.
-- **Why:** decorative illustrations say the design is decorated, not designed. They fill space without serving the content.
+- **Tell:** Undraw, Storyset, or generic 3D blob characters with no connection to the product.
 - **Fix:** illustrations must have a direct connection to the product, with the connection written down (R-22). If none exists, use real screenshots or no illustration.
+- **CSS visuals alternative (proven):** product-accurate CSS illustrations built from HTML + the existing token set. Three types used: stacked idea-cards (representing AI output), a gate ring (identity motif scaled up), a platform-status grid (encodes build state). No image assets needed. See `patterns/css-visuals.md`.
+
+---
 
 ## Structural & Flow
 
 ### Dead Navigation
 
 - **Tell:** navbar links to pages or sections that do not exist.
-- **Why:** dead links are a broken promise. They break trust the moment a user clicks them.
-- **Fix:** every navigation item must have a real destination (R-24). If a feature is not built, leave it out, or label it "Coming soon" clearly. The navbar reflects content that actually exists.
+- **Fix:** every navigation item must have a real destination (R-24).
 
 ### Non-Functional Controls
 
 - **Tell:** buttons do nothing, dropdowns won't open, forms cannot submit.
-- **Why:** the visual is finished but the behavior is not. This is the difference between a mockup and a product.
-- **Fix:** every interactive element has real behavior, or it is removed (R-26). If an element genuinely cannot have a destination, ship a clear `// TODO` plus a visible "Coming soon" label, or do not ship it.
+- **Fix:** every interactive element has real behavior, or it is removed (R-26). Decorative buttons inside a `aria-hidden` product mockup use `tabindex="-1"` so they are skipped by keyboard.
 
 ### Sections That Fill a Template
 
 - **Tell:** a section exists because "every AI landing page has one", not because the content needs it.
-- **Why:** template sections are content without purpose. They add length and remove focus.
-- **Fix:** every section earns its place from the product's content (C-3). Remove sections that only fill a template. A page with fewer, purposeful sections is stronger than a page with all the defaults.
+- **Fix:** every section earns its place from the product's content (C-3).
+
+---
 
 ## App & Dashboard
 
-The patterns above are landing-page shapes. These are the app-side equivalents: the defaults an agent reaches for when the screen is a dashboard, an admin panel, or any signed-in view. The rules they break are the same ones; only the shape is new.
-
 ### Default Dashboard Shell
 
-- **Tell:** left sidebar, top bar, four stat cards, a chart, a table. Chosen before anyone asked what the screen is for, and identical whether it manages invoices, patients, or servers.
-- **Why:** it is the landing-page template problem in an app: a layout picked from memory instead of from the work the screen supports. Swap the labels and it belongs to any product.
-- **Fix:** name the screen's job and the one decision the user makes on it, then build the hierarchy around that (C-3, R-20). If the job is "spot the failing job and retry it", the failing jobs are the page and the stat row is a footnote. Sections that survive only because dashboards usually have them get cut (C-3).
+- **Tell:** left sidebar, top bar, four stat cards, a chart, a table — chosen before anyone asked what the screen is for.
+- **Fix:** name the screen's job and the one decision the user makes on it, then build the hierarchy around that (C-3, R-20).
 
 ### Stat Cards With Invented Numbers
 
-- **Tell:** a row of four cards reading 12,483 / 94.2% / $48.2K / 1,204, each with a green "+12% this week" delta.
-- **Why:** the numbers are decoration, and the deltas are worse: a trend claim with no series behind it. Real dashboards have metrics that matter and metrics that do not, so four equal cards is already a hierarchy failure.
-- **Fix:** show real numbers or none (R-17, R-38). Wire the cards to real data, or ship the one metric that is real. A delta appears only when the comparison period is real and named. If the screen is a prototype, label the values as placeholder where the user can see it (R-38).
+- **Tell:** four equal cards with green "+12% this week" deltas.
+- **Fix:** show real numbers or none (R-17, R-38). A delta appears only when the comparison period is real and named.
 
 ### Filler Activity Feed
 
 - **Tell:** "Sarah Chen updated a document, 2 hours ago", repeated with rotating names and avatars.
-- **Why:** invented people, invented events. It is the testimonial section wearing a different layout, and it makes an empty product look busy.
-- **Fix:** the feed shows real events or does not ship (R-18, R-38). An honest empty state beats a fabricated feed, and it tells the user what to do first (R-27).
+- **Fix:** the feed shows real events or does not ship (R-18, R-38).
 
 ### Charts Without a Question
 
-- **Tell:** a line or donut chart placed because the space looked bare, with a generic title ("Overview", "Performance") and no axis the reader can act on.
-- **Why:** a chart is an answer. Without the question, it is texture, and it costs more attention than a sentence would.
-- **Fix:** write the question the chart answers before drawing it, and put that question in the title ("Failed jobs per hour, last 24h"). If a sentence answers it better, write the sentence (C-3). Chart segments still need 3:1 contrast against their neighbours (R-25).
+- **Tell:** a line or donut chart with a generic title ("Overview") and no axis the reader can act on.
+- **Fix:** write the question the chart answers before drawing it, and put that question in the title (C-3).
 
 ### Generic Table Columns
 
-- **Tell:** Name, Status, Date, Actions, whatever the rows actually are, with a three-dot menu on every row.
-- **Why:** the columns come from the table component, not from the data. The user scans for the field that decides their next move and it is not there.
-- **Fix:** pick columns from the decision the user makes in this table, and put the deciding field early. The row menu holds actions that exist; anything that does nothing comes out (R-26).
+- **Tell:** Name, Status, Date, Actions — whatever the rows actually are.
+- **Fix:** pick columns from the decision the user makes in this table (R-26).
 
 ### Filler Data in Fields and Columns
 
-- **Tell:** empty form fields and table columns filled with fake but plausible data: `John Doe`, `johndoe@example.com`, `"Let's build something"`, phone numbers and dates that belong to nobody.
-- **Why:** fabricated content disguised as real. It reads fine in a mockup and falls apart the moment a real user looks: the name is not a customer, the email is not a lead, and the message is a tagline. It is the strongest tell that the screen was generated, not built.
-- **Fix:** leave empty cells empty, or use placeholders that clearly say what goes there: `Your Name`, `email@example.com`, `Drop your message here...`, or `[REAL DATA]` when a value is expected (R-23, R-38). Real data goes in when it exists. Generic filler copy like "Let's build something" is buzzword slop and does not belong in a data column (R-16).
+- **Tell:** fake but plausible data: `John Doe`, `johndoe@example.com`, `"Let's build something"`.
+- **Fix:** leave empty cells empty, or use placeholders that clearly say what goes there (R-23, R-38).
 
 ### Placeholder Empty and Loading States
 
-- **Tell:** "No data available" with an illustration, a bare spinner, or a full-page skeleton that mimics a layout the real data never fills.
-- **Why:** R-27 requires the states, and these technically have them. They still tell the user nothing: no cause, no next action, no idea whether this is normal.
-- **Fix:** an empty state says why it is empty and gives the one action that fills it ("No jobs yet. Run a sync to see results here"). A loading state says what it is loading. An error state says what failed and what to do next (R-27). First run, filtered to nothing, and permission denied are different screens and read differently.
+- **Tell:** "No data available" with an illustration, or a bare spinner.
+- **Fix:** an empty state says why it is empty and gives the one action that fills it (R-27).
+
+---
 
 ## Motion
 
 ### Endless Pulses and Loops
 
 - **Tell:** elements that pulse, bounce, or float forever with no user trigger.
-- **Why:** perpetual motion is noise. It competes with the content for attention and never stops to let the user rest.
-- **Fix:** motion must have a clear UX purpose, written down (R-19). Animation guides attention to a moment; it does not run on a loop. If the MOTION dial is 1 (hover states only), an endless loop is a FAIL against the declared dial.
+- **Fix:** motion must have a clear UX purpose, written down (R-19). If the MOTION dial is 1, an endless loop is a FAIL.
+- **Float animation exception (proven):** a single hero focal-point element (e.g. a product dashboard card) may use a continuous `translateY` float animation when: (1) it is the page's designated 3D/interactive focal point; (2) the float uses `transform: translateY` only (GPU-composited, no layout); (3) the animation is skipped under `prefers-reduced-motion`; (4) the reason is written in the design comment. One element, one property, one section.
 
 ### Template Animations Stacked
 
 - **Tell:** every element uses Fade Up + Fade In + Floating + Scale + Bounce simultaneously.
-- **Why:** a page where everything animates has no focal point. Motion becomes wallpaper.
-- **Fix:** choreograph motion to a purpose and to the MOTION dial (R-19). Not everything moves. The hero speaks, the supporting elements stay calm. Claimed "cinematic" pages must actually move; claimed "static" pages must not.
+- **Fix:** choreograph motion to a purpose and to the MOTION dial (R-19). Not everything moves.
+
+### Missing Reduced-Motion Guard
+
+- **Tell:** animations and transitions run without checking `prefers-reduced-motion`.
+- **Why:** ~35% of users with vestibular disorders enable this preference. Running motion for them is an accessibility failure and a legal risk.
+- **Fix (proven pattern):**
+  ```css
+  @media (prefers-reduced-motion: reduce) {
+    [data-reveal] { opacity: 1; transform: none; transition: none }
+  }
+  ```
+  ```js
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduceMotion) return; // skip all JS-driven motion
+  ```
+  Apply to: scroll reveals, JS tilt, border glow, and any `@keyframes` animation.
+
+### JS Tilt Without Device Guard
+
+- **Tell:** a JS mouse-tracking tilt effect applied on touch screens, where it fires on `touchstart` and creates jitter.
+- **Fix (proven):** guard with `(hover: hover) and (pointer: fine)` before attaching any `mousemove` handler. This targets pointer devices only (desktop mouse) and skips touch screens and styluses:
+  ```js
+  if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+  ```
+
+### CSS Animation and JS Transform Conflict
+
+- **Tell:** a CSS `@keyframes` animation and a JS `style.setProperty` call both modify `transform` on the same element, causing them to fight — the JS value gets overridden by the CSS animation on every frame.
+- **Fix (proven):** separate with a wrapper. The outer element holds the CSS `@keyframes` animation on `translateY` only. The inner element receives the JS tilt via CSS custom properties (`--rx`, `--ry`):
+  ```html
+  <div class="float-wrapper"> <!-- @keyframes translateY -->
+    <div class="card" id="card"> <!-- JS sets --rx and --ry -->
+  ```
+  ```css
+  .float-wrapper { animation: float 7s ease-in-out infinite }
+  .card { transform: rotateX(var(--rx, 6deg)) rotateY(var(--ry, -14deg)) }
+  @keyframes float { 50% { transform: translateY(-14px) } }
+  ```
+  Never put `translateY`, `rotateX`, and `rotateY` in the same `transform` chain if one is controlled by CSS animation and another by JS.
+
+---
+
+## WCAG Contrast: Muted Text on Deep Backgrounds
+
+- **Tell:** a muted text color that passes contrast on a medium-dark background but fails on the brand's near-black background. Agent assumes the lighter bg is the floor.
+- **Why:** when a brand uses a very deep background (e.g. `#070c09`), muted colours that look fine on `#121212` (4.51:1) can fail on the deeper background. The failure is not visible in the design tool but shows in the contrast checker.
+- **Fix:** always run the contrast checker against the deepest background in the palette. `#637669` fails on `#070c09` at 4.06:1. Bump to `#718579` for 5.01:1 pass. Rule: muted colour on the deepest background must clear 4.5:1, not just 3:1.
+
+---
+
+## Hero Section: 3D Focal Point Without WebGL
+
+For static HTML or simple sites where React Three Fiber and Spline are unavailable, the CSS perspective pattern delivers Zyno-level 3D depth with zero dependencies.
+
+**Decision tree:**
+1. Is a 3D asset (.glb, Spline) already available? → Spline embed or React Three Fiber.
+2. Is React + Framer Motion available? → Framer Motion `motion.div` with `rotateX/Y` on hover.
+3. Static HTML, no build step? → **CSS perspective card + JS tilt** (proven below).
+
+**Proven pattern:**
+```css
+.hero-visual {
+  perspective: 1100px;
+  perspective-origin: 50% 45%;
+}
+.float-wrap { animation: dash-float 7s ease-in-out infinite }
+.card {
+  transform: rotateX(var(--rx, 6deg)) rotateY(var(--ry, -14deg));
+  transition: transform .1s ease;
+  will-change: transform;
+}
+@keyframes dash-float { 50% { transform: translateY(-14px) } }
+@media (prefers-reduced-motion: reduce) { .float-wrap { animation: none } }
+```
+```js
+var visual = document.getElementById('heroVisual');
+var card   = document.getElementById('dashCard');
+if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+visual.addEventListener('mousemove', function(e) {
+  var rect = visual.getBoundingClientRect();
+  var rx = ((e.clientY - rect.top  - rect.height / 2) / (rect.height / 2)) * -6;
+  var ry = ((e.clientX - rect.left - rect.width  / 2) / (rect.width  / 2)) * 10;
+  card.style.setProperty('--rx', (6  + rx).toFixed(2) + 'deg');
+  card.style.setProperty('--ry', (-14 + ry).toFixed(2) + 'deg');
+});
+visual.addEventListener('mouseleave', function() {
+  card.style.setProperty('--rx', '6deg');
+  card.style.setProperty('--ry', '-14deg');
+});
+```
+**What makes this pattern pass the purpose test:** the 3D card IS the product UI. It shows real approval states, real metrics, and demonstrates the core value proposition visually. It is not "cool 3D for the sake of 3D"; it is a product demo rendered in CSS.
+
+---
+
+## Scroll Reveal: IntersectionObserver Pattern
+
+**Proven implementation (zero dependencies, prefers-reduced-motion safe):**
+
+```css
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity .65s ease, transform .65s ease;
+}
+[data-reveal].revealed { opacity: 1; transform: translateY(0) }
+[data-reveal][data-delay="1"] { transition-delay: .12s }
+[data-reveal][data-delay="2"] { transition-delay: .24s }
+[data-reveal][data-delay="3"] { transition-delay: .36s }
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] { opacity: 1; transform: none; transition: none }
+}
+```
+
+```js
+(function() {
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var els = document.querySelectorAll('[data-reveal]');
+  if (reduceMotion) {
+    els.forEach(function(el) { el.classList.add('revealed'); });
+    return;
+  }
+  // Hero elements reveal on load, not on scroll
+  document.querySelectorAll('.hero-inner [data-reveal]').forEach(function(el) {
+    setTimeout(function() { el.classList.add('revealed'); }, 80);
+  });
+  var io = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('revealed');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  els.forEach(function(el) {
+    if (!el.closest('.hero-inner')) io.observe(el);
+  });
+})();
+```
+
+**Usage rules:**
+- Hero content: `setTimeout` reveal on load (visible immediately, no scroll gate).
+- Body sections: IntersectionObserver at `threshold: 0.12` (fires when 12% visible).
+- Stagger sibling cards: add `data-delay="1"`, `"2"`, `"3"` on successive elements.
+- Never `unobserve` before observing — check `el.closest('.hero-inner')` first.
+
+---
 
 ## UI Skill Checklist
 
 Run these alongside the core Delivery Gate when the task is UI work. All answers must be **yes**:
 
+**Color & Visual**
 - [ ] Is the palette derived from `DESIGN.md` or a written brand identity, not the default gradient set? (R-01, R-29)
-- [ ] Is the accent used at the key moment only, not spread across every element? (core Part 3, one deliberate accent)
+- [ ] Is the accent used at the key moment only, not spread across every element? (core Part 3)
+- [ ] Muted text tested against the **deepest** background in the palette, not just the average dark? (WCAG AA ≥ 4.5:1)
+- [ ] Is the page free of the blue-purple gradient family as the primary visual treatment? (R-01)
+- [ ] Is glass, glow, shadow, and radius used at their dose caps, not as a page-wide default? (R-10, R-11, R-12, R-13)
+- [ ] If two ambient glows exist, are they at different positions with different spatial roles (e.g. hero top + CTA bottom)? (R-13)
+
+**Typography & Copy**
 - [ ] Is the copy free of decorative emoji scattered through headings, bullets, and buttons? (R-04)
+- [ ] Is the space above the H1 clear of a pill badge holding a label the headline already says? (R-09)
+- [ ] If a spaced-letter wordmark is used, is it applied to the brand name only (not section headings), with reason in DESIGN.md? (R-06)
+- [ ] Is every section heading a real h2/h3 in the DOM hierarchy, not a styled div? (R-06)
+
+**Layout & Structure**
 - [ ] Do section compositions vary according to the declared RHYTHM dial instead of repeating one template? (R-05)
 - [ ] Is the layout free of the default AI shapes: bento-grid mosaic, fake terminal window, three pricing columns, and left-edge color stripes with no meaning? (R-05, R-01)
-- [ ] Is the space above the H1 clear of a pill badge holding a label the headline already says? (R-09)
+- [ ] Does every section earn its place from product content, not template convention? (C-3)
+
+**Navigation & Interaction**
 - [ ] Does every navigation item and interactive element have a real destination or behavior, or a visible "Coming soon" label? (R-24, R-26)
+- [ ] Do decorative buttons inside aria-hidden product mockups carry `tabindex="-1"`? (R-32)
+- [ ] Does the skip link exist and reach the main content? (R-32)
+
+**Motion**
 - [ ] Does motion follow the declared MOTION dial and serve a written purpose, with no endless loops? (R-19)
-- [ ] Is glass, glow, shadow, and radius used at their dose caps, not as a page-wide default? (R-10, R-11, R-12, R-13)
+- [ ] Is every animation (CSS `@keyframes`, JS tilt, scroll reveals, border glow) guarded by `prefers-reduced-motion`? (R-19)
+- [ ] If a JS mouse tilt exists, is it guarded by `(hover: hover) and (pointer: fine)` to skip touch devices? (R-19)
+- [ ] Are CSS `@keyframes` and JS `style.setProperty` on `transform` on different elements (wrapper vs. card)? (R-19)
 - [ ] Is every colored dot and status light marking a real state, with no decorative glow or endless pulse? (R-13, R-19, R-31)
-- [ ] On an app screen, is the layout built around the decision the user makes there, rather than the sidebar plus stat row plus chart plus table default? (C-3, R-20)
+
+**Product Visuals**
+- [ ] Does the hero focal point (card, visual, mockup) demonstrate the actual product rather than a generic 3D shape or illustration? (R-22, C-5)
+- [ ] Are CSS visuals (stacked cards, ring, platform grid) connected to a specific product concept written in the code comment? (R-22)
+- [ ] Are numbers in a highlights strip real product metrics, not invented deltas? (R-17, R-38)
+
+**App/Dashboard**
+- [ ] On an app screen, is the layout built around the decision the user makes there, not the sidebar + stat row + chart + table default? (C-3, R-20)
 - [ ] Is every number, delta, feed entry, and table row real or a labelled placeholder, with no invented metrics? (R-17, R-18, R-38)
-- [ ] Do empty form fields and table cells stay empty or carry honest placeholders (Your Name, email@example.com) instead of fake-looking data (John Doe, johndoe@example.com)? (R-23, R-38)
-- [ ] Do the empty, loading, and error states name the cause and the next action instead of saying "No data"? (R-27)
+- [ ] Do empty, loading, and error states name the cause and the next action? (R-27)
+
+**Responsive & Accessibility**
 - [ ] Does the page hold up at every breakpoint, theme, and state, and pass keyboard-only use? (R-03, R-34, C-4)
+- [ ] On mobile (≤860px): does the hero stack vertically, the 3D tilt disable, and storytelling pairs stack correctly? (R-03)
+- [ ] Do flip-layout sections reset their `order` to text-first on mobile? (R-03)
