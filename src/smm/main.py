@@ -1,8 +1,72 @@
-from fastapi import FastAPI
-import subprocess
+import time
+import uuid
 import json
+import os
+from fastapi import FastAPI, Request, Response
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import HTTPException
+import structlog
+from starlette.middleware.base import Middleware
 
-app = FastAPI()
+app = FastAPI(title="SMM Automation API")
+
+# Structlog configuration for structured logging
+structlog.configure(
+    processors=[
+        structlog.processors.JSONRenderer()
+    ]
+)
+
+# Request ID middleware
+@app.middleware("http")
+async def add_request_id(request: Request, call_next):
+    request_id = str(uuid.uuid4())
+    response = await call_next(request)
+    response.headers["X-Request-ID"] = request_id
+    response.headers["X-Process-Time"] = str(time.time() - request.scope.get("root_path", ""))
+    
+    # Log the request with structured data
+    structlog.get_logger().info(
+        "http_request",
+        request_id=request_id,
+        method=request.method,
+        path=request.url.path,
+        query=str(request.query_params),
+        client_host=request.client.host,
+        user_agent=request.headers.get("user-agent", ""),
+    )
+    
+    return response
+
+# Error handler for HTTP exceptions
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    structlog.get_logger().error(
+        "http_exception",
+        request_id=request.headers.get("X-Request-ID", "unknown"),
+        status_code=exc.status_code,
+        detail=exc.detail,
+        path=request.url.path,
+    )
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"error": exc.detail, "code": exc.status_code},
+    )
+
+# General exception handler
+@app.exception_handler(Exception)
+async def general_exception_handler(request: Request, exc: Exception):
+    structlog.get_logger().error(
+        "unhandled_exception",
+        request_id=request.headers.get("X-Request-ID", "unknown"),
+        path=request.url.path,
+        error=str(exc),
+        exc_info=True,
+    )
+    return JSONResponse(
+        status_code=500,
+        content={"error": "Internal server error", "code": 500},
+    )
 
 
 @app.get("/api/health")
