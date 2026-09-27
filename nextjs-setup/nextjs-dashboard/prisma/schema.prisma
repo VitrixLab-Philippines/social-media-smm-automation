@@ -67,6 +67,8 @@ model ModerationRun {
   result        String
   findings      Json?
   createdAt     DateTime @default(now())
+
+  draft         String
 }
 
 model Approval {
