@@ -1,51 +1,54 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  Client,
-  ClientStatus,
-  CLIENT_STATUSES,
-  initialClients,
-} from "@/lib/crm";
+import { prisma } from "@/lib/prisma";
 
-// In-memory store (same pattern as drafts)
-let clients: Client[] = [...initialClients];
-
-function nowISO() {
-  return new Date().toISOString();
-}
+const ClientStatus = ["PROSPECT", "ACTIVE", "PAUSED", "CHURNED"] as const;
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const status = url.searchParams.get("status");
-  const search = url.searchParams.get("search")?.toLowerCase().trim();
+  const search = url.searchParams.get("search")?.trim();
   const includeStats = url.searchParams.get("stats") === "1";
 
-  let result = [...clients];
+  const where: Record<string, unknown> = {};
 
-  if (status && CLIENT_STATUSES.includes(status as ClientStatus)) {
-    result = result.filter((c) => c.status === status);
+  if (status && Object.values(ClientStatus).includes(status as any)) {
+    where.status = status;
   }
 
   if (search) {
-    result = result.filter((c) =>
-      [c.name, c.company, c.email, c.industry ?? "", ...c.tags]
-        .join(" ")
-        .toLowerCase()
-        .includes(search)
-    );
+    where.OR = [
+      { name: { contains: search, mode: "insensitive" } },
+      { company: { contains: search, mode: "insensitive" } },
+      { email: { contains: search, mode: "insensitive" } },
+      { industry: { contains: search, mode: "insensitive" } },
+    ];
   }
 
-  // newest activity first
-  result.sort((a, b) => (a.lastActivity < b.lastActivity ? 1 : -1));
+  const clients = await prisma.client.findMany({
+    where,
+    orderBy: { lastActivity: "desc" },
+  });
 
-  const body: Record<string, unknown> = { clients: result };
+  const body: Record<string, unknown> = { clients };
+
   if (includeStats) {
+    const [total, active, prospects, churned, revenueAgg, postsAgg] =
+      await Promise.all([
+        prisma.client.count(),
+        prisma.client.count({ where: { status: "ACTIVE" } }),
+        prisma.client.count({ where: { status: "PROSPECT" } }),
+        prisma.client.count({ where: { status: "CHURNED" } }),
+        prisma.client.aggregate({ _sum: { revenue: true } }),
+        prisma.client.aggregate({ _sum: { postCount: true } }),
+      ]);
+
     body.stats = {
-      total: clients.length,
-      active: clients.filter((c) => c.status === "active").length,
-      prospects: clients.filter((c) => c.status === "prospect").length,
-      churned: clients.filter((c) => c.status === "churned").length,
-      totalRevenue: clients.reduce((sum, c) => sum + c.revenue, 0),
-      totalPosts: clients.reduce((sum, c) => sum + c.posts.count, 0),
+      total,
+      active,
+      prospects,
+      churned,
+      totalRevenue: revenueAgg._sum.revenue ?? 0,
+      totalPosts: postsAgg._sum.postCount ?? 0,
     };
   }
 
@@ -53,7 +56,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  let payload: Partial<Client>;
+  let payload: Record<string, unknown>;
   try {
     payload = await req.json();
   } catch {
@@ -67,39 +70,30 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const status: ClientStatus = CLIENT_STATUSES.includes(
-    payload.status as ClientStatus
-  )
-    ? (payload.status as ClientStatus)
-    : "prospect";
+  const client = await prisma.client.create({
+    data: {
+      name: String(payload.name),
+      company: String(payload.company),
+      email: String(payload.email),
+      phone: payload.phone ? String(payload.phone) : null,
+      website: payload.website ? String(payload.website) : null,
+      industry: payload.industry ? String(payload.industry) : null,
+      status: (payload.status as any) ?? "PROSPECT",
+      approved: Boolean(payload.approved),
+      revenue: Number(payload.revenue) || 0,
+      accountManager: payload.accountManager
+        ? String(payload.accountManager)
+        : null,
+      tags: Array.isArray(payload.tags) ? payload.tags : [],
+      notes: payload.notes ? String(payload.notes) : null,
+    },
+  });
 
-  const ts = nowISO();
-  const client: Client = {
-    id: `cl-${Date.now().toString(36)}`,
-    name: payload.name.trim(),
-    company: payload.company.trim(),
-    email: payload.email.trim(),
-    phone: payload.phone?.trim() || undefined,
-    website: payload.website?.trim() || undefined,
-    industry: payload.industry?.trim() || undefined,
-    status,
-    approved: payload.approved ?? false,
-    posts: payload.posts ?? { count: 0, lastPost: null },
-    revenue: typeof payload.revenue === "number" ? payload.revenue : 0,
-    accountManager: payload.accountManager?.trim() || undefined,
-    tags: Array.isArray(payload.tags) ? payload.tags : [],
-    notes: payload.notes?.trim() || undefined,
-    lastActivity: ts,
-    createdAt: ts,
-    updatedAt: ts,
-  };
-
-  clients = [client, ...clients];
   return NextResponse.json({ client }, { status: 201 });
 }
 
 // Used by tests / dev reset
 export async function DELETE() {
-  clients = [...initialClients];
+  // Reset would be handled by Prisma in v3
   return NextResponse.json({ ok: true });
 }

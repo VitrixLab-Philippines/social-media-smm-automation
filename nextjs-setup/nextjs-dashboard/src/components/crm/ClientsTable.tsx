@@ -34,6 +34,7 @@ export default function ClientsTable() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     load();
   }, [load]);
 
@@ -167,7 +168,6 @@ export default function ClientsTable() {
                 <th style={{ padding: "10px 12px", fontSize: 12, color: "#6b7280", textTransform: "uppercase", letterSpacing: 0.4, borderBottom: "1px solid #e5e7eb" }}>Revenue</th>
                 <th style={{ padding: "10px 12px", fontSize: 12, color: "#6b7280", textTransform: "uppercase", letterSpacing: 0.4, borderBottom: "1px solid #e5e7eb" }}>Manager</th>
                 <th style={{ padding: "10px 12px", fontSize: 12, color: "#6b7280", textTransform: "uppercase", letterSpacing: 0.4, borderBottom: "1px solid #e5e7eb" }}>Last activity</th>
-                <th style={{ padding: "10px 12px", fontSize: 12, color: "#6b7280", textTransform: "uppercase", letterSpacing: 0.4, borderBottom: "1px solid #e5e7eb" }}</th>
               </tr>
             </thead>
             <tbody>

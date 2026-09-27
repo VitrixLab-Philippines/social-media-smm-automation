@@ -1,71 +1,52 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ContentDraft, DraftStatus } from "@/lib/crm";
+import { prisma } from "@/lib/prisma";
 
-type Job = {
-  id: string;
-  draftId: string;
-  platform: string;
-  status: "pending" | "succeeded" | "failed";
-  createdAt: string;
-  completedAt?: string;
-  error?: string;
-};
-
-// In-memory store for publish jobs
-const publishJobs: Record<string, Job[]> = {};
-
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
+  let payload: Record<string, unknown>;
   try {
-    const body = await request.json();
-    const { draftId, platform } = body;
-
-    if (!draftId || !platform) {
-      return NextResponse.json(
-        { error: "draftId and platform are required" },
-        { status: 400 }
-      );
-    }
-
-    const jobId = `publish-${Date.now().toString().slice(-4)}`;
-    const job: Job = {
-      id: crypto.randomUUID(),
-      draftId: String(draftId),
-      platform: String(platform),
-      status: "pending",
-      createdAt: new Date().toISOString(),
-    };
-
-    publishJobs[jobId] = publishJobs[jobId] ?? [];
-    publishJobs[jobId].push(job);
-
-    // Simulate async publish job - in production this would call external API
-    setTimeout(() => {
-      // Simulate successful publish
-      const job = publishJobs[jobId]?.find((j) => j.id === jobId);
-      if (job) {
-        job.status = "succeeded";
-        job.completedAt = new Date().toISOString();
-      }
-    }, 1500);
-
-    return NextResponse.json({ success: true, jobId }, { status: 201 });
+    payload = await req.json();
   } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  const { draftId, platform } = payload;
+  if (!draftId || !platform) {
     return NextResponse.json(
-      { error: "Failed to create publish job" },
-      { status: 500 }
+      { error: "draftId and platform are required" },
+      { status: 400 }
     );
   }
-}
 
-export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const jobId = searchParams.get("jobId");
+  const job = await prisma.publishJob.create({
+    data: {
+      draftId: String(draftId),
+      platform: String(platform),
+      status: "PENDING",
+    },
+  });
 
-  if (jobId && publishJobs[jobId]) {
-    return NextResponse.json({ job: publishJobs[jobId][0] });
-  }
+  // Simulate async publishing
+  setTimeout(async () => {
+    try {
+      await prisma.publishJob.update({
+        where: { id: job.id },
+        data: { status: "SUCCEEDED", completedAt: new Date() },
+      });
+      await prisma.contentDraft.update({
+        where: { id: String(draftId) },
+        data: { status: "PUBLISHED", publishedAt: new Date() },
+      });
+    } catch (err) {
+      await prisma.publishJob.update({
+        where: { id: job.id },
+        data: {
+          status: "FAILED",
+          error: err instanceof Error ? err.message : "Unknown error",
+          completedAt: new Date(),
+        },
+      });
+    }
+  }, 5000);
 
-  // Return all jobs
-  const allJobs = Object.values(publishJobs).flat();
-  return NextResponse.json({ jobs: allJobs });
+  return NextResponse.json({ job }, { status: 201 });
 }

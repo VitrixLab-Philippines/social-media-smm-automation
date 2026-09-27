@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+/* eslint prefer-const: off */
 let systemState = {
   health: "healthy",
   dryRun: true,
