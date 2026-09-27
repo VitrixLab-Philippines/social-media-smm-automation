@@ -1,76 +1,26 @@
-// Stub Prisma client for v3.0 PostgreSQL + Neon migration
-// This provides the API surface needed by CRM API routes
+/**
+ * Prisma client for Next.js App Router.
+ * 
+ * IMPORTANT: This module uses the real PrismaClient connected to PostgreSQL.
+ * The global singleton pattern prevents multiple instances in development
+ * while ensuring a single client is used in production (Vercel).
+ */
 
-export const prisma = {
-  client: {
-    findMany: async function (model: string, where?: object, orderBy?: object): Promise<Array<object>> {
-      return [];
-    },
+import { PrismaClient } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 
-    findUnique: async function (model: string, where: { id: string }): Promise<object | null> {
-      return null;
-    },
-
-    create: async function (model: string, data: object): Promise<object> {
-      return {};
-    },
-
-    update: async function (model: string, where: { id: string }, data: object): Promise<object> {
-      return {};
-    },
-
-    delete: async function (model: string, where: { id: string }): Promise<object> {
-      return {};
-    },
-
-    count: async function (model: string, where?: object): Promise<{ _sum: { revenue?: number; postCount?: number } }> {
-      return { _sum: {} };
-    },
-
-    aggregate: async function (model: string, where?: object): Promise<{ _sum: { revenue?: number; postCount?: number } }> {
-      return { _sum: {} };
-    },
-  },
-
-  brandProfile: {
-    findFirst: async function (): Promise<{ id: string; name: string } | null> {
-      return null;
-    },
-    upsert: async function (): Promise<void> {
-      return;
-    },
-    update: async function (): Promise<void> {
-      return;
-    },
-    create: async function (): Promise<void> {
-      return;
-    },
-  },
-
-  contentDraft: {
-    findMany: async function (): Promise<Array<{ id: string; topic: string; status: string }>> {
-      return [];
-    },
-    findUnique: async function (): Promise<{ id: string; topic: string; status: string } | null> {
-      return null;
-    },
-    create: async function (): Promise<{ id: string; topic: string; status: string }> {
-      return { id: "new", topic: "", status: "draft" };
-    },
-    update: async function (): Promise<void> {
-      return;
-    },
-    delete: async function (): Promise<void> {
-      return;
-    },
-  },
-
-  publishJob: {
-    create: async function (): Promise<{ id: string; draftId: string; platform: string; status: string }> {
-      return { id: "new", draftId: "", platform: "", status: "PENDING" };
-    },
-    update: async function (): Promise<void> {
-      return;
-    },
-  },
+const globalForPrisma = globalThis as unknown as {
+  prisma?: PrismaClient;
 };
+
+export const prisma =
+  globalForPrisma.prisma ??
+  new PrismaClient({
+    log: process.env.NODE_ENV !== "production" ? ["query", "error", "warn"] : ["error"],
+  });
+
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = prisma;
+}
+
+export default prisma;

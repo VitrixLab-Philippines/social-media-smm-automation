@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
+import { verifySession } from "@/lib/auth";
 
 const ClientStatus = ["PROSPECT", "ACTIVE", "PAUSED", "CHURNED"] as const;
 
@@ -9,7 +10,14 @@ export async function GET(req: NextRequest) {
   const search = url.searchParams.get("search")?.trim();
   const includeStats = url.searchParams.get("stats") === "1";
 
+  const session = await verifySession();
+  const workspaceId = session?.workspaceId;
+
   const where: Record<string, unknown> = {};
+
+  if (workspaceId) {
+    where.workspaceId = workspaceId;
+  }
 
   if (status && Object.values(ClientStatus).includes(status as any)) {
     where.status = status;
@@ -34,10 +42,10 @@ export async function GET(req: NextRequest) {
   if (includeStats) {
     const [total, active, prospects, churned, revenueAgg, postsAgg] =
       await Promise.all([
-        prisma.client.count(),
-        prisma.client.count({ where: { status: "ACTIVE" } }),
-        prisma.client.count({ where: { status: "PROSPECT" } }),
-        prisma.client.count({ where: { status: "CHURNED" } }),
+        prisma.client.count({ where }),
+        prisma.client.count({ where: { ...where, status: "ACTIVE" } }),
+        prisma.client.count({ where: { ...where, status: "PROSPECT" } }),
+        prisma.client.count({ where: { ...where, status: "CHURNED" } }),
         prisma.client.aggregate({ _sum: { revenue: true } }),
         prisma.client.aggregate({ _sum: { postCount: true } }),
       ]);
@@ -70,6 +78,9 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const session = await verifySession();
+  const workspaceId = session?.workspaceId;
+
   const client = await prisma.client.create({
     data: {
       name: String(payload.name),
@@ -86,6 +97,7 @@ export async function POST(req: NextRequest) {
         : null,
       tags: Array.isArray(payload.tags) ? payload.tags : [],
       notes: payload.notes ? String(payload.notes) : null,
+      workspaceId,
     },
   });
 

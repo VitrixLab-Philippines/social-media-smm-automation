@@ -5,112 +5,86 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
 }
 
 // ------------------------------------------------------------------
-// Enums
+// Authentication
 // ------------------------------------------------------------------
 
-enum ClientStatus {
-  PROSPECT
-  ACTIVE
-  PAUSED
-  CHURNED
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  role         String   @default("user")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  workspaces  Workspace[]
+  sessions    Session[]
+  memberships Membership[]
 }
 
-enum DraftStatus {
-  DRAFT
-  PENDING
-  APPROVED
-  REJECTED
-  SCHEDULED
-  PUBLISHED
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
 }
 
-enum JobStatus {
-  PENDING
-  SUCCEEDED
-  FAILED
+model Workspace {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users  Membership[]
+  user   User?        @relation(fields: [userId], references: [id])
+  userId String?
 }
 
-// ------------------------------------------------------------------
-// Models
-// ------------------------------------------------------------------
-
-model BrandProfile {
-  id                  String   @id @default(cuid())
-  name                String
-  audience            String
-  voice               String
-  prohibitedTopics    String[]
-  requiredDisclosures String[]
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
-}
-
-model Client {
-  id             String       @id @default(cuid())
-  name           String
-  company        String
-  email          String       @unique
-  phone          String?
-  website        String?
-  industry       String?
-  status         ClientStatus @default(PROSPECT)
-  approved       Boolean      @default(false)
-  revenue        Float        @default(0)
-  accountManager String?
-  tags           String[]
-  notes          String?
-  postCount      Int          @default(0)
-  lastPostAt     DateTime?
-  lastActivity   DateTime     @default(now())
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-
-  drafts         ContentDraft[]
-
-  @@index([status])
-  @@index([company])
-}
-
-model ContentDraft {
-  id              String      @id @default(cuid())
-  topic           String
-  platform        String
-  text            String
-  hashtags        String[]
-  status          DraftStatus @default(DRAFT)
-  metadata        Json?
-  engagementScore Int?
-  author          String?
-  scheduledAt     DateTime?
-  publishedAt     DateTime?
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-
-  clientId        String?
-  client          Client?     @relation(fields: [clientId], references: [id], onDelete: SetNull)
-
-  jobs            PublishJob[]
-
-  @@index([status])
-  @@index([clientId])
-  @@index([platform])
-}
-
-model PublishJob {
+model Membership {
   id          String    @id @default(cuid())
-  draftId     String
-  draft       ContentDraft @relation(fields: [draftId], references: [id], onDelete: Cascade)
-  platform    String
-  status      JobStatus @default(PENDING)
-  error       String?
-  createdAt   DateTime  @default(now())
-  completedAt DateTime?
+  role        String
+  user        User      @relation(fields: [userId], references: [id])
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  userId      String
+  workspaceId String
 
-  @@index([draftId])
-  @@index([status])
+  @@unique([userId, workspaceId])
+}
+
+// ------------------------------------------------------------------
+// Moderation & Approval
+// ------------------------------------------------------------------
+
+model ModerationRun {
+  id            String   @id @default(cuid())
+  draftId       String
+  policyVersion String
+  result        String
+  findings      Json?
+  createdAt     DateTime @default(now())
+}
+
+model Approval {
+  id            String   @id @default(cuid())
+  draftId       String
+  revisionId    String
+  actorId       String
+  approvedAt    DateTime @default(now())
+  policyVersion String
+
+  @@unique([draftId, revisionId])
+}
+
+model ContentRevision {
+  id        String   @id @default(cuid())
+  draftId   String
+  content   Json
+  version   Int
+  createdAt DateTime @default(now())
+  createdBy String?
 }
