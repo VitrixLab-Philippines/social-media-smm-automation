@@ -19,6 +19,14 @@ export type DraftStatus =
   | "scheduled"
   | "published";
 
+export type ClientStatus =
+  | "PROSPECT"
+  | "ACTIVE"
+  | "PAUSED"
+  | "CHURNED";
+
+export const CLIENT_STATUSES: ClientStatus[] = ["PROSPECT", "ACTIVE", "PAUSED", "CHURNED"];
+
 export interface BrandProfile {
   name: string;
   audience: string;
@@ -64,6 +72,15 @@ export interface Client {
   lastActivity: string;
 }
 
+export interface ClientStats {
+  id: string;
+  name: string;
+  revenue: number;
+  postCount: number;
+  lastActivity: Date | string;
+  status: ClientStatus;
+}
+
 export const initialBrandProfile: BrandProfile = {
   name: "",
   audience: "",
@@ -97,11 +114,12 @@ export const initialAnalytics: AnalyticsMetric[] = [
 ];
 
 export type DashboardViewSection =
+  | "overview"
   | "approval"
-  | "graph"
+  | "drafts"
+  | "clients"
   | "analytics"
-  | "guardrails"
-  | "crm";
+  | "settings";
 
 export const initialDrafts: ContentDraft[] = [
   {

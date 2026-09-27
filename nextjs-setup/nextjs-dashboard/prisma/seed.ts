@@ -1,5 +1,5 @@
 // prisma/seed.ts
-import prisma from "../src/generated/prisma";
+import prisma from "../src/generated/prisma/client";
 
 async function main() {
   // Brand profile
