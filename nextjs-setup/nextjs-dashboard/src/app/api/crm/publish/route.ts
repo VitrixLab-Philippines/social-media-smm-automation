@@ -1,5 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
+import { verifySession } from "@/lib/auth";
+import crypto from "crypto";
+import {
+  enqueuePublishJob,
+  dequeuePublishJob,
+  getQueueLength,
+  getDLQLength,
+  addToDLQ,
+  getQueueStats,
+} from "@/lib/queue";
 
 export async function POST(req: NextRequest) {
   let payload: Record<string, unknown>;
@@ -17,36 +27,87 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // RBAC: verify draft belongs to current workspace
+  const session = await verifySession();
+  const workspaceId = session?.workspaceId;
+
+  const draft = await prisma.contentDraft.findUnique({
+    where: { id: draftId },
+  });
+
+  if (!draft) {
+    return NextResponse.json({ error: "Draft not found" }, { status: 404 });
+  }
+
+  if (draft.workspaceId !== workspaceId) {
+    return NextResponse.json(
+      { error: "Forbidden: draft does not belong to your workspace" },
+      { status: 403 }
+    );
+  }
+
+  // Generate idempotency key from request components
+  const idempotencyKey = crypto
+    .createHash("sha256")
+    .update(`${draftId}-${platform}-${Date.now()}`)
+    .digest("hex");
+
+  // Check if this idempotency key already has a result
+  const existingJob = await prisma.publishJob.findFirst({
+    where: { idempotencyKey },
+  });
+
+  if (existingJob) {
+    return NextResponse.json({
+      job: { id: existingJob.id, status: existingJob.status },
+      idempotencyKey,
+      fromCache: true,
+    });
+  }
+
+  // Create publish job in database (durable persistence)
   const job = await prisma.publishJob.create({
     data: {
       draftId: String(draftId),
       platform: String(platform),
       status: "PENDING",
+      idempotencyKey,
     },
   });
 
-  // Simulate async publishing
-  setTimeout(async () => {
-    try {
-      await prisma.publishJob.update({
-        where: { id: job.id },
-        data: { status: "SUCCEEDED", completedAt: new Date() },
-      });
-      await prisma.contentDraft.update({
-        where: { id: String(draftId) },
-        data: { status: "PUBLISHED", publishedAt: new Date() },
-      });
-    } catch (err) {
-      await prisma.publishJob.update({
-        where: { id: job.id },
-        data: {
-          status: "FAILED",
-          error: err instanceof Error ? err.message : "Unknown error",
-          completedAt: new Date(),
-        },
-      });
-    }
-  }, 5000);
+  // Update draft status to SCHEDULED
+  await prisma.contentDraft.update({
+    where: { id: String(draftId) },
+    data: { status: "SCHEDULED" },
+  });
 
-  return NextResponse.json({ job }, { status: 201 });
+  // Enqueue to durable Redis queue for background processing
+  const publishedJob = await enqueuePublishJob({
+    jobId: job.id,
+    workflowId: "default",
+    workspaceId: workspaceId,
+    socialAccountId: platform,
+    contentRevisionId: draftId,
+    idempotencyKey,
+  });
+
+  return NextResponse.json({ job, idempotencyKey }, { status: 201 });
+}
+
+// Optional: endpoint to check queue status
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const action = searchParams.get("action");
+
+  if (action === "stats") {
+    const stats = await getQueueStats();
+    return NextResponse.json(stats);
+  }
+
+  if (action === "queue-length") {
+    const length = await getQueueLength();
+    return NextResponse.json({ pending: length });
+  }
+
+  return NextResponse.json({ error: "Invalid action" }, { status: 400 });
 }
