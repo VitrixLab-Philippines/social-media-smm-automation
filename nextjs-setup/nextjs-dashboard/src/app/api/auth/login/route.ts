@@ -1,56 +1,54 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import crypto from "node:crypto";
 import prisma from "@/lib/prisma";
+import { AUTH_COOKIE_NAME } from "@/lib/auth";
+import { checkRateLimit, rateLimitResponse, requireSameOrigin } from "@/lib/security";
 
 export async function POST(request: NextRequest) {
+  const limit = await checkRateLimit(request, { limit: 5, windowSeconds: 60, scope: "auth:login" });
+  if (!limit.allowed) return rateLimitResponse(limit);
+  if (!requireSameOrigin(request)) return NextResponse.json({ message: "Invalid request origin." }, { status: 403 });
+
   try {
-    const body = (await request.json()) as { email: string; password: string };
-    const { email, password } = body;
+    const body = await request.json() as { email?: unknown; password?: unknown };
+    const email = typeof body.email === "string" ? body.email.toLowerCase().trim() : "";
+    const password = typeof body.password === "string" ? body.password : "";
 
-    if (!email || !password) {
-      return NextResponse.json(
-        { message: "Email and password are required." },
-        { status: 400 }
-      );
+    if (!email || !password || email.length > 254 || password.length > 256) {
+      return NextResponse.json({ message: "Invalid credentials." }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase().trim() },
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
+      return NextResponse.json({ message: "Invalid credentials." }, { status: 401 });
+    }
+
+    const membership = await prisma.workspaceMember.findFirst({
+      where: { userId: user.id },
+      orderBy: { createdAt: "asc" },
     });
+    if (!membership) return NextResponse.json({ message: "Account is not assigned to a workspace." }, { status: 403 });
 
-    if (!user) {
-      console.log("[login] no user for email:", email);
-      return NextResponse.json(
-        { message: "Invalid credentials." },
-        { status: 401 }
-      );
-    }
-
-    const passwordMatch = await bcrypt.compare(password, user.passwordHash);
-
-    if (!passwordMatch) {
-      console.log("[login] password mismatch for:", email);
-      return NextResponse.json(
-        { message: "Invalid credentials." },
-        { status: 401 }
-      );
-    }
+    const rawToken = crypto.randomBytes(32).toString("base64url");
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    await prisma.session.create({
+      data: { userId: user.id, tokenHash: crypto.createHash("sha256").update(rawToken).digest("hex"), expiresAt },
+    });
 
     const response = NextResponse.json({
-      user: { id: user.id, email: user.email, role: user.role },
+      user: { id: user.id, email: user.email, role: membership.role },
+      workspaceId: membership.workspaceId,
     });
-
-    response.cookies.set("session", user.id, {
+    response.cookies.set(AUTH_COOKIE_NAME, rawToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
-      maxAge: 60 * 60 * 24 * 7,
+      maxAge: 7 * 24 * 60 * 60,
     });
-
     return response;
-  } catch (err) {
-    console.error("[login] error:", err);
-    return NextResponse.json({ message: "Server error." }, { status: 500 });
+  } catch {
+    return NextResponse.json({ message: "Unable to sign in." }, { status: 500 });
   }
 }
