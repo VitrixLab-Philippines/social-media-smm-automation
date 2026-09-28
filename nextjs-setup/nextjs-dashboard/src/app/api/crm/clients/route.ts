@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
   const search = url.searchParams.get("search")?.trim();
   const includeStats = url.searchParams.get("stats") === "1";
 
-  const session = await verifySession();
+  const session = await verifySession(request);
   const workspaceId = session?.workspaceId;
 
   const where: Record<string, unknown> = {};
@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const session = await verifySession();
+  const session = await verifySession(request);
   const workspaceId = session?.workspaceId;
 
   const client = await prisma.client.create({
