@@ -8,16 +8,10 @@ out/
 build/
 dist/
 
-# AI / editor tool state
-.agents/
-.claude/
-.windsurf/
-.cursor/
-skills-lock.json
-
-# Environment variables
+# Env — all variants, keep the template
 .env
-.env*.local
+.env.*
+!.env.example
 
 # Logs
 *.log
@@ -38,3 +32,15 @@ pnpm-debug.log*
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
+
+# Python bytecode and packaging
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+
+# Nested lockfiles — only the root one is canonical
+nextjs-setup/**/pnpm-lock.yaml
+
+# Temp debug scripts
+test-db.mts

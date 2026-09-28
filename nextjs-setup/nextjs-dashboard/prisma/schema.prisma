@@ -5,7 +5,8 @@
 // Do NOT add `url` or `directUrl` here — Prisma 7 errors if both exist.
 
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
