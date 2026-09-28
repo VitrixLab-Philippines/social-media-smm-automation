@@ -6,7 +6,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const platform = searchParams.get("platform");
 
-  const session = await verifySession();
+  const session = await verifySession(request);
   const workspaceId = session?.workspaceId;
 
   let where: any = {};
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { type, topic, platform } = body;
 
-    const session = await verifySession();
+    const session = await verifySession(request);
     const workspaceId = session?.workspaceId;
 
     if (!workspaceId) {
