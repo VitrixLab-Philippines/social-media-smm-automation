@@ -91,8 +91,8 @@ export async function POST(req: NextRequest) {
     socialAccountId: platform,
     contentRevisionId: draftId,
     idempotencyKey,
-    type: "publish",
-    version: "1",
+    type: "publish.requested",
+    version: 1,
   });
 
   return NextResponse.json({ job, idempotencyKey }, { status: 201 });
