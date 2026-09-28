@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
         data: {
           topic,
           platform: platform || "meta",
-          status: "draft",
+          status: "DRAFT",
           workspaceId,
           text: "",
           hashtags: [],
