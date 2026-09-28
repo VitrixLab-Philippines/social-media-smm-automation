@@ -378,10 +378,33 @@ model WebhookEvent {
 // Architecture upgrade: CRM, idempotency, audit, integration lifecycle
 // ------------------------------------------------------------------
 
-enum LeadStatus { NEW QUALIFIED WORKING CONVERTED LOST }
-enum ActivityType { NOTE CALL EMAIL MEETING TASK SYSTEM }
-enum OpportunityStatus { OPEN WON LOST }
-enum IntegrationStatus { CONNECTING CONNECTED DEGRADED REAUTH_REQUIRED DISCONNECTED }
+enum LeadStatus {
+  NEW
+  QUALIFIED
+  WORKING
+  CONVERTED
+  LOST
+}
+enum ActivityType {
+  NOTE
+  CALL
+  EMAIL
+  MEETING
+  TASK
+  SYSTEM
+}
+enum OpportunityStatus {
+  OPEN
+  WON
+  LOST
+}
+enum IntegrationStatus {
+  CONNECTING
+  CONNECTED
+  DEGRADED
+  REAUTH_REQUIRED
+  DISCONNECTED
+}
 
 model Contact {
   id String @id @default(cuid())
