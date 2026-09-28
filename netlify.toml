@@ -1,7 +1,7 @@
 [build]
   base = "nextjs-setup/nextjs-dashboard"
   command = "pnpm --filter nextjs-dashboard... run build"
-  publish = "nextjs-setup/nextjs-dashboard/.next"
+  publish = ".next"
 
 [build.environment]
   SECRETS_SCAN_OMIT_PATHS = "**/*.md,**/*.mdx,**/.env.example,**/README.md,**/.netlify/**"

@@ -5,7 +5,19 @@
 import Redis from "ioredis";
 
 // Redis client instance
-const redis = new Redis();
+let redis: Redis | undefined;
+
+const getRedis = (): Redis => {
+  if (redis) return redis;
+
+  const connectionString = process.env.REDIS_URL;
+  if (!connectionString) {
+    throw new Error("REDIS_URL is not configured");
+  }
+
+  redis = new Redis(connectionString);
+  return redis;
+};
 
 // Queue keys
 const PUBLISH_QUEUE = "smmai:queue:publish";
@@ -29,16 +41,16 @@ export const enqueuePublishJob = async (event: PublishJobEvent): Promise<string>
   const key = `${PUBLISH_QUEUE}:${event.jobId}`;
 
   // Check if job already exists (idempotency)
-  const exists = await redis.exists(key);
+  const exists = await getRedis().exists(key);
   if (exists) {
     return event.jobId;
   }
 
   // Set job with TTL (7 days) and JSON payload
-  await redis.set(key, JSON.stringify(event), "EX", 604800); // 7 days
+  await getRedis().set(key, JSON.stringify(event), "EX", 604800); // 7 days
 
   // Add to sorted queue by score (timestamp)
-  await redis.zadd(PUBLISH_QUEUE, Date.now(), event.jobId);
+  await getRedis().zadd(PUBLISH_QUEUE, Date.now(), event.jobId);
 
   return event.jobId;
 };
@@ -49,14 +61,14 @@ export const dequeuePublishJob = async (): Promise<{
   event: PublishJobEvent | null;
 }> => {
   // Pop the first job from the sorted set
-  const jobId = await redis.zpopmin(PUBLISH_QUEUE);
+  const jobId = await getRedis().zpopmin(PUBLISH_QUEUE);
 
   if (!jobId || jobId.length === 0) {
     return { jobId: "", event: null };
   }
 
   const [id] = jobId;
-  const raw = await redis.get(`${PUBLISH_QUEUE}:${id}`);
+  const raw = await getRedis().get(`${PUBLISH_QUEUE}:${id}`);
 
   if (!raw) {
     return { jobId: id, event: null };
@@ -65,15 +77,15 @@ export const dequeuePublishJob = async (): Promise<{
   const event: PublishJobEvent = JSON.parse(raw);
 
   // Check for dead-letter condition (5+ failures)
-  const failureCount = await redis.get(
+  const failureCount = await getRedis().get(
     `${FAILURE_COUNTER_PREFIX}${jobId}`
   );
 
   if (failureCount && parseInt(failureCount) >= 5) {
     // Move to dead-letter queue
-    await redis.zadd(DEAD_LETTER_QUEUE, Date.now(), id);
-    await redis.del(`${PUBLISH_QUEUE}:${id}`);
-    await redis.del(`${FAILURE_COUNTER_PREFIX}${jobId}`);
+    await getRedis().zadd(DEAD_LETTER_QUEUE, Date.now(), id);
+    await getRedis().del(`${PUBLISH_QUEUE}:${id}`);
+    await getRedis().del(`${FAILURE_COUNTER_PREFIX}${jobId}`);
 
     return { jobId: id, event: null as any };
   }
@@ -83,18 +95,18 @@ export const dequeuePublishJob = async (): Promise<{
 
 // Get queue length
 export const getQueueLength = async (): Promise<number> => {
-  return await redis.zcard(PUBLISH_QUEUE);
+  return await getRedis().zcard(PUBLISH_QUEUE);
 };
 
 // Get dead-letter queue length
 export const getDLQLength = async (): Promise<number> => {
-  return await redis.zcard(DEAD_LETTER_QUEUE);
+  return await getRedis().zcard(DEAD_LETTER_QUEUE);
 };
 
 // Add to dead-letter queue
 export const addToDLQ = async (jobId: string, reason: string): Promise<void> => {
-  await redis.zadd(DEAD_LETTER_QUEUE, Date.now(), jobId);
-  await redis.set(`${FAILURE_COUNTER_PREFIX}${jobId}`, "1", "EX", 86400); // 24 hours
+  await getRedis().zadd(DEAD_LETTER_QUEUE, Date.now(), jobId);
+  await getRedis().set(`${FAILURE_COUNTER_PREFIX}${jobId}`, "1", "EX", 86400); // 24 hours
 };
 
 // Get queue stats
