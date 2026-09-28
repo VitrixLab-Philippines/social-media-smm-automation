@@ -26,6 +26,7 @@ export async function checkRateLimit(request: NextRequest, policy: RateLimitPoli
   const scope = policy.scope ?? request.nextUrl.pathname;
   const key = `smmai:rl:${scope}:${clientIp(request)}`;
   const client = redisClient();
+  if (!client && process.env.NODE_ENV === "production") return { allowed: false, remaining: 0, retryAfter: 5 };
 
   if (client) {
     try {
