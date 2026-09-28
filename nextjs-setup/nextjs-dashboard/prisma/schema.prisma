@@ -348,3 +348,16 @@ model Workflow {
 
   @@index([workspaceId])
 }
+
+model WebhookEvent {
+  id         String   @id @default(cuid())
+  platform   String
+  eventId    String
+  status     String?
+  postId     String?
+  receivedAt DateTime @default(now())
+  rawPayload String
+
+  @@unique([platform, eventId])
+  @@index([eventId])
+}

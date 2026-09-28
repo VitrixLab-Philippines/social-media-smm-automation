@@ -6,10 +6,10 @@ import ClientForm from "./ClientForm";
 import ClientStatsCards from "./ClientStatsCards";
 
 const statusColor: Record<ClientStatus, { bg: string; color: string }> = {
-  prospect: { bg: "#fef3c7", color: "#92400e" },
-  active: { bg: "#d1fae5", color: "#065f46" },
-  paused: { bg: "#e0e7ff", color: "#3730a3" },
-  churned: { bg: "#fee2e2", color: "#991b1b" },
+  PROSPECT: { bg: "#fef3c7", color: "#92400e" },
+  ACTIVE: { bg: "#d1fae5", color: "#065f46" },
+  PAUSED: { bg: "#e0e7ff", color: "#3730a3" },
+  CHURNED: { bg: "#fee2e2", color: "#991b1b" },
 };
 
 export default function ClientsTable() {

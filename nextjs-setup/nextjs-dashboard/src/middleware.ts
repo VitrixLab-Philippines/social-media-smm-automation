@@ -2,7 +2,7 @@
 // Based on vercel-fix-v4.md P0 requirements
 
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/navigation";
+import type { NextRequest } from "next/server";
 
 // Public routes that don't require authentication
 const PUBLIC_PATHS = [
