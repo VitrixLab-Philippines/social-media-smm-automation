@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
   const status = searchParams.get("status");
   const platform = searchParams.get("platform");
 
-  const session = await verifySession();
+  const session = await verifySession(request);
   const workspaceId = session?.workspaceId;
 
   let filtered = await prisma.contentDraft.findMany({
