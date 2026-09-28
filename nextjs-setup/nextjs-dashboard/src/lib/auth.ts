@@ -1,40 +1,57 @@
 import type { NextRequest } from "next/server";
+import prisma from "@/lib/prisma";
+import { hashSecret } from "@/lib/security";
 
-// Authentication options and helpers for Next.js API routes
-// Used by middleware and route handlers to verify session
-
-// Session cookie name
 export const AUTH_COOKIE_NAME = "smmai_session";
 
-// Session payload interface
 export interface SessionPayload {
   userId: string;
   email: string;
-  role: "admin" | "user";
+  role: "admin" | "manager" | "editor" | "viewer";
   workspaceId: string;
   iat?: number;
   exp?: number;
 }
 
-// Verify session from request
-// In production, this would validate a jwt or session cookie
-export function verifySession(request: NextRequest): { valid: true; payload: SessionPayload } | { valid: false; reason: string } {
-  const cookie = request.cookies.get(AUTH_COOKIE_NAME);
+const roleMap = {
+  ADMIN: "admin",
+  MANAGER: "manager",
+  EDITOR: "editor",
+  VIEWER: "viewer",
+} as const;
 
-  if (!cookie) {
-    return { valid: false, reason: "No session cookie" };
+export async function verifySession(request: NextRequest): Promise<
+  { valid: true; payload: SessionPayload } | { valid: false; reason: string }
+> {
+  const raw = request.cookies.get(AUTH_COOKIE_NAME)?.value;
+  if (!raw || raw.length < 32) return { valid: false, reason: "No session cookie" };
+
+  const session = await prisma.session.findUnique({
+    where: { tokenHash: hashSecret(raw) },
+    include: { user: true },
+  });
+
+  if (!session || session.expiresAt <= new Date()) {
+    if (session) await prisma.session.delete({ where: { id: session.id } }).catch(() => undefined);
+    return { valid: false, reason: "Invalid or expired session" };
   }
 
-  // TODO: In production, verify JWT signature and expiration
-  // const payload = jwt.verify(cookie.value, process.env.SESSION_SECRET!);
-  // return { valid: true, payload };
+  const membership = await prisma.workspaceMember.findFirst({
+    where: { userId: session.userId },
+    orderBy: { createdAt: "asc" },
+  });
+  if (!membership) return { valid: false, reason: "No workspace membership" };
 
-  // For development: check if it's the demo session
-  if (cookie.value === "demo-session") {
-    return { valid: true, payload: { userId: "user_demo", email: "admin@smmai.com", role: "admin", workspaceId: "ws_demo" } };
-  }
-
-  return { valid: false, reason: "Invalid session" };
+  return {
+    valid: true,
+    payload: {
+      userId: session.userId,
+      email: session.user.email,
+      role: roleMap[membership.role],
+      workspaceId: membership.workspaceId,
+      exp: Math.floor(session.expiresAt.getTime() / 1000),
+    },
+  };
 }
 
 export default verifySession;

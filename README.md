@@ -54,3 +54,12 @@ Live publishing is not enabled by default. `DRY_RUN=true` is the safe default.
 ## Development
 
 CI runs Ruff and pytest. The daily workflow performs a scheduled dry-run planning job and can also be started manually.
+
+## Architecture upgrade
+
+The current system architecture and Phase 2 integration contract are documented in:
+
+- `docs/architecture/system-architecture-upgrade.md`
+- `docs/architecture/phase2-integration-contract.md`
+
+Production security requires `REDIS_URL` for distributed rate limiting and `TOKEN_ENCRYPTION_KEY` for provider credentials. Publish mutations require a client-supplied `Idempotency-Key`. Provider webhooks must be configured with their provider-specific signing secret.
