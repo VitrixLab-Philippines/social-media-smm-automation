@@ -20,7 +20,7 @@ const empty: Partial<Client> = {
   phone: "",
   website: "",
   industry: "",
-  status: "prospect",
+  status: "PROSPECT",
   approved: false,
   revenue: 0,
   accountManager: "",
@@ -47,7 +47,7 @@ export default function ClientForm({ initial, onSaved, onCancel }: Props) {
 
     const tags = tagsInput
       .split(",")
-      .map((t) => t.trim())
+      .map((t: string) => t.trim())
       .filter(Boolean);
 
     const payload = { ...form, tags };
@@ -170,7 +170,7 @@ export default function ClientForm({ initial, onSaved, onCancel }: Props) {
           <label style={labelStyle}>Status</label>
           <select
             style={inputStyle}
-            value={form.status ?? "prospect"}
+            value={form.status ?? "PROSPECT"}
             onChange={(e) => update("status", e.target.value as ClientStatus)}
           >
             {CLIENT_STATUSES.map((s) => (
