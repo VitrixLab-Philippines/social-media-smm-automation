@@ -39,6 +39,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const session = await verifySession(request);
+  if (!session.valid) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
   try {
     const body = await request.json();
     const newDraft: any = {
@@ -46,7 +48,7 @@ export async function POST(request: NextRequest) {
       platform: body.platform || "instagram",
       text: body.text || "",
       hashtags: body.hashtags || [],
-      status: "pending",
+      status: "PENDING",
       createdAt: new Date().toISOString(),
       author: body.author || "Marketing Team",
     };
@@ -65,6 +67,8 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
+  const session = await verifySession(request);
+  if (!session.valid) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
   try {
     const body = await request.json();
     const { id, status } = body as { id: string; status: string };
@@ -87,7 +91,7 @@ export async function PATCH(request: NextRequest) {
 
     const draft = await prisma.contentDraft.update({
       where: { id },
-      data: { status },
+      data: { status: status.toUpperCase() as "DRAFT" | "PENDING" | "APPROVED" | "REJECTED" | "SCHEDULED" | "PUBLISHED" },
     });
 
     return NextResponse.json({ success: true, draft });
@@ -97,6 +101,8 @@ export async function PATCH(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
+  const session = await verifySession(request);
+  if (!session.valid) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
   try {
     const body = await request.json();
     const { id } = body as { id: string };
