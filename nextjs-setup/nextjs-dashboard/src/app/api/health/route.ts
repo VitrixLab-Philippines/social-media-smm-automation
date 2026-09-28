@@ -48,7 +48,7 @@ async function checkReadiness() {
 async function checkIntegrationHealth() {
   // Check webhook events table accessibility
   try {
-    await prisma.webhookEvent.findCount({});
+    await prisma.webhookEvent.count();
     return { status: "ok", detailed: "Webhook events table accessible" };
   } catch (error) {
     return { status: "unhealthy", detailed: String(error) };

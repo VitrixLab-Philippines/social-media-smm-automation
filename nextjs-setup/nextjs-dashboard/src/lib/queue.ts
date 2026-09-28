@@ -66,14 +66,14 @@ export const dequeuePublishJob = async (): Promise<{
 
   // Check for dead-letter condition (5+ failures)
   const failureCount = await redis.get(
-    `${FAILURE_COUNTER_PREFIX}${id}`
+    `${FAILURE_COUNTER_PREFIX}${jobId}`
   );
 
   if (failureCount && parseInt(failureCount) >= 5) {
     // Move to dead-letter queue
     await redis.zadd(DEAD_LETTER_QUEUE, Date.now(), id);
     await redis.del(`${PUBLISH_QUEUE}:${id}`);
-    await redis.del(`${FAILURE_COUNTER_PREFIX}${id}`);
+    await redis.del(`${FAILURE_COUNTER_PREFIX}${jobId}`);
 
     return { jobId: id, event: null as any };
   }
@@ -94,7 +94,7 @@ export const getDLQLength = async (): Promise<number> => {
 // Add to dead-letter queue
 export const addToDLQ = async (jobId: string, reason: string): Promise<void> => {
   await redis.zadd(DEAD_LETTER_QUEUE, Date.now(), jobId);
-  await redis.set(`${FAILURE_COUNTER_PREFIX}${id}`, "1", "EX", 86400); // 24 hours
+  await redis.set(`${FAILURE_COUNTER_PREFIX}${jobId}`, "1", "EX", 86400); // 24 hours
 };
 
 // Get queue stats

@@ -8,6 +8,13 @@ out/
 build/
 dist/
 
+# AI / editor tool state
+.agents/
+.claude/
+.windsurf/
+.cursor/
+skills-lock.json
+
 # Environment variables
 .env
 .env*.local

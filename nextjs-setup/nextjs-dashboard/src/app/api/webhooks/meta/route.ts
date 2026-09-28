@@ -118,6 +118,8 @@ export async function POST(request: NextRequest) {
 
     // Enqueue for asynchronous processing (publish job)
     await enqueuePublishJob({
+      type: "publish.requested",
+      version: 1,
       jobId: `webhook_${parsed.entryId}`,
       workflowId: "meta_webhook",
       workspaceId: "ws_default",

@@ -6,8 +6,9 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const platform = searchParams.get("platform");
 
-  const session = await verifySession();
-  const workspaceId = session?.workspaceId;
+  const session = await verifySession(request);
+  if (!session.valid) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+  const workspaceId = session.payload.workspaceId;
 
   let where: any = {};
 
@@ -19,19 +20,11 @@ export async function GET(request: NextRequest) {
     where.platform = platform;
   }
 
-  // Use existing ContentDraft and Approval models for inbox items
-  const [drafts, approvals] = await Promise.all([
-    prisma.contentDraft.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-      take: 20,
-    }),
-    prisma.approval.findMany({
-      where,
-      orderBy: { approvedAt: "desc" },
-      take: 20,
-    }),
-  ]);
+  const drafts = await prisma.contentDraft.findMany({
+    where,
+    orderBy: { createdAt: "desc" },
+    take: 20,
+  });
 
   // Transform into inbox item format
   const items = [
@@ -43,18 +36,11 @@ export async function GET(request: NextRequest) {
       status: d.status,
       createdAt: d.createdAt,
     })),
-    ...approvals.map((a: any) => ({
-      id: a.id,
-      type: "approval",
-      topic: d?.topic || "approval",
-      platform: "meta",
-      status: a.policyVersion,
-      createdAt: a.approvedAt,
-    })),
+
   ];
 
   const total = items.length;
-  const unread = items.filter((i: any) => i.status !== "published").length;
+  const unread = items.filter((i: any) => i.status !== "PUBLISHED").length;
 
   return NextResponse.json({
     items,
@@ -69,8 +55,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { type, topic, platform } = body;
 
-    const session = await verifySession();
-    const workspaceId = session?.workspaceId;
+    const session = await verifySession(request);
+    if (!session.valid) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+    const workspaceId = session.payload.workspaceId;
 
     if (!workspaceId) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 });
@@ -81,7 +68,7 @@ export async function POST(request: NextRequest) {
         data: {
           topic,
           platform: platform || "meta",
-          status: "draft",
+          status: "DRAFT",
           workspaceId,
           text: "",
           hashtags: [],

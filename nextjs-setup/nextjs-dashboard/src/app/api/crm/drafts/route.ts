@@ -7,15 +7,16 @@ export async function GET(request: NextRequest) {
   const status = searchParams.get("status");
   const platform = searchParams.get("platform");
 
-  const session = await verifySession();
-  const workspaceId = session?.workspaceId;
+  const session = await verifySession(request);
+  if (!session.valid) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+  const workspaceId = session.payload.workspaceId;
 
   let filtered = await prisma.contentDraft.findMany({
     where: { workspaceId },
   });
 
   if (status && status !== "all") {
-    filtered = filtered.filter((d: any) => d.status === status);
+    filtered = filtered.filter((d: any) => d.status === status.toUpperCase());
   }
   if (platform && platform !== "all") {
     filtered = filtered.filter((d: any) => d.platform === platform);
@@ -23,11 +24,11 @@ export async function GET(request: NextRequest) {
 
   const counts = {
     all: filtered.length,
-    pending: filtered.filter((d: any) => d.status === "pending").length,
-    approved: filtered.filter((d: any) => d.status === "approved").length,
-    draft: filtered.filter((d: any) => d.status === "draft").length,
-    rejected: filtered.filter((d: any) => d.status === "rejected").length,
-    published: filtered.filter((d: any) => d.status === "published").length,
+    pending: filtered.filter((d: any) => d.status === "PENDING").length,
+    approved: filtered.filter((d: any) => d.status === "APPROVED").length,
+    draft: filtered.filter((d: any) => d.status === "DRAFT").length,
+    rejected: filtered.filter((d: any) => d.status === "REJECTED").length,
+    published: filtered.filter((d: any) => d.status === "PUBLISHED").length,
   };
 
   return NextResponse.json({
@@ -38,6 +39,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const session = await verifySession(request);
+  if (!session.valid) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
   try {
     const body = await request.json();
     const newDraft: any = {
@@ -45,7 +48,7 @@ export async function POST(request: NextRequest) {
       platform: body.platform || "instagram",
       text: body.text || "",
       hashtags: body.hashtags || [],
-      status: "pending",
+      status: "PENDING",
       createdAt: new Date().toISOString(),
       author: body.author || "Marketing Team",
     };
@@ -53,7 +56,7 @@ export async function POST(request: NextRequest) {
     const draft = await prisma.contentDraft.create({
       data: {
         ...newDraft,
-        workspaceId: session?.workspaceId,
+        workspaceId: session.valid ? session.payload.workspaceId : undefined,
       },
     });
 
@@ -64,6 +67,8 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
+  const session = await verifySession(request);
+  if (!session.valid) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
   try {
     const body = await request.json();
     const { id, status } = body as { id: string; status: string };
@@ -77,7 +82,7 @@ export async function PATCH(request: NextRequest) {
       where: { id },
     });
 
-    if (existingDraft?.workspaceId !== session?.workspaceId) {
+    if (existingDraft?.workspaceId !== (session.valid ? session.payload.workspaceId : undefined)) {
       return NextResponse.json(
         { error: "Forbidden: draft does not belong to your workspace" },
         { status: 403 }
@@ -86,7 +91,7 @@ export async function PATCH(request: NextRequest) {
 
     const draft = await prisma.contentDraft.update({
       where: { id },
-      data: { status },
+      data: { status: status.toUpperCase() as "DRAFT" | "PENDING" | "APPROVED" | "REJECTED" | "SCHEDULED" | "PUBLISHED" },
     });
 
     return NextResponse.json({ success: true, draft });
@@ -96,6 +101,8 @@ export async function PATCH(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
+  const session = await verifySession(request);
+  if (!session.valid) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
   try {
     const body = await request.json();
     const { id } = body as { id: string };
@@ -109,7 +116,7 @@ export async function DELETE(request: NextRequest) {
       where: { id },
     });
 
-    if (existingDraft?.workspaceId !== session?.workspaceId) {
+    if (existingDraft?.workspaceId !== (session.valid ? session.payload.workspaceId : undefined)) {
       return NextResponse.json(
         { error: "Forbidden: draft does not belong to your workspace" },
         { status: 403 }

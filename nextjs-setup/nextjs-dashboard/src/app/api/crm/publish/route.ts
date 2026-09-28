@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
   }
 
   const { draftId, platform } = payload;
-  if (!draftId || !platform) {
+  if (typeof draftId !== "string" || typeof platform !== "string") {
     return NextResponse.json(
       { error: "draftId and platform are required" },
       { status: 400 }
@@ -28,8 +28,9 @@ export async function POST(req: NextRequest) {
   }
 
   // RBAC: verify draft belongs to current workspace
-  const session = await verifySession();
-  const workspaceId = session?.workspaceId;
+  const session = await verifySession(req);
+  if (!session.valid) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+  const workspaceId = session.payload.workspaceId;
 
   const draft = await prisma.contentDraft.findUnique({
     where: { id: draftId },
@@ -68,6 +69,7 @@ export async function POST(req: NextRequest) {
   // Create publish job in database (durable persistence)
   const job = await prisma.publishJob.create({
     data: {
+      workspaceId,
       draftId: String(draftId),
       platform: String(platform),
       status: "PENDING",
