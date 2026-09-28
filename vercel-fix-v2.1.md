@@ -730,7 +730,7 @@ Expect a clean type-check and the header to appear in the dashboard. Then:
 pnpm dev
 ```
 
-Open `http://localhost:3000/dashboard` and check:
+Open `http://localhost:YOUR_PORT/dashboard` and check:
 
 - [ ] Tabs switch sections (Overview / Approval / Drafts / Clients / Analytics / Settings)
 - [ ] Grid/List toggle visibly toggles `aria-pressed` and swaps the icon styling

@@ -52,10 +52,10 @@ Create `.env.local` in `nextjs-setup/nextjs-dashboard/`:
 
 ```ini
 # Pooled connection — for the app
-DATABASE_URL="postgresql://[user]:[password]@[endpoint]-pooler.[region].aws.neon.tech/[dbname]?sslmode=require"
+DATABASE_URL="postgresql://USER:PASSWORD@HOST.neon.tech/DBNAME?sslmode=require"
 
 # Direct connection — for Prisma CLI (migrations, db push)
-DIRECT_URL="postgresql://[user]:[password]@[endpoint].[region].aws.neon.tech/[dbname]?sslmode=require"
+DIRECT_URL="postgresql://USER:PASSWORD@HOST.neon.tech/DBNAME?sslmode=require"
 ```
 
 Replace the placeholders with the actual values from the Neon Console.
@@ -816,29 +816,29 @@ Test the API routes:
 
 ```bash
 # List clients
-curl http://localhost:3000/api/crm/clients
+curl http://localhost:YOUR_PORT/api/crm/clients
 
 # With stats
-curl "http://localhost:3000/api/crm/clients?stats=1"
+curl "http://localhost:YOUR_PORT/api/crm/clients?stats=1"
 
 # Filter by status
-curl "http://localhost:3000/api/crm/clients?status=ACTIVE"
+curl "http://localhost:YOUR_PORT/api/crm/clients?status=ACTIVE"
 
 # Search
-curl "http://localhost:3000/api/crm/clients?search=lumen"
+curl "http://localhost:YOUR_PORT/api/crm/clients?search=lumen"
 
 # Create
-curl -X POST http://localhost:3000/api/crm/clients \
+curl -X POST http://localhost:YOUR_PORT/api/crm/clients \
   -H "Content-Type: application/json" \
   -d '{"name":"Test User","company":"Test Co","email":"test@test.com"}'
 
 # Update
-curl -X PATCH http://localhost:3000/api/crm/clients/cl-001 \
+curl -X PATCH http://localhost:YOUR_PORT/api/crm/clients/cl-001 \
   -H "Content-Type: application/json" \
   -d '{"status":"PAUSED"}'
 
 # Delete
-curl -X DELETE http://localhost:3000/api/crm/clients/cl-002
+curl -X DELETE http://localhost:YOUR_PORT/api/crm/clients/cl-002
 ```
 
 ### Production

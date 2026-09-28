@@ -13,7 +13,7 @@ from smm.integrations.adapters import MetaAdapter
 from smm.config import get_settings
 
 settings = get_settings()
-redis_client = redis.from_url(os.getenv("REDIS_URL", "redis://localhost:6379"))
+redis_client = redis.from_url(os.getenv("REDIS_URL", "redis://your-redis-host:6379"))
 
 
 PRIVATE_QUEUE = "smmai:schedule:cron"
