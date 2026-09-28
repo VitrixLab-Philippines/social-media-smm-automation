@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { AUTH_COOKIE_NAME } from "@/lib/auth";
 import { hashSecret } from "@/lib/security";

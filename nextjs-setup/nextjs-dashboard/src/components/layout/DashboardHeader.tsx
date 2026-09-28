@@ -33,7 +33,12 @@ const LABELS: Record<DashboardViewSection, string> = {
   clients: "Clients",
   settings: "Settings",
   graph: "System diagnostics",
-};
+  accounts: "Accounts",
+  audit: "Audit",
+  automation: "Automation",
+  calendar: "Calendar",
+  inbox: "Inbox",
+  pipeline: "Pipeline",};
 
 export default function DashboardHeader({
   currentSection,

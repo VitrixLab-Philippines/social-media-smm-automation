@@ -3,7 +3,9 @@ import prisma from "@/lib/prisma";
 import { verifySession } from "@/lib/auth";
 import { checkRateLimit, rateLimitResponse, readJsonWithLimit, requireSameOrigin } from "@/lib/security";
 
-export async function GET(request: NextRequest) {\n  const limit = await checkRateLimit(request, { limit: 120, scope: "crm:drafts:read" });\n  if (!limit.allowed) return rateLimitResponse(limit);
+export async function GET(request: NextRequest) {
+  const limit = await checkRateLimit(request, { limit: 120, scope: "crm:drafts:read" });
+  if (!limit.allowed) return rateLimitResponse(limit);
   const { searchParams } = new URL(request.url);
   const status = searchParams.get("status");
   const platform = searchParams.get("platform");
@@ -39,11 +41,14 @@ export async function GET(request: NextRequest) {\n  const limit = await checkRa
   });
 }
 
-export async function POST(request: NextRequest) {\n  const limit = await checkRateLimit(request, { limit: 60, scope: "crm:drafts:write" });\n  if (!limit.allowed) return rateLimitResponse(limit);\n  if (!requireSameOrigin(request)) return NextResponse.json({ error: "Invalid request origin" }, { status: 403 });
+export async function POST(request: NextRequest) {
+  const limit = await checkRateLimit(request, { limit: 60, scope: "crm:drafts:write" });
+  if (!limit.allowed) return rateLimitResponse(limit);
+  if (!requireSameOrigin(request)) return NextResponse.json({ error: "Invalid request origin" }, { status: 403 });
   const session = await verifySession(request);
   if (!session.valid) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
   try {
-    const body = await readJsonWithLimit(request);
+    const body = await readJsonWithLimit<Record<string, any>>(request);
     const newDraft: any = {
       topic: body.topic || "Untitled Campaign Draft",
       platform: body.platform || "instagram",
@@ -67,11 +72,14 @@ export async function POST(request: NextRequest) {\n  const limit = await checkR
   }
 }
 
-export async function PATCH(request: NextRequest) {\n  const limit = await checkRateLimit(request, { limit: 60, scope: "crm:drafts:write" });\n  if (!limit.allowed) return rateLimitResponse(limit);\n  if (!requireSameOrigin(request)) return NextResponse.json({ error: "Invalid request origin" }, { status: 403 });
+export async function PATCH(request: NextRequest) {
+  const limit = await checkRateLimit(request, { limit: 60, scope: "crm:drafts:write" });
+  if (!limit.allowed) return rateLimitResponse(limit);
+  if (!requireSameOrigin(request)) return NextResponse.json({ error: "Invalid request origin" }, { status: 403 });
   const session = await verifySession(request);
   if (!session.valid) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
   try {
-    const body = await request.json();
+    const body = await request.json() as { topic?: string; platform?: string; text?: string; hashtags?: string[]; clientId?: string; status?: string; author?: string };
     const { id, status } = body as { id: string; status: string };
 
     if (!id || !status) {
@@ -101,11 +109,14 @@ export async function PATCH(request: NextRequest) {\n  const limit = await check
   }
 }
 
-export async function DELETE(request: NextRequest) {\n  const limit = await checkRateLimit(request, { limit: 30, scope: "crm:drafts:delete" });\n  if (!limit.allowed) return rateLimitResponse(limit);\n  if (!requireSameOrigin(request)) return NextResponse.json({ error: "Invalid request origin" }, { status: 403 });
+export async function DELETE(request: NextRequest) {
+  const limit = await checkRateLimit(request, { limit: 30, scope: "crm:drafts:delete" });
+  if (!limit.allowed) return rateLimitResponse(limit);
+  if (!requireSameOrigin(request)) return NextResponse.json({ error: "Invalid request origin" }, { status: 403 });
   const session = await verifySession(request);
   if (!session.valid) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
   try {
-    const body = await request.json();
+    const body = await request.json() as { topic?: string; platform?: string; text?: string; hashtags?: string[]; clientId?: string; status?: string; author?: string };
     const { id } = body as { id: string };
 
     if (!id) {
