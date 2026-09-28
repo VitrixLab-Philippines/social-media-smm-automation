@@ -3,7 +3,7 @@ import prisma from "@/lib/prisma";
 import { verifySession } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
-  const session = await verifySession();
+  const session = await verifySession(request);
   const workspaceId = session?.workspaceId;
 
   const brand = await prisma.brandProfile.findFirst({
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const session = await verifySession();
+    const session = await verifySession(request);
     const workspaceId = session?.workspaceId;
 
     // RBAC: verify or create brand within workspace
