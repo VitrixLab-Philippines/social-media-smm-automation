@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { AUTH_COOKIE_NAME } from "@/lib/auth";
+const AUTH_COOKIE_NAME = "smmai_session";
 
 const PUBLIC_PATHS = ["/", "/login", "/api/auth/login", "/api/auth/register", "/api/auth/reset-password"];
 const PROTECTED_PREFIXES = ["/dashboard", "/api/crm/", "/api/publish/", "/api/accounts/", "/api/analytics/", "/api/settings/", "/api/automation", "/api/engagement"];
