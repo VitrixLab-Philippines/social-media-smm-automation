@@ -1,78 +1,40 @@
-// Middleware for route protection and session verification
-// Based on vercel-fix-v4.md P0 requirements
-
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { AUTH_COOKIE_NAME } from "@/lib/auth";
 
-// Public routes that don't require authentication
-const PUBLIC_PATHS = [
-  "/",
-  "/login",
-  "/api/auth/login",
-  "/api/auth/register",
-  "/api/auth/reset-password",
-];
+const PUBLIC_PATHS = ["/", "/login", "/api/auth/login", "/api/auth/register", "/api/auth/reset-password"];
+const PROTECTED_PREFIXES = ["/dashboard", "/api/crm/", "/api/publish/", "/api/accounts/", "/api/analytics/", "/api/settings/", "/api/automation", "/api/engagement"];
 
-// Protected routes that require authentication
-const PROTECTED_PATHS = [
-  "/dashboard",
-  "/api/crm",
-  "/api/publish",
-  "/api/accounts",
-  "/api/analytics",
-  "/api/settings",
-];
-
-// Protected route prefixes
-const PROTECTED_PREFIXES = [
-  "/dashboard",
-  "/api/crm/",
-  "/api/publish/",
-  "/api/accounts/",
-  "/api/analytics/",
-  "/api/settings/",
-];
+function isPublic(pathname: string) {
+  return PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
+}
 
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+  const response = NextResponse.next();
 
-  // Check if path is public
-  const isPublicPath = PUBLIC_PATHS.some((path) =>
-    pathname.startsWith(path)
-  );
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("X-Frame-Options", "DENY");
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  response.headers.set("Cross-Origin-Opener-Policy", "same-origin");
+  response.headers.set("Cross-Origin-Resource-Policy", "same-origin");
 
-  if (isPublicPath) {
-    return NextResponse.next();
+  if (isPublic(pathname)) return response;
+
+  const protectedPath = PROTECTED_PREFIXES.some((prefix) => pathname === prefix.replace(/\/$/, "") || pathname.startsWith(prefix));
+  if (protectedPath && !request.cookies.has(AUTH_COOKIE_NAME)) {
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json({ error: "Authentication required" }, { status: 401, headers: response.headers });
+    }
+    const url = new URL("/login", request.url);
+    url.searchParams.set("redirect", pathname);
+    return NextResponse.redirect(url);
   }
 
-  // Check if path is protected
-  const isProtectedPath = PROTECTED_PATHS.some((path) =>
-    pathname.startsWith(path)
-  ) || PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
-
-  if (isProtectedPath) {
-    // In production, verify session here
-    // For now, check for auth token in cookies or header
-    const authHeader = request.headers.get("authorization");
-    const cookieHeader = request.headers.get("cookie");
-
-    // TODO: Replace with real session verification
-    // if (!isLoggedIn(authHeader, cookieHeader)) {
-    //   const url = new URL("/login", request.url);
-    //   url.searchParams.set("redirect", pathname);
-    //   return NextResponse.redirect(url);
-    // }
-
-    // Temporary: allow through for development
-    // In production, uncomment the session check above
-    return NextResponse.next();
-  }
-
-  // Default: allow other paths
-  return NextResponse.next();
+  return response;
 }
 
 export const config = {
-  // Match all routes
-  matcher: ["/((?!api/auth/.+|_next|favicon.ico).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };
