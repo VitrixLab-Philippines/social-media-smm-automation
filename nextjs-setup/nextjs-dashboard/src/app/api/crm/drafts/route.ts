@@ -110,7 +110,7 @@ export async function DELETE(request: NextRequest) {
       where: { id },
     });
 
-    if (existingDraft?.workspaceId !== session?.workspaceId) {
+    if (existingDraft?.workspaceId !== (session.valid ? session.payload.workspaceId : undefined)) {
       return NextResponse.json(
         { error: "Forbidden: draft does not belong to your workspace" },
         { status: 403 }
