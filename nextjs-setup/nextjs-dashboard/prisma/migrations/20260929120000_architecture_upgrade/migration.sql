@@ -1,5 +1,7 @@
 ALTER TABLE "SocialAccount" RENAME COLUMN "accessToken" TO "accessTokenCiphertext";\nALTER TABLE "SocialAccount" RENAME COLUMN "refreshToken" TO "refreshTokenCiphertext";\n-- Architecture upgrade migration: CRM + audit + idempotency + integration lifecycle
 ALTER TABLE "Session" RENAME COLUMN "token" TO "tokenHash";
+ALTER INDEX "Session_token_key" RENAME TO "Session_tokenHash_key";
+ALTER INDEX "Session_token_idx" RENAME TO "Session_tokenHash_idx";
 
 CREATE TYPE "LeadStatus" AS ENUM ('NEW','QUALIFIED','WORKING','CONVERTED','LOST');
 CREATE TYPE "ActivityType" AS ENUM ('NOTE','CALL','EMAIL','MEETING','TASK','SYSTEM');
