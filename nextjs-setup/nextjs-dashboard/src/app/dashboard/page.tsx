@@ -84,7 +84,17 @@ export default function DashboardPage() {
 
           {currentSection === "guardrails" && <BrandProfileCard />}
 
-          {currentSection === "graph" && <GraphExplorer />}\n\n          {["inbox","calendar","pipeline","accounts","automation","audit"].includes(currentSection) && (\n            <section className="card" aria-labelledby="planned-surface" style={{ padding: "1.25rem" }}>\n              <h2 id="planned-surface" style={{ margin: 0, fontSize: "var(--text-lg)" }}>{sectionMeta[currentSection].title}</h2>\n              <p style={{ color: "var(--muted)", lineHeight: "var(--lh-relaxed)" }}>This surface is now part of the application information architecture and server contract. Its records are workspace-scoped; provider actions remain behind authenticated API services, queues, and audit events.</p>\n              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: "0.65rem" }}>\n                <div className="card" style={{ padding: "0.8rem" }}>Loading state</div><div className="card" style={{ padding: "0.8rem" }}>Empty state</div><div className="card" style={{ padding: "0.8rem" }}>Error/retry state</div>\n              </div>\n            </section>\n          )}
+          {currentSection === "graph" && <GraphExplorer />}
+
+          {["inbox","calendar","pipeline","accounts","automation","audit"].includes(currentSection) && (
+            <section className="card" aria-labelledby="planned-surface" style={{ padding: "1.25rem" }}>
+              <h2 id="planned-surface" style={{ margin: 0, fontSize: "var(--text-lg)" }}>{sectionMeta[currentSection].title}</h2>
+              <p style={{ color: "var(--muted)", lineHeight: "var(--lh-relaxed)" }}>This surface is now part of the application information architecture and server contract. Its records are workspace-scoped; provider actions remain behind authenticated API services, queues, and audit events.</p>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: "0.65rem" }}>
+                <div className="card" style={{ padding: "0.8rem" }}>Loading state</div><div className="card" style={{ padding: "0.8rem" }}>Empty state</div><div className="card" style={{ padding: "0.8rem" }}>Error/retry state</div>
+              </div>
+            </section>
+          )}
 
           {currentSection === "clients" && (
             <section className="card" aria-labelledby="clients-heading">
