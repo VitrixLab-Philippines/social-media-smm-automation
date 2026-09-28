@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "node:crypto";
 import prisma from "@/lib/prisma";
-import { checkRateLimit, rateLimitResponse, readJsonWithLimit } from "@/lib/security";
+import { checkRateLimit, rateLimitResponse } from "@/lib/security";
 import { enqueuePublishJob } from "@/lib/queue";
 
 const VERIFY_TOKEN = process.env.META_VERIFY_TOKEN;
@@ -24,8 +24,9 @@ export async function POST(request: NextRequest) {
   if (!limit.allowed) return rateLimitResponse(limit);
 
   try {
-    const body = await readJsonWithLimit<Record<string, unknown>>(request);
-    const raw = JSON.stringify(body);
+    const raw = await request.text();
+    if (Buffer.byteLength(raw, "utf8") > 1024 * 1024) return NextResponse.json({ error: "Payload too large" }, { status: 413 });
+    const body = JSON.parse(raw) as Record<string, unknown>;
     const signature = request.headers.get("x-hub-signature-256") || "";
     if (!verifyMetaSignature(raw, signature)) return NextResponse.json({ error: "Invalid webhook signature" }, { status: 401 });
 
