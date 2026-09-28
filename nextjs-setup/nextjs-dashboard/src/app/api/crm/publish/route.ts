@@ -20,6 +20,7 @@ export async function POST(req: NextRequest) {
   }
 
   const { draftId, platform } = payload;
+  if (typeof draftId !== "string" || typeof platform !== "string") {
   if (!draftId || !platform) {
     return NextResponse.json(
       { error: "draftId and platform are required" },
