@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
   const search = url.searchParams.get("search")?.trim();
   const includeStats = url.searchParams.get("stats") === "1";
 
-  const session = await verifySession(request);
+  const session = await verifySession(req);
   if (!session.valid) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
   const workspaceId = session.payload.workspaceId;
 
@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const session = await verifySession(request);
+  const session = await verifySession(req);
   if (!session.valid) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
   const workspaceId = session.payload.workspaceId;
 
