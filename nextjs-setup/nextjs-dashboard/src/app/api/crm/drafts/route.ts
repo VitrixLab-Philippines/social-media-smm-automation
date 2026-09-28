@@ -1,79 +1,134 @@
 import { NextRequest, NextResponse } from "next/server";
-import { initialDrafts, ContentDraft, DraftStatus } from "@/lib/crm";
-
-// In-memory store for session persistence
-const drafts: ContentDraft[] = [...initialDrafts];
+import prisma from "@/lib/prisma";
+import { verifySession } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const status = searchParams.get("status");
   const platform = searchParams.get("platform");
 
-  let filtered = [...drafts];
+  const session = await verifySession(request);
+  if (!session.valid) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+  const workspaceId = session.payload.workspaceId;
+
+  let filtered = await prisma.contentDraft.findMany({
+    where: { workspaceId },
+  });
+
   if (status && status !== "all") {
-    filtered = filtered.filter((d) => d.status === status);
+    filtered = filtered.filter((d: any) => d.status === status.toUpperCase());
   }
   if (platform && platform !== "all") {
-    filtered = filtered.filter((d) => d.platform === platform);
+    filtered = filtered.filter((d: any) => d.platform === platform);
   }
+
+  const counts = {
+    all: filtered.length,
+    pending: filtered.filter((d: any) => d.status === "PENDING").length,
+    approved: filtered.filter((d: any) => d.status === "APPROVED").length,
+    draft: filtered.filter((d: any) => d.status === "DRAFT").length,
+    rejected: filtered.filter((d: any) => d.status === "REJECTED").length,
+    published: filtered.filter((d: any) => d.status === "PUBLISHED").length,
+  };
 
   return NextResponse.json({
     drafts: filtered,
-    total: drafts.length,
-    counts: {
-      all: drafts.length,
-      pending: drafts.filter((d) => d.status === "pending").length,
-      approved: drafts.filter((d) => d.status === "approved").length,
-      draft: drafts.filter((d) => d.status === "draft").length,
-      rejected: drafts.filter((d) => d.status === "rejected").length,
-      published: drafts.filter((d) => d.status === "published").length,
-    },
+    total: filtered.length,
+    counts,
   });
 }
 
-export async function PATCH(request: NextRequest) {
+export async function POST(request: NextRequest) {
+  const session = await verifySession(request);
+  if (!session.valid) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
   try {
     const body = await request.json();
-    const { id, status } = body as { id: string; status: DraftStatus };
+    const newDraft: any = {
+      topic: body.topic || "Untitled Campaign Draft",
+      platform: body.platform || "instagram",
+      text: body.text || "",
+      hashtags: body.hashtags || [],
+      status: "PENDING",
+      createdAt: new Date().toISOString(),
+      author: body.author || "Marketing Team",
+    };
+
+    const draft = await prisma.contentDraft.create({
+      data: {
+        ...newDraft,
+        workspaceId: session.valid ? session.payload.workspaceId : undefined,
+      },
+    });
+
+    return NextResponse.json({ success: true, draft }, { status: 201 });
+  } catch {
+    return NextResponse.json({ error: "Failed to create draft" }, { status: 500 });
+  }
+}
+
+export async function PATCH(request: NextRequest) {
+  const session = await verifySession(request);
+  if (!session.valid) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+  try {
+    const body = await request.json();
+    const { id, status } = body as { id: string; status: string };
 
     if (!id || !status) {
       return NextResponse.json({ error: "id and status are required" }, { status: 400 });
     }
 
-    const index = drafts.findIndex((d) => d.id === id);
-    if (index === -1) {
-      return NextResponse.json({ error: "Draft not found" }, { status: 404 });
+    // RBAC: verify draft belongs to current workspace
+    const existingDraft = await prisma.contentDraft.findUnique({
+      where: { id },
+    });
+
+    if (existingDraft?.workspaceId !== (session.valid ? session.payload.workspaceId : undefined)) {
+      return NextResponse.json(
+        { error: "Forbidden: draft does not belong to your workspace" },
+        { status: 403 }
+      );
     }
 
-    drafts[index] = {
-      ...drafts[index],
-      status,
-    };
+    const draft = await prisma.contentDraft.update({
+      where: { id },
+      data: { status: status.toUpperCase() as "DRAFT" | "PENDING" | "APPROVED" | "REJECTED" | "SCHEDULED" | "PUBLISHED" },
+    });
 
-    return NextResponse.json({ success: true, draft: drafts[index] });
+    return NextResponse.json({ success: true, draft });
   } catch {
     return NextResponse.json({ error: "Failed to update draft" }, { status: 500 });
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function DELETE(request: NextRequest) {
+  const session = await verifySession(request);
+  if (!session.valid) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
   try {
     const body = await request.json();
-    const newDraft: ContentDraft = {
-      id: `draft-${Date.now().toString().slice(-4)}`,
-      topic: body.topic || "Untitled Campaign Draft",
-      platform: body.platform || "instagram",
-      text: body.text || "",
-      hashtags: body.hashtags || [],
-      status: "pending",
-      createdAt: new Date().toISOString(),
-      author: body.author || "Marketing Team",
-      engagementScore: Math.floor(Math.random() * 20) + 75,
-    };
+    const { id } = body as { id: string };
 
-    drafts.unshift(newDraft);
-    return NextResponse.json({ success: true, draft: newDraft }, { status: 201 });
+    if (!id) {
+      return NextResponse.json({ error: "id is required" }, { status: 400 });
+    }
+
+    // RBAC: verify draft belongs to current workspace
+    const existingDraft = await prisma.contentDraft.findUnique({
+      where: { id },
+    });
+
+    if (existingDraft?.workspaceId !== (session.valid ? session.payload.workspaceId : undefined)) {
+      return NextResponse.json(
+        { error: "Forbidden: draft does not belong to your workspace" },
+        { status: 403 }
+      );
+    }
+
+    await prisma.contentDraft.delete({
+      where: { id },
+    });
+
+    return NextResponse.json({ success: true });
   } catch {
-    return NextResponse.json({ error: "Failed to create draft" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to delete draft" }, { status: 500 });
   }
 }

@@ -1,0 +1,1 @@
+export type ClientStatus = "PROSPECT" | "ACTIVE" | "PAUSED" | "CHURNED";

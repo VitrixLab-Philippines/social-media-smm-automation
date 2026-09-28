@@ -1,23 +1,9 @@
-// src/lib/crm.ts
+export type Platform = "meta" | "linkedin" | "twitter" | "x" | "facebook" | "instagram" | "tiktok" | "youtube" | (string & {});
 
-export type Platform =
-  | "meta"
-  | "linkedin"
-  | "twitter"
-  | "x"
-  | "facebook"
-  | "instagram"
-  | "tiktok"
-  | "youtube"
-  | (string & {}); // allows custom strings while still giving autocomplete
+export type DraftStatus = "draft" | "pending" | "approved" | "rejected" | "scheduled" | "published";
+export type ClientStatus = "PROSPECT" | "ACTIVE" | "PAUSED" | "CHURNED";
 
-export type DraftStatus =
-  | "draft"
-  | "pending"
-  | "approved"
-  | "rejected"
-  | "scheduled"
-  | "published";
+export const CLIENT_STATUSES: ClientStatus[] = ["PROSPECT", "ACTIVE", "PAUSED", "CHURNED"];
 
 export interface BrandProfile {
   name: string;
@@ -36,7 +22,6 @@ export interface ContentDraft {
   status: DraftStatus;
   metadata?: Record<string, unknown>;
   createdAt: string | Date;
-  // Optional fields used by the UI
   engagementScore?: number;
   author?: string;
   scheduledAt?: string | Date;
@@ -49,7 +34,6 @@ export interface AnalyticsMetric {
   engagements: number;
   clicks: number;
   followersGained: number;
-  // Optional extras used by AnalyticsCards
   change?: number;
   rate?: number;
 }
@@ -57,11 +41,28 @@ export interface AnalyticsMetric {
 export interface Client {
   id: string;
   name: string;
+  company: string;
   email: string;
+  phone?: string | null;
+  website?: string | null;
+  industry?: string | null;
+  status: ClientStatus;
   approved: boolean;
-  posts: { count: number; lastPost: Date | string };
   revenue: number;
-  lastActivity: string;
+  accountManager?: string | null;
+  tags: string[];
+  notes?: string | null;
+  posts: { count: number; lastPost: Date | string };
+  lastActivity: Date | string;
+}
+
+export interface ClientStats {
+  total: number;
+  active: number;
+  prospects: number;
+  churned: number;
+  totalRevenue: number;
+  totalPosts: number;
 }
 
 export const initialBrandProfile: BrandProfile = {
@@ -72,46 +73,18 @@ export const initialBrandProfile: BrandProfile = {
   requiredDisclosures: [],
 };
 
-export const initialClients: Client[] = [
-  {
-    id: "1",
-    name: "Acme Corp",
-    email: "contact@acme.com",
-    approved: true,
-    posts: { count: 42, lastPost: new Date() },
-    revenue: 12500,
-    lastActivity: "2024-01-15",
-  },
-];
+export const initialClients: Client[] = [];
 
-export const initialAnalytics: AnalyticsMetric[] = [
-  {
-    platform: "meta",
-    impressions: 100,
-    engagements: 12,
-    clicks: 5,
-    followersGained: 3,
-    change: 0,
-    rate: 0,
-  },
-];
+export const initialAnalytics: AnalyticsMetric[] = [];
 
 export type DashboardViewSection =
+  | "overview"
   | "approval"
-  | "graph"
+  | "drafts"
   | "analytics"
   | "guardrails"
-  | "crm";
+  | "clients"
+  | "settings"
+  | "graph";
 
-export const initialDrafts: ContentDraft[] = [
-  {
-    id: "1",
-    topic: "Welcome to SMMAI",
-    platform: "meta",
-    text: "Get started with social media management automation.",
-    hashtags: ["#content", "#automation"],
-    status: "published",
-    metadata: {},
-    createdAt: new Date().toISOString(),
-  },
-];
+export const initialDrafts: ContentDraft[] = [];

@@ -1,49 +1,48 @@
 import { NextRequest, NextResponse } from "next/server";
-
-let systemState = {
-  health: "healthy",
-  dryRun: true,
-  wasmRanking: false,
-  lastChecked: new Date().toISOString(),
-};
+import prisma from "@/lib/prisma";
+import { verifySession } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const force = searchParams.get("force") === "true";
-
-  // Allow forced refresh to override caching
-  if (!force) {
-    const cacheControl = request.headers.get("cache-control");
-    if (!cacheControl?.includes("no-store")) {
-      return NextResponse.json(systemState, {
-        headers: { "Cache-Control": "no-store, max-age=0" },
-      });
-    }
+  const session = await verifySession(request);
+  if (!session.valid) {
+    return NextResponse.json({ error: "Unauthenticated" }, { status: 401 });
   }
 
-  return NextResponse.json(systemState);
+  try {
+    const dbHealth = await prisma.$queryRaw`SELECT 1 AS healthy`;
+    return NextResponse.json({
+      automationMode: null,
+      dbHealth,
+      workspaceId: session.payload.workspaceId,
+    });
+  } catch (error: unknown) {
+    console.error("CRM status error:", error);
+    return NextResponse.json(
+      {
+        error: "Failed to fetch system state",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { type, value } = body;
+    const { type } = body;
 
-    if (type === "dryRun") {
-      systemState.dryRun = value === true;
-    } else if (type === "health") {
-      systemState.health = value === "unhealthy" ? "unhealthy" : "healthy";
-    } else if (type === "wasmRanking") {
-      systemState.wasmRanking = value === true;
+    const session = await verifySession(request);
+    if (!session.valid) {
+      return NextResponse.json({ error: "Authentication required" }, { status: 401 });
     }
 
-    systemState.lastChecked = new Date().toISOString();
+    if (type === "dryRun") return NextResponse.json({ ok: true });
+    if (type === "health") return NextResponse.json({ healthy: true });
+    if (type === "wasmRanking") return NextResponse.json({ ranking: false });
 
-    return NextResponse.json(systemState);
+    return NextResponse.json({ error: "Failed to update system state" }, { status: 500 });
   } catch {
-    return NextResponse.json(
-      { error: "Failed to update system state" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to update system state" }, { status: 500 });
   }
 }
