@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
     const code = (error as { code?: string }).code;
     if (code === "P2002") {
       const replay = await prisma.idempotencyRecord.findUnique({ where: { workspaceId_key: { workspaceId: session.payload.workspaceId, key: idempotencyKey } } });
-      if (replay?.requestHash === requestHash) return NextResponse.json(replay.response ?? responseBody, { status: replay.statusCode ?? 202, headers: { "Idempotent-Replay": "true" } });
+      if (replay?.requestHash === requestHash) return NextResponse.json(replay.response ?? { status: "accepted" }, { status: replay.statusCode ?? 202, headers: { "Idempotent-Replay": "true" } });
       return NextResponse.json({ error: "Idempotency-Key conflict" }, { status: 409 });
     }
     return NextResponse.json({ error: "Failed to enqueue publish job" }, { status: 500 });
