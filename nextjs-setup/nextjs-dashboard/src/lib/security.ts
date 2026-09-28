@@ -8,9 +8,16 @@ const memoryBuckets = new Map<string, { count: number; resetAt: number }>();
 let redis: Redis | null = null;
 
 function redisClient() {
-  if (redis) return redis;
   const redisUrl = process.env.REDIS_URL?.trim();
   if (!redisUrl) return null;
+
+  // Netlify can reuse a warm serverless instance after the Redis connection has
+  // been closed. Never keep a terminal ioredis client around.
+  if (redis && (redis.status === "end" || redis.status === "close")) {
+    redis = null;
+  }
+
+  if (redis) return redis;
 
   redis = new Redis(redisUrl, {
     lazyConnect: true,
