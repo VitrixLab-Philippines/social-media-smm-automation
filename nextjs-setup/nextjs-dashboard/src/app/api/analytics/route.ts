@@ -102,7 +102,8 @@ export async function POST(request: NextRequest) {
     const { type, data } = body;
 
     const session = await verifySession(request);
-    const workspaceId = session?.workspaceId;
+    if (!session.valid) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+    const workspaceId = session.payload.workspaceId;
 
     if (!workspaceId) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 });
