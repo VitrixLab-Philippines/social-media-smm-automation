@@ -7,7 +7,8 @@ export async function GET(request: NextRequest) {
   const category = searchParams.get("category"); // general, automation, moderation, branding
 
   const session = await verifySession(request);
-  const workspaceId = session?.workspaceId;
+  if (!session.valid) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+  const workspaceId = session.payload.workspaceId;
 
   let where: any = {};
 
@@ -70,7 +71,8 @@ export async function POST(request: NextRequest) {
     const { category, data } = body;
 
     const session = await verifySession(request);
-    const workspaceId = session?.workspaceId;
+    if (!session.valid) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+  const workspaceId = session.payload.workspaceId;
 
     if (!workspaceId) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 });
@@ -120,7 +122,8 @@ export async function PATCH(request: NextRequest) {
     const { category, key, value } = body;
 
     const session = await verifySession(request);
-    const workspaceId = session?.workspaceId;
+    if (!session.valid) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+  const workspaceId = session.payload.workspaceId;
 
     if (!workspaceId) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 });
