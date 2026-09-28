@@ -82,12 +82,12 @@ model Session {
   id        String   @id @default(cuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  token     String   @unique
+  tokenHash String   @unique
   expiresAt DateTime
   createdAt DateTime @default(now())
 
   @@index([userId])
-  @@index([token])
+  @@index([tokenHash])
 }
 
 model Workspace {
@@ -105,6 +105,15 @@ model Workspace {
   socialAccounts SocialAccount[]
   workflows     Workflow[]
   settings      WorkspaceSettings?
+  contacts      Contact[]
+  leads         Lead[]
+  pipelines     Pipeline[]
+  opportunities Opportunity[]
+  activities    Activity[]
+  auditLogs     AuditLog[]
+  idempotencyRecords IdempotencyRecord[]
+  integrations  IntegrationConnection[]
+  analyticsSnapshots AnalyticsSnapshot[]
 
   @@index([slug])
 }
@@ -164,6 +173,7 @@ model Client {
   updatedAt      DateTime     @updatedAt
 
   drafts         ContentDraft[]
+  contacts       Contact[]
 
   @@index([workspaceId])
   @@index([status])
@@ -361,4 +371,191 @@ model WebhookEvent {
 
   @@unique([platform, eventId])
   @@index([eventId])
+}
+
+ 
+// ------------------------------------------------------------------
+// Architecture upgrade: CRM, idempotency, audit, integration lifecycle
+// ------------------------------------------------------------------
+
+enum LeadStatus { NEW QUALIFIED WORKING CONVERTED LOST }
+enum ActivityType { NOTE CALL EMAIL MEETING TASK SYSTEM }
+enum OpportunityStatus { OPEN WON LOST }
+enum IntegrationStatus { CONNECTING CONNECTED DEGRADED REAUTH_REQUIRED DISCONNECTED }
+
+model Contact {
+  id String @id @default(cuid())
+  workspaceId String
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  clientId String?
+  client Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  firstName String
+  lastName String?
+  email String?
+  phone String?
+  jobTitle String?
+  tags String[]
+  metadata Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  activities Activity[]
+  leads Lead[]
+  @@index([workspaceId])
+  @@index([clientId])
+  @@index([email])
+}
+
+model Lead {
+  id String @id @default(cuid())
+  workspaceId String
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contactId String?
+  contact Contact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  title String
+  status LeadStatus @default(NEW)
+  source String?
+  ownerUserId String?
+  value Decimal? @db.Decimal(18, 2)
+  metadata Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  opportunities Opportunity[]
+  @@index([workspaceId, status])
+  @@index([ownerUserId])
+}
+
+model Pipeline {
+  id String @id @default(cuid())
+  workspaceId String
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name String
+  isDefault Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  stages PipelineStage[]
+  opportunities Opportunity[]
+  @@unique([workspaceId, name])
+}
+
+model PipelineStage {
+  id String @id @default(cuid())
+  pipelineId String
+  pipeline Pipeline @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
+  name String
+  position Int
+  probability Int @default(0)
+  createdAt DateTime @default(now())
+  opportunities Opportunity[]
+  @@unique([pipelineId, position])
+}
+
+model Opportunity {
+  id String @id @default(cuid())
+  workspaceId String
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  leadId String?
+  lead Lead? @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  pipelineId String
+  pipeline Pipeline @relation(fields: [pipelineId], references: [id], onDelete: Restrict)
+  stageId String
+  stage PipelineStage @relation(fields: [stageId], references: [id], onDelete: Restrict)
+  title String
+  amount Decimal? @db.Decimal(18, 2)
+  status OpportunityStatus @default(OPEN)
+  expectedCloseAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([workspaceId, status])
+  @@index([pipelineId, stageId])
+}
+
+model Activity {
+  id String @id @default(cuid())
+  workspaceId String
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contactId String?
+  contact Contact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  type ActivityType
+  subject String
+  body String?
+  dueAt DateTime?
+  completedAt DateTime?
+  createdBy String?
+  createdAt DateTime @default(now())
+  @@index([workspaceId, dueAt])
+  @@index([contactId, createdAt])
+}
+
+model AuditLog {
+  id String @id @default(cuid())
+  workspaceId String?
+  workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  actorUserId String?
+  action String
+  resourceType String
+  resourceId String?
+  requestId String?
+  ipHash String?
+  metadata Json?
+  createdAt DateTime @default(now())
+  @@index([workspaceId, createdAt])
+  @@index([resourceType, resourceId])
+  @@index([actorUserId, createdAt])
+}
+
+model IdempotencyRecord {
+  id String @id @default(cuid())
+  workspaceId String
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  key String
+  requestHash String
+  statusCode Int?
+  response Json?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([workspaceId, key])
+  @@index([expiresAt])
+}
+
+model IntegrationConnection {
+  id String @id @default(cuid())
+  workspaceId String
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  platform Platform
+  status IntegrationStatus @default(CONNECTING)
+  scopes String[]
+  accessTokenCiphertext String?
+  refreshTokenCiphertext String?
+  tokenExpiresAt DateTime?
+  externalAccountId String?
+  metadata Json?
+  lastErrorAt DateTime?
+  lastSyncedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([workspaceId, status])
+  @@index([platform, externalAccountId])
+}
+
+model AnalyticsSnapshot {
+  id String @id @default(cuid())
+  workspaceId String
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  socialAccountId String?
+  platform Platform
+  externalPostId String?
+  capturedAt DateTime
+  impressions Int @default(0)
+  engagements Int @default(0)
+  clicks Int @default(0)
+  shares Int @default(0)
+  saves Int @default(0)
+  followersGained Int @default(0)
+  watchTimeSeconds Int @default(0)
+  conversions Int @default(0)
+  rawMetrics Json?
+  createdAt DateTime @default(now())
+  @@index([workspaceId, platform, capturedAt])
+  @@index([externalPostId, capturedAt])
 }
