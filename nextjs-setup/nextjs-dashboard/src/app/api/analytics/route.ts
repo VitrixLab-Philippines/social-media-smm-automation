@@ -9,7 +9,8 @@ export async function GET(request: NextRequest) {
   const timeframe = searchParams.get("timeframe") || "30d";
 
   const session = await verifySession(request);
-  const workspaceId = session?.workspaceId;
+  if (!session.valid) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+  const workspaceId = session.payload.workspaceId;
 
   let where: any = {};
 
