@@ -11,7 +11,8 @@ export async function GET(req: NextRequest) {
   const includeStats = url.searchParams.get("stats") === "1";
 
   const session = await verifySession(request);
-  const workspaceId = session?.workspaceId;
+  if (!session.valid) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+  const workspaceId = session.payload.workspaceId;
 
   const where: Record<string, unknown> = {};
 
@@ -79,7 +80,8 @@ export async function POST(req: NextRequest) {
   }
 
   const session = await verifySession(request);
-  const workspaceId = session?.workspaceId;
+  if (!session.valid) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+  const workspaceId = session.payload.workspaceId;
 
   const client = await prisma.client.create({
     data: {
