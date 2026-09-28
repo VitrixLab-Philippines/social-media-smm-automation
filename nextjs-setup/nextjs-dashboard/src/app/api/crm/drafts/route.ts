@@ -8,7 +8,8 @@ export async function GET(request: NextRequest) {
   const platform = searchParams.get("platform");
 
   const session = await verifySession(request);
-  const workspaceId = session?.workspaceId;
+  if (!session.valid) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+  const workspaceId = session.payload.workspaceId;
 
   let filtered = await prisma.contentDraft.findMany({
     where: { workspaceId },
@@ -53,7 +54,7 @@ export async function POST(request: NextRequest) {
     const draft = await prisma.contentDraft.create({
       data: {
         ...newDraft,
-        workspaceId: session?.workspaceId,
+        workspaceId: session.valid ? session.payload.workspaceId : undefined,
       },
     });
 
@@ -77,7 +78,7 @@ export async function PATCH(request: NextRequest) {
       where: { id },
     });
 
-    if (existingDraft?.workspaceId !== session?.workspaceId) {
+    if (existingDraft?.workspaceId !== (session.valid ? session.payload.workspaceId : undefined)) {
       return NextResponse.json(
         { error: "Forbidden: draft does not belong to your workspace" },
         { status: 403 }
