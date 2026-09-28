@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { AUTH_COOKIE_NAME, verifySession } from "@/lib/auth";
+import { AUTH_COOKIE_NAME } from "@/lib/auth";
 import { hashSecret } from "@/lib/security";
 
 export async function POST(request: NextRequest) {
