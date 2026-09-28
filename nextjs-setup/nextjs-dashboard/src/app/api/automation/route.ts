@@ -6,7 +6,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const action = searchParams.get("action"); // status, policies
 
-  const session = await verifySession();
+  const session = await verifySession(request);
   const workspaceId = session?.workspaceId;
 
   let where: any = {};
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { action, policyId, policyData } = body;
 
-    const session = await verifySession();
+    const session = await verifySession(request);
     const workspaceId = session?.workspaceId;
 
     if (!workspaceId) {
@@ -110,7 +110,7 @@ export async function PATCH(request: NextRequest) {
     const body = await request.json();
     const { policyId, enabled } = body;
 
-    const session = await verifySession();
+    const session = await verifySession(request);
     const workspaceId = session?.workspaceId;
 
     if (!workspaceId) {
