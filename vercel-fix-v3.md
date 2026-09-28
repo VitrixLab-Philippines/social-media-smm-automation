@@ -52,10 +52,10 @@ Create `.env.local` in `nextjs-setup/nextjs-dashboard/`:
 
 ```ini
 # Pooled connection — for the app
-DATABASE_URL="postgresql://[user]:[password]@[endpoint]-pooler.[region].aws.neon.tech/[dbname]?sslmode=require"
+DATABASE_URL="postgresql://USER:PASSWORD@HOST.neon.tech/DBNAME?sslmode=require"
 
 # Direct connection — for Prisma CLI (migrations, db push)
-DIRECT_URL="postgresql://[user]:[password]@[endpoint].[region].aws.neon.tech/[dbname]?sslmode=require"
+DIRECT_URL="postgresql://USER:PASSWORD@HOST.neon.tech/DBNAME?sslmode=require"
 ```
 
 Replace the placeholders with the actual values from the Neon Console.
