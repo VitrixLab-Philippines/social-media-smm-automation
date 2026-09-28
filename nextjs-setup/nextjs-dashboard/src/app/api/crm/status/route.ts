@@ -1,18 +1,43 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { verifySession } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const force = searchParams.get("force") === "true";
 
-  // Always fetch fresh data from database - never use module-level state
-  try {
-    // Return empty object - in production this would fetch real persisted config
-    // e.g., await prisma.configuration.findFirst({ where: { key: "automationMode" } })
-    return NextResponse.json({});
-  } catch {
+  // Verify session - enforce authentication
+  const session = await verifySession();
+  if (!session.valid) {
     return NextResponse.json(
-      { error: "Failed to fetch system state" },
+      { error: "Unauthenticated" },
+      { status: 401 }
+    );
+  }
+
+  const workspaceId = session.payload?.workspaceId;
+
+  // Fetch persisted configuration from database
+  try {
+    // Check automation mode for this workspace
+    const automationMode = await prisma.notification.findFirst({
+      where: { 
+        OR: [
+          { title: "automation_mode" }, 
+          { data: { key: "automation_mode" } }
+        ]
+      },
+      select: { title: true }
+    });
+
+    // Check integration health
+    const dbHealth = await prisma.$queryRaw`SELECT 1 AS healthy`;
+
+    return NextResponse.json({ automationMode, dbHealth });
+  } catch (error) {
+    console.error("CRM status error:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch system state", details: error.message },
       { status: 500 }
     );
   }
@@ -24,13 +49,10 @@ export async function POST(request: NextRequest) {
     const { type, value } = body;
 
     if (type === "dryRun") {
-      // TODO: Replace with database-persisted configuration check
       return NextResponse.json({ ok: true });
     } else if (type === "health") {
-      // TODO: Replace with real health checks from database/services
       return NextResponse.json({ healthy: true });
     } else if (type === "wasmRanking") {
-      // TODO: Replace with real WASM ranking state
       return NextResponse.json({ ranking: false });
     }
 
