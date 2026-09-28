@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
   const platform = searchParams.get("platform");
   const timeframe = searchParams.get("timeframe") || "30d";
 
-  const session = await verifySession();
+  const session = await verifySession(request);
   const workspaceId = session?.workspaceId;
 
   let where: any = {};
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { type, data } = body;
 
-    const session = await verifySession();
+    const session = await verifySession(request);
     const workspaceId = session?.workspaceId;
 
     if (!workspaceId) {
