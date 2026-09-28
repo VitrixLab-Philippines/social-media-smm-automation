@@ -70,6 +70,7 @@ export default function DashboardPage() {
 
           {currentSection === "overview" && (
             <div style={{ display: "grid", gap: "1.5rem" }}>
+              <CommandCenter onNavigate={setCurrentSection} />
               <AutomationStatusCard />
               <ApprovalQueue selectedPlatform={selectedPlatform} />
             </div>
