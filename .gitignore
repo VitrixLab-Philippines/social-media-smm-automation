@@ -44,3 +44,7 @@ nextjs-setup/**/pnpm-lock.yaml
 
 # Temp debug scripts
 test-db.mts
+
+# TypeScript build info (regenerated on every build)
+*.tsbuildinfo
+**/tsconfig.tsbuildinfo
