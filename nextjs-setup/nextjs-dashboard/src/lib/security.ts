@@ -9,8 +9,18 @@ let redis: Redis | null = null;
 
 function redisClient() {
   if (redis) return redis;
-  if (!process.env.REDIS_URL) return null;
-  redis = new Redis(process.env.REDIS_URL, { lazyConnect: true, maxRetriesPerRequest: 1 });
+  const redisUrl = process.env.REDIS_URL?.trim();
+  if (!redisUrl) return null;
+
+  redis = new Redis(redisUrl, {
+    lazyConnect: true,
+    maxRetriesPerRequest: 1,
+    enableOfflineQueue: false,
+    retryStrategy: () => null,
+  });
+  redis.on("error", (error) => {
+    console.error("[Redis] Rate limiter connection error:", error);
+  });
   return redis;
 }
 
@@ -21,22 +31,36 @@ function clientIp(request: NextRequest) {
 
 export type RateLimitPolicy = { limit: number; windowSeconds?: number; scope?: string };
 
-export async function checkRateLimit(request: NextRequest, policy: RateLimitPolicy) {
+type RateLimitResult = {
+  allowed: boolean;
+  remaining: number;
+  retryAfter: number;
+  unavailable?: boolean;
+};
+
+export async function checkRateLimit(request: NextRequest, policy: RateLimitPolicy): Promise<RateLimitResult> {
   const windowSeconds = policy.windowSeconds ?? WINDOW_SECONDS;
   const scope = policy.scope ?? request.nextUrl.pathname;
   const key = `smmai:rl:${scope}:${clientIp(request)}`;
   const client = redisClient();
-  if (!client && process.env.NODE_ENV === "production") return { allowed: false, remaining: 0, retryAfter: 5 };
+
+  if (!client && process.env.NODE_ENV === "production") {
+    return { allowed: false, remaining: 0, retryAfter: 5, unavailable: true };
+  }
 
   if (client) {
     try {
       if (client.status === "wait") await client.connect();
       const count = await client.incr(key);
       if (count === 1) await client.expire(key, windowSeconds);
-      return { allowed: count <= policy.limit, remaining: Math.max(0, policy.limit - count), retryAfter: count > policy.limit ? await client.ttl(key) : 0 };
-    } catch {
-      // Fail closed for sensitive endpoints when the distributed limiter is unavailable.
-      return { allowed: false, remaining: 0, retryAfter: 5 };
+      return {
+        allowed: count <= policy.limit,
+        remaining: Math.max(0, policy.limit - count),
+        retryAfter: count > policy.limit ? await client.ttl(key) : 0,
+      };
+    } catch (error) {
+      console.error("[Redis] Rate limiter unavailable:", error);
+      return { allowed: false, remaining: 0, retryAfter: 5, unavailable: true };
     }
   }
 
@@ -47,13 +71,22 @@ export async function checkRateLimit(request: NextRequest, policy: RateLimitPoli
     return { allowed: true, remaining: policy.limit - 1, retryAfter: 0 };
   }
   current.count += 1;
-  return { allowed: current.count <= policy.limit, remaining: Math.max(0, policy.limit - current.count), retryAfter: Math.ceil((current.resetAt - now) / 1000) };
+  return {
+    allowed: current.count <= policy.limit,
+    remaining: Math.max(0, policy.limit - current.count),
+    retryAfter: Math.ceil((current.resetAt - now) / 1000),
+  };
 }
 
-export function rateLimitResponse(result: Awaited<ReturnType<typeof checkRateLimit>>) {
-  return new Response(JSON.stringify({ error: "Too many requests" }), {
-    status: 429,
-    headers: { "content-type": "application/json", "retry-after": String(Math.max(1, result.retryAfter)) },
+export function rateLimitResponse(result: RateLimitResult) {
+  const status = result.unavailable ? 503 : 429;
+  const message = result.unavailable ? "Rate limiting service unavailable" : "Too many requests";
+  return new Response(JSON.stringify({ error: message }), {
+    status,
+    headers: {
+      "content-type": "application/json",
+      "retry-after": String(Math.max(1, result.retryAfter)),
+    },
   });
 }
 
