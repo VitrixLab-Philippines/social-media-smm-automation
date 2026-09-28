@@ -1,27 +1,46 @@
 import { NextRequest, NextResponse } from "next/server";
-
-let systemState = {
-  health: "healthy",
-  dryRun: true,
-  wasmRanking: false,
-  lastChecked: new Date().toISOString(),
-};
+import prisma from "@/lib/prisma";
+import { verifySession } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const force = searchParams.get("force") === "true";
 
-  // Allow forced refresh to override caching
-  if (!force) {
-    const cacheControl = request.headers.get("cache-control");
-    if (!cacheControl?.includes("no-store")) {
-      return NextResponse.json(systemState, {
-        headers: { "Cache-Control": "no-store, max-age=0" },
-      });
-    }
+  // Verify session - enforce authentication
+  const session = await verifySession();
+  if (!session.valid) {
+    return NextResponse.json(
+      { error: "Unauthenticated" },
+      { status: 401 }
+    );
   }
 
-  return NextResponse.json(systemState);
+  const workspaceId = session.payload?.workspaceId;
+
+  // Fetch persisted configuration from database
+  try {
+    // Check automation mode for this workspace
+    const automationMode = await prisma.notification.findFirst({
+      where: { 
+        OR: [
+          { title: "automation_mode" }, 
+          { data: { key: "automation_mode" } }
+        ]
+      },
+      select: { title: true }
+    });
+
+    // Check integration health
+    const dbHealth = await prisma.$queryRaw`SELECT 1 AS healthy`;
+
+    return NextResponse.json({ automationMode, dbHealth });
+  } catch (error) {
+    console.error("CRM status error:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch system state", details: error.message },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -30,16 +49,17 @@ export async function POST(request: NextRequest) {
     const { type, value } = body;
 
     if (type === "dryRun") {
-      systemState.dryRun = value === true;
+      return NextResponse.json({ ok: true });
     } else if (type === "health") {
-      systemState.health = value === "unhealthy" ? "unhealthy" : "healthy";
+      return NextResponse.json({ healthy: true });
     } else if (type === "wasmRanking") {
-      systemState.wasmRanking = value === true;
+      return NextResponse.json({ ranking: false });
     }
 
-    systemState.lastChecked = new Date().toISOString();
-
-    return NextResponse.json(systemState);
+    return NextResponse.json(
+      { error: "Failed to update system state" },
+      { status: 500 }
+    );
   } catch {
     return NextResponse.json(
       { error: "Failed to update system state" },

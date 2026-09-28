@@ -8,7 +8,7 @@ out/
 build/
 dist/
 
-# Env
+# Environment variables
 .env
 .env*.local
 
