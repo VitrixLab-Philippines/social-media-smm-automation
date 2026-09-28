@@ -44,32 +44,34 @@ export async function POST(req: NextRequest) {
   if (draft.workspaceId !== session.payload.workspaceId) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   if (draft.status !== "APPROVED") return NextResponse.json({ error: "Only approved drafts may be published" }, { status: 409 });
 
-  const responseBody = { status: "accepted", draftId, platform };
   try {
-    const record = await prisma.idempotencyRecord.create({
-      data: {
-        workspaceId: session.payload.workspaceId,
-        key: idempotencyKey,
-        requestHash,
-        statusCode: 202,
-        response: responseBody,
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-      },
+    const result = await prisma.$transaction(async (tx) => {
+      const job = await tx.publishJob.create({
+        data: {
+          workspaceId: session.payload.workspaceId,
+          draftId,
+          platform,
+          status: "PENDING",
+          idempotencyKey,
+        },
+      });
+      const responseBody = { status: "accepted", draftId, platform, jobId: job.id };
+      const record = await tx.idempotencyRecord.create({
+        data: {
+          workspaceId: session.payload.workspaceId,
+          key: idempotencyKey,
+          requestHash,
+          statusCode: 202,
+          response: responseBody,
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        },
+      });
+      await tx.contentDraft.update({ where: { id: draftId }, data: { status: "SCHEDULED" } });
+      return { job, record, responseBody };
     });
 
-    const job = await prisma.publishJob.create({
-      data: {
-        workspaceId: session.payload.workspaceId,
-        draftId,
-        platform,
-        status: "PENDING",
-        idempotencyKey: idempotencyKey,
-      },
-    });
-
-    await prisma.contentDraft.update({ where: { id: draftId }, data: { status: "SCHEDULED" } });
     await enqueuePublishJob({
-      jobId: job.id,
+      jobId: result.job.id,
       workflowId: "default",
       workspaceId: session.payload.workspaceId,
       socialAccountId: platform,
@@ -79,7 +81,7 @@ export async function POST(req: NextRequest) {
       version: 1,
     });
 
-    return NextResponse.json({ ...responseBody, jobId: job.id, idempotencyRecordId: record.id }, { status: 202 });
+    return NextResponse.json({ ...result.responseBody, idempotencyRecordId: result.record.id }, { status: 202 });
   } catch (error) {
     const code = (error as { code?: string }).code;
     if (code === "P2002") {
