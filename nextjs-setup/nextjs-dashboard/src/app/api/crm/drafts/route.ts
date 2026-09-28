@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
   });
 
   if (status && status !== "all") {
-    filtered = filtered.filter((d: any) => d.status === status);
+    filtered = filtered.filter((d: any) => d.status === status.toUpperCase());
   }
   if (platform && platform !== "all") {
     filtered = filtered.filter((d: any) => d.platform === platform);
@@ -24,11 +24,11 @@ export async function GET(request: NextRequest) {
 
   const counts = {
     all: filtered.length,
-    pending: filtered.filter((d: any) => d.status === "pending").length,
-    approved: filtered.filter((d: any) => d.status === "approved").length,
-    draft: filtered.filter((d: any) => d.status === "draft").length,
-    rejected: filtered.filter((d: any) => d.status === "rejected").length,
-    published: filtered.filter((d: any) => d.status === "published").length,
+    pending: filtered.filter((d: any) => d.status === "PENDING").length,
+    approved: filtered.filter((d: any) => d.status === "APPROVED").length,
+    draft: filtered.filter((d: any) => d.status === "DRAFT").length,
+    rejected: filtered.filter((d: any) => d.status === "REJECTED").length,
+    published: filtered.filter((d: any) => d.status === "PUBLISHED").length,
   };
 
   return NextResponse.json({
