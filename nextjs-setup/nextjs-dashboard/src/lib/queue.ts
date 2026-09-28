@@ -66,7 +66,7 @@ export const dequeuePublishJob = async (): Promise<{
 
   // Check for dead-letter condition (5+ failures)
   const failureCount = await redis.get(
-    `${FAILURE_COUNTER_PREFIX}${id}`
+    `${FAILURE_COUNTER_PREFIX}${jobId}`
   );
 
   if (failureCount && parseInt(failureCount) >= 5) {
