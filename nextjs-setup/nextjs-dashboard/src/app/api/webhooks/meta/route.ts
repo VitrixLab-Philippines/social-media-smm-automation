@@ -61,8 +61,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ status: "received", eventId: id }, { status: 200 });
   } catch (error) {
-    const message = error instanceof Error && error.message === "PAYLOAD_TOO_LARGE" ? "Payload too large" : "Failed to process webhook";
-    return NextResponse.json({ error: message }, { status: error === undefined ? 500 : message === "Payload too large" ? 413 : 500 });
+    const tooLarge = error instanceof Error && error.message === "PAYLOAD_TOO_LARGE";
+    return NextResponse.json({ error: tooLarge ? "Payload too large" : "Failed to process webhook" }, { status: tooLarge ? 413 : 500 });
   }
 }
 
