@@ -41,20 +41,28 @@ export interface AnalyticsMetric {
 export interface Client {
   id: string;
   name: string;
+  company: string;
   email: string;
+  phone?: string | null;
+  website?: string | null;
+  industry?: string | null;
+  status: ClientStatus;
   approved: boolean;
-  posts: { count: number; lastPost: Date | string };
   revenue: number;
-  lastActivity: string;
+  accountManager?: string | null;
+  tags: string[];
+  notes?: string | null;
+  posts: { count: number; lastPost: Date | string };
+  lastActivity: Date | string;
 }
 
 export interface ClientStats {
-  id: string;
-  name: string;
-  revenue: number;
-  postCount: number;
-  lastActivity: Date | string;
-  status: ClientStatus;
+  total: number;
+  active: number;
+  prospects: number;
+  churned: number;
+  totalRevenue: number;
+  totalPosts: number;
 }
 
 export const initialBrandProfile: BrandProfile = {
