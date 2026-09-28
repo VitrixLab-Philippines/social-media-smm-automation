@@ -14,6 +14,8 @@ interface ContentDraftCardProps {
   compact?: boolean;
 }
 
+const platformLabels: Record<string, string> = { meta: "Meta", instagram: "Instagram", linkedin: "LinkedIn", x: "X", twitter: "X", tiktok: "TikTok", youtube: "YouTube" };
+
 export default function ContentDraftCard({
   draft: draftData,
   onApprove = () => {},
@@ -23,226 +25,89 @@ export default function ContentDraftCard({
   onUpdateStatus = () => {},
   compact = false,
 }: ContentDraftCardProps) {
-  const [isPublishing, setIsPublishing] = React.useState(false);
-
-  const platformColors: Record<string, string> = {
-    meta: "#1877F2",
-    instagram: "#E4405F",
-    linkedin: "#0A66C2",
-    x: "#718579",
-    tiktok: "#00F2FE",
-    youtube: "#FF0000",
-  };
-
-  const createPublishJob = async (draftId: string, platform: string) => {
-    setIsPublishing(true);
-    try {
-      const res = await fetch("/api/crm/publish", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ draftId, platform }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setIsPublishing(false);
-        onUpdateStatus(draftId, "published");
-        alert("Publish job submitted successfully");
-      } else {
-        setIsPublishing(false);
-        alert("Failed to submit publish job: " + (data.error || ""));
-      }
-    } catch {
-      setIsPublishing(false);
-      alert("Error submitting publish job");
-    }
-  };
+  const [publishing, setPublishing] = React.useState(false);
+  const [publishMessage, setPublishMessage] = React.useState("");
 
   const draft = draftData || {
-    id: "draft-001",
+    id: "unknown",
     topic: "No draft selected",
     text: "",
     platform: "unknown",
-    status: "draft",
+    status: "draft" as DraftStatus,
     hashtags: [],
-    engagementScore: 0,
     author: "System",
     createdAt: new Date(),
   };
 
+  async function createPublishJob() {
+    setPublishing(true);
+    setPublishMessage("");
+    try {
+      const res = await fetch("/api/crm/publish", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ draftId: draft.id, platform: draft.platform }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Unable to create publish job.");
+      setPublishMessage("Publish job queued. Delivery status will update asynchronously.");
+      onPublish(draft.id, draft.platform);
+      onUpdateStatus(draft.id, "scheduled");
+    } catch (error) {
+      setPublishMessage(error instanceof Error ? error.message : "Unable to create publish job.");
+    } finally {
+      setPublishing(false);
+    }
+  }
+
   return (
-    <div
-      className="card"
-      style={{
-        padding: compact ? "1rem" : "1.5rem",
-        display: "flex",
-        flexDirection: "column",
-        gap: compact ? "0.65rem" : "1rem",
-        borderColor: draft.status === "pending" ? "rgba(245, 158, 11, 0.3)" : undefined,
-      }}
-    >
-      {/* Top Header */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.5rem" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-          <span
-            style={{
-              fontSize: "var(--text-xs)",
-              fontWeight: "var(--weight-black)",
-              textTransform: "uppercase",
-              padding: "0.2rem 0.5rem",
-              borderRadius: "var(--radius-small)",
-              background: "var(--surface)",
-              color: platformColors[draft.platform] || "var(--primary)",
-              border: "1px solid var(--line)",
-            }}
-          >
-            {draft.platform}
-          </span>
-          <span style={{ fontSize: "var(--text-xs)", color: "var(--muted)" }}>
-            ID: {draft.id}
-          </span>
-        </div>
+    <article className="card" style={{ padding: compact ? "1rem" : "1.25rem", display: "flex", flexDirection: "column", gap: "0.9rem", borderColor: draft.status === "pending" ? "rgba(245,158,11,0.35)" : "var(--line)" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem" }}>
+        <span style={{ display: "inline-flex", alignItems: "center", minHeight: 28, padding: "0.2rem 0.55rem", border: "1px solid var(--line)", borderRadius: "var(--radius-small)", background: "var(--surface)", color: "var(--primary)", fontSize: "var(--text-xs)", fontWeight: "var(--weight-bold)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+          {platformLabels[draft.platform] || draft.platform}
+        </span>
         <StatusPill status={draft.status} />
       </div>
 
-      {/* Title / Topic */}
-      <h3
-        style={{
-          fontSize: compact ? "var(--text-sm)" : "var(--text-md)",
-          fontWeight: "var(--weight-bold)",
-          color: "var(--text)",
-          margin: 0,
-          lineHeight: "var(--lh-snug)",
-        }}
-      >
-        {draft.topic}
-      </h3>
-
-      {/* Post Text */}
-      <div
-        style={{
-          background: "var(--surface)",
-          border: "1px solid var(--line)",
-          borderRadius: "var(--radius-small)",
-          padding: compact ? "0.6rem 0.75rem" : "0.85rem 1rem",
-          fontSize: compact ? "var(--text-xs)" : "var(--text-sm)",
-          color: "var(--text)",
-          lineHeight: "var(--lh-normal)",
-          whiteSpace: "pre-wrap",
-        }}
-      >
-        {draft.text}
+      <div>
+        <h3 style={{ margin: 0, fontSize: compact ? "var(--text-sm)" : "var(--text-md)", fontWeight: "var(--weight-bold)", lineHeight: "var(--lh-snug)" }}>{draft.topic}</h3>
+        <p style={{ margin: "0.45rem 0 0", color: "var(--muted)", fontSize: "var(--text-xs)" }}>
+          {draft.author ? "By " + draft.author + " · " : ""}{new Date(draft.createdAt).toLocaleDateString()}
+        </p>
       </div>
 
-      {/* Hashtags & Meta */}
-      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "0.5rem" }}>
+      <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--radius-small)", padding: compact ? "0.65rem" : "0.85rem", color: "var(--text)", fontSize: "var(--text-sm)", lineHeight: "var(--lh-normal)", whiteSpace: "pre-wrap" }}>
+        {draft.text || "No copy has been added yet."}
+      </div>
+
+      {draft.hashtags.length > 0 && (
         <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem" }}>
-          {draft.hashtags.map((tag) => (
-            <span
-              key={tag}
-              style={{
-                fontSize: "var(--text-xs)",
-                color: "var(--primary)",
-                background: "var(--primary-light)",
-                padding: "0.15rem 0.45rem",
-                borderRadius: "var(--radius-small)",
-              }}
-            >
-              {tag}
-            </span>
-          ))}
+          {draft.hashtags.map((tag) => <span key={tag} style={{ padding: "0.15rem 0.45rem", borderRadius: "var(--radius-small)", background: "var(--primary-light)", color: "var(--primary)", fontSize: "var(--text-xs)" }}>{tag}</span>)}
         </div>
-        {draft.engagementScore && (
-          <span style={{ fontSize: "var(--text-xs)", color: "var(--muted)" }}>
-            AI Score: <strong style={{ color: "var(--text)" }}>{draft.engagementScore}/100</strong>
-          </span>
-        )}
+      )}
+
+      {typeof draft.engagementScore === "number" && (
+        <div style={{ fontSize: "var(--text-xs)", color: "var(--muted)" }}>AI signal <strong style={{ color: "var(--text)" }}>{draft.engagementScore}/100</strong></div>
+      )}
+
+      {publishMessage && <div role="status" style={{ padding: "0.55rem 0.65rem", borderRadius: "var(--radius-small)", background: "var(--surface)", border: "1px solid var(--line)", color: "var(--muted)", fontSize: "var(--text-xs)" }}>{publishMessage}</div>}
+
+      <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", borderTop: "1px solid var(--line)", paddingTop: "0.8rem", marginTop: "auto" }}>
+        {draft.status === "pending" && <>
+          <button type="button" className="btn primary" style={{ flex: "1 1 150px", padding: "0.5rem 0.7rem", fontSize: "var(--text-xs)" }} onClick={() => onApprove(draft.id)}>Approve</button>
+          <button type="button" className="btn secondary" style={{ padding: "0.5rem 0.7rem", fontSize: "var(--text-xs)" }} onClick={() => onReject(draft.id)}>Reject</button>
+        </>}
+
+        {draft.status === "approved" && <>
+          <button type="button" className="btn primary" disabled={publishing} style={{ flex: "1 1 180px", padding: "0.5rem 0.7rem", fontSize: "var(--text-xs)", opacity: publishing ? 0.65 : 1 }} onClick={() => void createPublishJob()}>{publishing ? "Queueing…" : "Queue for publishing"}</button>
+          <button type="button" className="btn secondary" style={{ padding: "0.5rem 0.7rem", fontSize: "var(--text-xs)" }} onClick={() => onEdit(draft.id)}>Return to draft</button>
+        </>}
+
+        {draft.status === "draft" && <button type="button" className="btn secondary" style={{ width: "100%", padding: "0.5rem 0.7rem", fontSize: "var(--text-xs)" }} onClick={() => onUpdateStatus(draft.id, "pending")}>Submit for review →</button>}
+        {draft.status === "rejected" && <button type="button" className="btn secondary" style={{ width: "100%", padding: "0.5rem 0.7rem", fontSize: "var(--text-xs)" }} onClick={() => onUpdateStatus(draft.id, "draft")}>Reopen as draft</button>}
+        {draft.status === "scheduled" && <span style={{ color: "var(--accent)", fontSize: "var(--text-xs)", alignSelf: "center" }}>Queued for delivery</span>}
+        {draft.status === "published" && <span style={{ color: "var(--primary)", fontSize: "var(--text-xs)", alignSelf: "center" }}>Published status received</span>}
       </div>
-
-      {/* Author and Date */}
-      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "var(--text-xs)", color: "var(--muted)" }}>
-        <span>Author: {draft.author}</span>
-        <span>{new Date(draft.createdAt).toLocaleDateString()}</span>
-      </div>
-
-      {/* Human Approval Gate Action Buttons */}
-      <div
-        style={{
-          display: "flex",
-          gap: "0.5rem",
-          borderTop: "1px solid var(--line)",
-          paddingTop: compact ? "0.6rem" : "0.85rem",
-          marginTop: "auto",
-        }}
-      >
-        {draft.status === "pending" && (
-          <>
-            <button
-              className="btn primary"
-              style={{ padding: "0.45rem 0.85rem", fontSize: "var(--text-xs)", flex: 1 }}
-              onClick={() => onApprove(draft.id)}
-            >
-              ✓ Approve Post
-            </button>
-            <button
-              className="btn secondary"
-              style={{ padding: "0.45rem 0.85rem", fontSize: "var(--text-xs)" }}
-              onClick={() => onReject(draft.id)}
-            >
-              ✕ Reject
-            </button>
-          </>
-        )}
-
-        {draft.status === "approved" && (
-          <>
-            <button
-              className="btn primary"
-              style={{
-                padding: "0.45rem 0.85rem",
-                fontSize: "var(--text-xs)",
-                flex: 1,
-                background: "var(--secondary)",
-              }}
-              onClick={() => isPublishing ? null : onPublish(draft.id, draft.platform)}
-            >
-              🚀 Publish to {draft.platform}
-            </button>
-            <button
-              className="btn secondary"
-              style={{ padding: "0.45rem 0.85rem", fontSize: "var(--text-xs)" }}
-onClick={() => onEdit(draft.id)}
-            >
-              Move to Draft
-            </button>
-          </>
-        )}
-
-        {draft.status === "draft" && (
-          <button
-            className="btn secondary"
-            style={{ padding: "0.45rem 0.85rem", fontSize: "var(--text-xs)", width: "100%" }}
-            onClick={() => onUpdateStatus(draft.id, "pending")}
-          >
-            Submit for Review →
-          </button>
-        )}
-
-        {draft.status === "rejected" && (
-          <button
-            className="btn secondary"
-            style={{ padding: "0.45rem 0.85rem", fontSize: "var(--text-xs)", width: "100%" }}
-            onClick={() => onUpdateStatus(draft.id, "draft")}
-          >
-            Reopen as Draft
-          </button>
-        )}
-
-        {draft.status === "published" && (
-          <div style={{ fontSize: "var(--text-xs)", color: "#60a5fa", display: "flex", alignItems: "center", gap: "0.35rem" }}>
-            ✓ Successfully pushed to platform API (Gate passed)
-          </div>
-        )}
-      </div>
-    </div>
+    </article>
   );
 }
