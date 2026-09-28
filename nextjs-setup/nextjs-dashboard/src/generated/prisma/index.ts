@@ -1,7 +1,7 @@
 // Stub Prisma Client - used when full Prisma codegen is not available.
 // This provides the minimal API surface needed by the CRM API routes.
 
-export const ClientStatus = "PROSPECT" | "ACTIVE" | "PAUSED" | "CHURNED";
+export const ClientStatus = { PROSPECT: "PROSPECT", ACTIVE: "ACTIVE", PAUSED: "PAUSED", CHURNED: "CHURNED" } as const;
 
 export const client = {
   findMany: async function (model: string, where?: object, orderBy?: object): Promise<Array<object>> {
