@@ -5,7 +5,9 @@ import { checkRateLimit, rateLimitResponse, readJsonWithLimit, requireSameOrigin
 
 const ClientStatus = ["PROSPECT", "ACTIVE", "PAUSED", "CHURNED"] as const;
 
-export async function GET(req: NextRequest) {\n  const limit = await checkRateLimit(req, { limit: 60, scope: "crm:clients:read" });\n  if (!limit.allowed) return rateLimitResponse(limit);
+export async function GET(req: NextRequest) {
+  const limit = await checkRateLimit(req, { limit: 60, scope: "crm:clients:read" });
+  if (!limit.allowed) return rateLimitResponse(limit);
   const url = new URL(req.url);
   const status = url.searchParams.get("status");
   const search = url.searchParams.get("search")?.trim();
@@ -65,7 +67,10 @@ export async function GET(req: NextRequest) {\n  const limit = await checkRateLi
   return NextResponse.json(body);
 }
 
-export async function POST(req: NextRequest) {\n  const limit = await checkRateLimit(req, { limit: 30, scope: "crm:clients:write" });\n  if (!limit.allowed) return rateLimitResponse(limit);\n  if (!requireSameOrigin(req)) return NextResponse.json({ error: "Invalid request origin" }, { status: 403 });
+export async function POST(req: NextRequest) {
+  const limit = await checkRateLimit(req, { limit: 30, scope: "crm:clients:write" });
+  if (!limit.allowed) return rateLimitResponse(limit);
+  if (!requireSameOrigin(req)) return NextResponse.json({ error: "Invalid request origin" }, { status: 403 });
   let payload: Record<string, unknown>;
   try {
     payload = await readJsonWithLimit(req);
