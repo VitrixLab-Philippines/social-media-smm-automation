@@ -56,18 +56,41 @@ export async function checkRateLimit(request: NextRequest, policy: RateLimitPoli
   }
 
   if (client) {
-    try {
-      if (client.status === "wait") await client.connect();
-      const count = await client.incr(key);
-      if (count === 1) await client.expire(key, windowSeconds);
+    const consume = async (redisClient: Redis) => {
+      if (redisClient.status === "wait") await redisClient.connect();
+      const count = await redisClient.incr(key);
+      if (count === 1) await redisClient.expire(key, windowSeconds);
       return {
         allowed: count <= policy.limit,
         remaining: Math.max(0, policy.limit - count),
-        retryAfter: count > policy.limit ? await client.ttl(key) : 0,
+        retryAfter: count > policy.limit ? await redisClient.ttl(key) : 0,
       };
+    };
+
+    try {
+      return await consume(client);
     } catch (error) {
-      console.error("[Redis] Rate limiter unavailable:", error);
-      return { allowed: false, remaining: 0, retryAfter: 5, unavailable: true };
+      // A warm Netlify instance can retain a terminal ioredis client after
+      // the upstream Redis connection was closed. Drop it and retry once.
+      console.error("[Redis] Rate limiter unavailable; reconnecting:", error);
+      if (redis === client) {
+        redis = null;
+        client.disconnect();
+      }
+
+      const retryClient = redisClient();
+      if (!retryClient) {
+        return { allowed: false, remaining: 0, retryAfter: 5, unavailable: true };
+      }
+
+      try {
+        return await consume(retryClient);
+      } catch (retryError) {
+        console.error("[Redis] Rate limiter reconnect failed:", retryError);
+        if (redis === retryClient) redis = null;
+        retryClient.disconnect();
+        return { allowed: false, remaining: 0, retryAfter: 5, unavailable: true };
+      }
     }
   }
 
