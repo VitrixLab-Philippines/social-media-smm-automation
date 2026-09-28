@@ -971,13 +971,13 @@ Then run the dev server and smoke-test manually:
 pnpm dev
 ```
 
-- `GET  http://localhost:3000/api/crm/clients` → `{ clients: [...] }`
-- `GET  http://localhost:3000/api/crm/clients?stats=1` → includes `stats`
-- `GET  http://localhost:3000/api/crm/clients?status=active` → filtered
-- `GET  http://localhost:3000/api/crm/clients?search=lumen` → filtered
-- `POST http://localhost:3000/api/crm/clients` with `{name, company, email}` → 201
-- `PATCH http://localhost:3000/api/crm/clients/cl-001` with `{status:"paused"}` → updated
-- `DELETE http://localhost:3000/api/crm/clients/cl-002` → removed
+- `GET  http://localhost:YOUR_PORT/api/crm/clients` → `{ clients: [...] }`
+- `GET  http://localhost:YOUR_PORT/api/crm/clients?stats=1` → includes `stats`
+- `GET  http://localhost:YOUR_PORT/api/crm/clients?status=active` → filtered
+- `GET  http://localhost:YOUR_PORT/api/crm/clients?search=lumen` → filtered
+- `POST http://localhost:YOUR_PORT/api/crm/clients` with `{name, company, email}` → 201
+- `PATCH http://localhost:YOUR_PORT/api/crm/clients/cl-001` with `{status:"paused"}` → updated
+- `DELETE http://localhost:YOUR_PORT/api/crm/clients/cl-002` → removed
 - Visit `/dashboard`, switch to **Clients**, exercise search/filter/create/edit/delete.
 
 ---

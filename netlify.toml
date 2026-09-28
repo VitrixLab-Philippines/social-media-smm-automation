@@ -4,8 +4,5 @@
   publish = "nextjs-setup/nextjs-dashboard/.next"
 
 [build.environment]
-  # Skip scanning for docs and example files — they contain only placeholders
-  SECRETS_SCAN_OMIT_PATHS = "*.md,*.mdx,.env.example,**/README.md,**/.netlify/**"
-
-  # NEXT_PUBLIC_* is public by design; localhost redis URL is not a secret
+  SECRETS_SCAN_OMIT_PATHS = "**/*.md,**/*.mdx,**/.env.example,**/README.md,**/.netlify/**"
   SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_APP_URL,REDIS_URL,DRY_RUN"
