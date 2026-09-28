@@ -45,13 +45,13 @@ export async function POST(request: NextRequest) {
           data: {
             email,
             passwordHash: demoPasswordHash,
-            role: "admin",
+            role: "ADMIN",
           },
         });
       } catch {
         // User may already exist
       }
-      user = { id: "user_1", email, role: "admin" };
+      user = { id: "user_1", email, role: "ADMIN" };
     } else {
       // Verify password against database hash
       const passwordMatch = await bcrypt.compare(password, user.passwordHash);
