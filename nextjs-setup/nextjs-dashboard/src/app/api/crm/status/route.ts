@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
   const force = searchParams.get("force") === "true";
 
   // Verify session - enforce authentication
-  const session = await verifySession();
+  const session = await verifySession(request);
   if (!session.valid) {
     return NextResponse.json(
       { error: "Unauthenticated" },
