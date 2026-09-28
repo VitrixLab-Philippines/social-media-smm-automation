@@ -17,3 +17,17 @@ jobs:
       - run: pip install -e ".[dev]"
       - run: ruff check .
       - run: pytest -q
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --dir nextjs-setup/nextjs-dashboard build
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -e ".[dev]"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --dir nextjs-setup/nextjs-dashboard build

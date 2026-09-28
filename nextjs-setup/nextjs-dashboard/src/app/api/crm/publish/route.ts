@@ -1,71 +1,113 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ContentDraft, DraftStatus } from "@/lib/crm";
+import prisma from "@/lib/prisma";
+import { verifySession } from "@/lib/auth";
+import crypto from "crypto";
+import {
+  enqueuePublishJob,
+  dequeuePublishJob,
+  getQueueLength,
+  getDLQLength,
+  addToDLQ,
+  getQueueStats,
+} from "@/lib/queue";
 
-type Job = {
-  id: string;
-  draftId: string;
-  platform: string;
-  status: "pending" | "succeeded" | "failed";
-  createdAt: string;
-  completedAt?: string;
-  error?: string;
-};
-
-// In-memory store for publish jobs
-const publishJobs: Record<string, Job[]> = {};
-
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
+  let payload: Record<string, unknown>;
   try {
-    const body = await request.json();
-    const { draftId, platform } = body;
-
-    if (!draftId || !platform) {
-      return NextResponse.json(
-        { error: "draftId and platform are required" },
-        { status: 400 }
-      );
-    }
-
-    const jobId = `publish-${Date.now().toString().slice(-4)}`;
-    const job: Job = {
-      id: crypto.randomUUID(),
-      draftId: String(draftId),
-      platform: String(platform),
-      status: "pending",
-      createdAt: new Date().toISOString(),
-    };
-
-    publishJobs[jobId] = publishJobs[jobId] ?? [];
-    publishJobs[jobId].push(job);
-
-    // Simulate async publish job - in production this would call external API
-    setTimeout(() => {
-      // Simulate successful publish
-      const job = publishJobs[jobId]?.find((j) => j.id === jobId);
-      if (job) {
-        job.status = "succeeded";
-        job.completedAt = new Date().toISOString();
-      }
-    }, 1500);
-
-    return NextResponse.json({ success: true, jobId }, { status: 201 });
+    payload = await req.json();
   } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  const { draftId, platform } = payload;
+  if (!draftId || !platform) {
     return NextResponse.json(
-      { error: "Failed to create publish job" },
-      { status: 500 }
+      { error: "draftId and platform are required" },
+      { status: 400 }
     );
   }
-}
 
-export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const jobId = searchParams.get("jobId");
+  // RBAC: verify draft belongs to current workspace
+  const session = await verifySession();
+  const workspaceId = session?.workspaceId;
 
-  if (jobId && publishJobs[jobId]) {
-    return NextResponse.json({ job: publishJobs[jobId][0] });
+  const draft = await prisma.contentDraft.findUnique({
+    where: { id: draftId },
+  });
+
+  if (!draft) {
+    return NextResponse.json({ error: "Draft not found" }, { status: 404 });
   }
 
-  // Return all jobs
-  const allJobs = Object.values(publishJobs).flat();
-  return NextResponse.json({ jobs: allJobs });
+  if (draft.workspaceId !== workspaceId) {
+    return NextResponse.json(
+      { error: "Forbidden: draft does not belong to your workspace" },
+      { status: 403 }
+    );
+  }
+
+  // Generate idempotency key from request components
+  const idempotencyKey = crypto
+    .createHash("sha256")
+    .update(`${draftId}-${platform}-${Date.now()}`)
+    .digest("hex");
+
+  // Check if this idempotency key already has a result
+  const existingJob = await prisma.publishJob.findFirst({
+    where: { idempotencyKey },
+  });
+
+  if (existingJob) {
+    return NextResponse.json({
+      job: { id: existingJob.id, status: existingJob.status },
+      idempotencyKey,
+      fromCache: true,
+    });
+  }
+
+  // Create publish job in database (durable persistence)
+  const job = await prisma.publishJob.create({
+    data: {
+      draftId: String(draftId),
+      platform: String(platform),
+      status: "PENDING",
+      idempotencyKey,
+    },
+  });
+
+  // Update draft status to SCHEDULED
+  await prisma.contentDraft.update({
+    where: { id: String(draftId) },
+    data: { status: "SCHEDULED" },
+  });
+
+  // Enqueue to durable Redis queue for background processing
+  const publishedJob = await enqueuePublishJob({
+    jobId: job.id,
+    workflowId: "default",
+    workspaceId: workspaceId,
+    socialAccountId: platform,
+    contentRevisionId: draftId,
+    idempotencyKey,
+  });
+
+  return NextResponse.json({ job, idempotencyKey }, { status: 201 });
+}
+
+// Optional: endpoint to check queue status
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const action = searchParams.get("action");
+
+  if (action === "stats") {
+    const stats = await getQueueStats();
+    return NextResponse.json(stats);
+  }
+
+  if (action === "queue-length") {
+    const length = await getQueueLength();
+    return NextResponse.json({ pending: length });
+  }
+
+  return NextResponse.json({ error: "Invalid action" }, { status: 400 });
 }
