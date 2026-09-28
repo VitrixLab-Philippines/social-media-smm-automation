@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
   }
 
   // RBAC: verify draft belongs to current workspace
-  const session = await verifySession();
+  const session = await verifySession(request);
   const workspaceId = session?.workspaceId;
 
   const draft = await prisma.contentDraft.findUnique({
