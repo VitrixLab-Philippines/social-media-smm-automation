@@ -85,6 +85,12 @@ export type DashboardViewSection =
   | "guardrails"
   | "clients"
   | "settings"
-  | "graph";
+  | "graph"
+  | "inbox"
+  | "calendar"
+  | "pipeline"
+  | "accounts"
+  | "automation"
+  | "audit";
 
 export const initialDrafts: ContentDraft[] = [];

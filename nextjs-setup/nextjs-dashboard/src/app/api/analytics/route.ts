@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { verifySession } from "@/lib/auth";
+import { checkRateLimit, rateLimitResponse, readJsonWithLimit, requireSameOrigin } from "@/lib/security";
 
 export async function GET(request: NextRequest) {
+  const limit = await checkRateLimit(request, { limit: 120, scope: "analytics:read" });
+  if (!limit.allowed) return rateLimitResponse(limit);
   const { searchParams } = new URL(request.url);
   const type = searchParams.get("type"); // overview, content, accounts
   const platform = searchParams.get("platform");
@@ -97,8 +100,11 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const limit = await checkRateLimit(request, { limit: 10, scope: "analytics:sync" });
+  if (!limit.allowed) return rateLimitResponse(limit);
+  if (!requireSameOrigin(request)) return NextResponse.json({ error: "Invalid request origin" }, { status: 403 });
   try {
-    const body = await request.json();
+    const body = await readJsonWithLimit(request) as { type?: string; data?: unknown; [k: string]: unknown };
     const { type, data } = body;
 
     const session = await verifySession(request);

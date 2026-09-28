@@ -1,160 +1,76 @@
-// Meta webhook endpoint with signature verification + queue processing
-// Per vercel-fix-v4.md requirements:
-// - Verify signature
-// - Persist raw event metadata
-// - Deduplicate
-// - Enqueue processing
-// - Acknowledge quickly
-// - Process asynchronously
-
 import { NextRequest, NextResponse } from "next/server";
+import crypto from "node:crypto";
 import prisma from "@/lib/prisma";
-import {
-  enqueuePublishJob,
-  getQueueLength,
-  getDLQLength,
-  addToDLQ,
-  getQueueStats,
-} from "@/lib/queue";
-import crypto from "crypto";
+import { checkRateLimit, rateLimitResponse } from "@/lib/security";
+import { enqueuePublishJob } from "@/lib/queue";
 
-// Meta webhook configuration
-const VERIFY_TOKEN = process.env.META_VERIFY_TOKEN || "smmai_webhook_secret";
+const VERIFY_TOKEN = process.env.META_VERIFY_TOKEN;
+const APP_SECRET = process.env.META_APP_SECRET;
 
-// Parse Meta webhook payload
-function parseMetaPayload(payload: any) {
-  if (!payload || typeof payload !== "object") {
-    return null;
-  }
-
-  const entry = payload.entry?.[0];
-  if (!entry) {
-    return null;
-  }
-
-  const changes = entry.changes?.[0];
-  if (!changes) {
-    return null;
-  }
-
-  return {
-    object: payload.object,
-    entryId: entry.id,
-    time: entry.time,
-    metadata: changes.field === "feed" ? changes.value : {},
-    status: changes.value?.status,
-    postId: changes.value?.media?.id || changes.value?.id,
-    message: changes.value?.message,
-    recipient: changes.value?.recipient?.id,
-  };
+function verifyMetaSignature(body: string, header: string) {
+  if (!APP_SECRET || !header?.startsWith("sha256=")) return false;
+  const provided = header.slice(7);
+  const expected = crypto.createHmac("sha256", APP_SECRET).update(body, "utf8").digest("hex");
+  if (provided.length !== expected.length) return false;
+  return crypto.timingSafeEqual(Buffer.from(provided, "utf8"), Buffer.from(expected, "utf8"));
 }
 
-// Verify Meta webhook signature
-function verifyMetaSignature(body: string, signature: string): boolean {
-  if (!signature) {
-    return false;
-  }
-
-  const hmac = crypto.createHmac("sha256", VERIFY_TOKEN);
-  const calculated = hmac.update(body).digest("hex");
-
-  return crypto.timingSafeEqual(
-    Buffer.from(calculated, "hex"),
-    Buffer.from(signature, "hex")
-  );
+function eventId(body: string) {
+  return crypto.createHash("sha256").update(body, "utf8").digest("hex");
 }
 
 export async function POST(request: NextRequest) {
+  const limit = await checkRateLimit(request, { limit: 120, windowSeconds: 60, scope: "webhook:meta" });
+  if (!limit.allowed) return rateLimitResponse(limit);
+
   try {
-    const body = await request.text();
-    const signature = request.headers.get("x-hub-signature-256") ||
-                     request.headers.get("x-signature") ||
-                     "";
+    const raw = await request.text();
+    if (Buffer.byteLength(raw, "utf8") > 1024 * 1024) return NextResponse.json({ error: "Payload too large" }, { status: 413 });
+    const body = JSON.parse(raw) as Record<string, unknown>;
+    const signature = request.headers.get("x-hub-signature-256") || "";
+    if (!verifyMetaSignature(raw, signature)) return NextResponse.json({ error: "Invalid webhook signature" }, { status: 401 });
 
-    // Verify signature
-    const isValid = verifyMetaSignature(body, signature);
+    const id = eventId(raw);
+    const existing = await prisma.webhookEvent.findUnique({ where: { platform_eventId: { platform: "meta", eventId: id } } });
+    if (existing) return NextResponse.json({ status: "duplicate", eventId: id }, { status: 200 });
 
-    if (!isValid) {
-      return NextResponse.json(
-        { error: "Invalid webhook signature" },
-        { status: 401 }
-      );
-    }
+    const entry = Array.isArray(body.entry) ? body.entry[0] as Record<string, unknown> | undefined : undefined;
+    const changes = entry && Array.isArray(entry.changes) ? entry.changes[0] as Record<string, unknown> | undefined : undefined;
+    const value = changes?.value as Record<string, unknown> | undefined;
 
-    // Parse payload
-    const parsed = parseMetaPayload(JSON.parse(body));
-
-    if (!parsed) {
-      return NextResponse.json(
-        { error: "Invalid webhook payload" },
-        { status: 400 }
-      );
-    }
-
-    // Deduplicate: check if this event already been processed
-    const existingEvent = await prisma.webhookEvent.findFirst({
-      where: {
-        platform: "meta",
-        eventId: parsed.entryId,
-      },
-    });
-
-    if (existingEvent) {
-      // Already processed - acknowledge quickly
-      return NextResponse.json({ status: "duplicate" }, { status: 200 });
-    }
-
-    // Persist raw event metadata BEFORE enqueuing
     await prisma.webhookEvent.create({
       data: {
         platform: "meta",
-        eventId: parsed.entryId,
-        status: parsed.status,
-        postId: parsed.postId,
+        eventId: id,
+        status: typeof value?.status === "string" ? value.status : null,
+        postId: typeof value?.id === "string" ? value.id : null,
         receivedAt: new Date(),
-        rawPayload: body,
+        rawPayload: raw,
       },
     });
 
-    // Enqueue for asynchronous processing (publish job)
     await enqueuePublishJob({
       type: "publish.requested",
       version: 1,
-      jobId: `webhook_${parsed.entryId}`,
+      jobId: `webhook_${id}`,
       workflowId: "meta_webhook",
       workspaceId: "ws_default",
-      socialAccountId: "meta_account",
-      contentRevisionId: parsed.postId || "",
-      idempotencyKey: parsed.entryId,
+      socialAccountId: "meta",
+      contentRevisionId: typeof value?.id === "string" ? value.id : "",
+      idempotencyKey: id,
     });
 
-    // Acknowledge quickly - return 200 within seconds
-    // Processing happens in background worker
-    return NextResponse.json(
-      { status: "received", eventId: parsed.entryId },
-      { status: 200 }
-    );
-  } catch {
-    return NextResponse.json(
-      { error: "Failed to process webhook" },
-      { status: 500 }
-    );
+    return NextResponse.json({ status: "received", eventId: id }, { status: 200 });
+  } catch (error) {
+    const tooLarge = error instanceof Error && error.message === "PAYLOAD_TOO_LARGE";
+    return NextResponse.json({ error: tooLarge ? "Payload too large" : "Failed to process webhook" }, { status: tooLarge ? 413 : 500 });
   }
 }
 
-// GET endpoint for Meta webhook verification
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const mode = searchParams.get("mode");
-  const token = searchParams.get("token");
-  const challenge = searchParams.get("challenge");
-
-  if (mode === "subscribe" && token === VERIFY_TOKEN) {
-    return NextResponse.json({ challenge }, { status: 200 });
+  if (VERIFY_TOKEN && searchParams.get("mode") === "subscribe" && searchParams.get("token") === VERIFY_TOKEN) {
+    return NextResponse.json({ challenge: searchParams.get("challenge") }, { status: 200 });
   }
-
-  return NextResponse.json(
-    { error: "Verification failed" },
-    { status: 403 }
-  );
+  return NextResponse.json({ error: "Verification failed" }, { status: 403 });
 }
