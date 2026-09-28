@@ -6,8 +6,9 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const action = searchParams.get("action"); // status, policies
 
-  const session = await verifySession();
-  const workspaceId = session?.workspaceId;
+  const session = await verifySession(request);
+  if (!session.valid) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+  const workspaceId = session.payload.workspaceId;
 
   let where: any = {};
 
@@ -71,8 +72,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { action, policyId, policyData } = body;
 
-    const session = await verifySession();
-    const workspaceId = session?.workspaceId;
+    const session = await verifySession(request);
+    if (!session.valid) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+  const workspaceId = session.payload.workspaceId;
 
     if (!workspaceId) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 });
@@ -110,8 +112,9 @@ export async function PATCH(request: NextRequest) {
     const body = await request.json();
     const { policyId, enabled } = body;
 
-    const session = await verifySession();
-    const workspaceId = session?.workspaceId;
+    const session = await verifySession(request);
+    if (!session.valid) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+  const workspaceId = session.payload.workspaceId;
 
     if (!workspaceId) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 });

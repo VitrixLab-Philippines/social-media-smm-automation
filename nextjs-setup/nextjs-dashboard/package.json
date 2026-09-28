@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "seed": "tsx prisma/seed.ts",
-    "lint": "eslint"
+    "lint": "eslint",
+    "prebuild": "prisma generate"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
