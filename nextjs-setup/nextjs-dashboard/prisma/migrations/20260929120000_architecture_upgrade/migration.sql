@@ -1,4 +1,4 @@
--- Architecture upgrade migration: CRM + audit + idempotency + integration lifecycle
+ALTER TABLE "SocialAccount" RENAME COLUMN "accessToken" TO "accessTokenCiphertext";\nALTER TABLE "SocialAccount" RENAME COLUMN "refreshToken" TO "refreshTokenCiphertext";\n-- Architecture upgrade migration: CRM + audit + idempotency + integration lifecycle
 ALTER TABLE "Session" RENAME COLUMN "token" TO "tokenHash";
 
 CREATE TYPE "LeadStatus" AS ENUM ('NEW','QUALIFIED','WORKING','CONVERTED','LOST');
