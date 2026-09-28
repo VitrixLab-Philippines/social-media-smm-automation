@@ -6,7 +6,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const category = searchParams.get("category"); // general, automation, moderation, branding
 
-  const session = await verifySession();
+  const session = await verifySession(request);
   const workspaceId = session?.workspaceId;
 
   let where: any = {};
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { category, data } = body;
 
-    const session = await verifySession();
+    const session = await verifySession(request);
     const workspaceId = session?.workspaceId;
 
     if (!workspaceId) {
@@ -119,7 +119,7 @@ export async function PATCH(request: NextRequest) {
     const body = await request.json();
     const { category, key, value } = body;
 
-    const session = await verifySession();
+    const session = await verifySession(request);
     const workspaceId = session?.workspaceId;
 
     if (!workspaceId) {
