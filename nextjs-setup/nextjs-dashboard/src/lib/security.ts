@@ -20,8 +20,8 @@ function redisClient() {
 
   if (!redisUrl) return null;
 
-  // Netlify can reuse a warm serverless instance after the Redis
-  // connection has been closed. Never keep a terminal client around.
+  // Netlify can reuse a warm serverless instance after the Redis connection has
+  // been closed. Never keep a terminal ioredis client around.
   if (redis && (redis.status === "end" || redis.status === "close")) {
     redis = null;
   }

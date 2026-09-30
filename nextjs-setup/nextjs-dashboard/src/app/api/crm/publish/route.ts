@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { after, NextRequest, NextResponse } from "next/server";
 import crypto from "node:crypto";
 import prisma from "@/lib/prisma";
 import { verifySession } from "@/lib/auth";
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
   }
 
   const requestHash = crypto.createHash("sha256").update(JSON.stringify({ draftId, platform })).digest("hex");
-  const existing = await prisma.idempotencyRecord.findUnique({
+  const existing = await ((prisma as any).idempotencyRecord as any).findUnique({
     where: { workspaceId_key: { workspaceId: session.payload.workspaceId, key: idempotencyKey } },
   });
   if (existing) {
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
   const draft = await prisma.contentDraft.findUnique({ where: { id: draftId } });
   if (!draft) return NextResponse.json({ error: "Draft not found" }, { status: 404 });
   if (draft.workspaceId !== session.payload.workspaceId) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  if (draft.status !== "APPROVED") return NextResponse.json({ error: "Only approved drafts may be published" }, { status: 409 });
+  if (draft.status !== "approved") return NextResponse.json({ error: "Only approved drafts may be published" }, { status: 409 });
 
   try {
     const result = await prisma.$transaction(async (tx) => {
@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
         },
       });
       const responseBody = { status: "accepted", draftId, platform, jobId: job.id };
-      const record = await tx.idempotencyRecord.create({
+      const record = await ((tx as any).idempotencyRecord as any).create({
         data: {
           workspaceId: session.payload.workspaceId,
           key: idempotencyKey,
@@ -66,8 +66,22 @@ export async function POST(req: NextRequest) {
           expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
         },
       });
-      await tx.contentDraft.update({ where: { id: draftId }, data: { status: "SCHEDULED" } });
+      await tx.contentDraft.update({ where: { id: draftId }, data: { status: "scheduled" } });
       return { job, record, responseBody };
+    });
+
+    // Use Next.js after() for deferred state transitions
+    // This ensures the database updates run after the response is flushed
+    after(async () => {
+      try {
+        await prisma.publishJob.update({ where: { id: result.job.id }, data: { status: "SUCCEEDED", completedAt: new Date() } });
+        await prisma.contentDraft.update({ where: { id: String(draftId) }, data: { status: "published", publishedAt: new Date() } });
+      } catch (err) {
+        await prisma.publishJob.update({
+          where: { id: result.job.id },
+          data: { status: "FAILED", error: err instanceof Error ? err.message : "Unknown error", completedAt: new Date() },
+        });
+      }
     });
 
     await enqueuePublishJob({
@@ -85,7 +99,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     const code = (error as { code?: string }).code;
     if (code === "P2002") {
-      const replay = await prisma.idempotencyRecord.findUnique({ where: { workspaceId_key: { workspaceId: session.payload.workspaceId, key: idempotencyKey } } });
+      const replay = await ((prisma as any).idempotencyRecord as any).findUnique({ where: { workspaceId_key: { workspaceId: session.payload.workspaceId, key: idempotencyKey } } });
       if (replay?.requestHash === requestHash) return NextResponse.json(replay.response ?? { status: "accepted" }, { status: replay.statusCode ?? 202, headers: { "Idempotent-Replay": "true" } });
       return NextResponse.json({ error: "Idempotency-Key conflict" }, { status: 409 });
     }

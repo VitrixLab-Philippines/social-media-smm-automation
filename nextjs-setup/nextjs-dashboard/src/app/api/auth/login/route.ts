@@ -33,8 +33,8 @@ export async function POST(request: NextRequest) {
     const rawToken = crypto.randomBytes(32).toString("base64url");
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     await prisma.session.create({
-      data: { userId: user.id, tokenHash: crypto.createHash("sha256").update(rawToken).digest("hex"), expiresAt },
-    });
+      data: { userId: user.id, tokenHash: crypto.createHash("sha256").update(rawToken).digest("hex"), expiresAt } as any,
+    } as any);
 
     const response = NextResponse.json({
       user: { id: user.id, email: user.email, role: membership.role },

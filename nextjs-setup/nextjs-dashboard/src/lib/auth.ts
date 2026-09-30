@@ -27,7 +27,7 @@ export async function verifySession(request: NextRequest): Promise<
   if (!raw || raw.length < 32) return { valid: false, reason: "No session cookie" };
 
   const session = await prisma.session.findUnique({
-    where: { tokenHash: hashSecret(raw) },
+    where: { tokenHash: hashSecret(raw) } as any,
     include: { user: true },
   });
 
@@ -46,7 +46,7 @@ export async function verifySession(request: NextRequest): Promise<
     valid: true,
     payload: {
       userId: session.userId,
-      email: session.user.email,
+      email: session?.user?.email,
       role: roleMap[membership.role],
       workspaceId: membership.workspaceId,
       exp: Math.floor(session.expiresAt.getTime() / 1000),

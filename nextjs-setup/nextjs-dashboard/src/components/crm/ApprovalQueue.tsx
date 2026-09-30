@@ -50,7 +50,7 @@ export default function ApprovalQueue({ selectedPlatform }: ApprovalQueueProps) 
     }
   }, [activeTab, selectedPlatform]);
 
-  useEffect(() => { void loadDrafts(); }, [loadDrafts]);
+  useEffect(() => { Promise.resolve().then(() => loadDrafts()); }, [loadDrafts]);
 
   useEffect(() => {
     if (!showCreateModal) return;
