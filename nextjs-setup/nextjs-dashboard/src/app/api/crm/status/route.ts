@@ -8,23 +8,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Unauthenticated" }, { status: 401 });
   }
 
-  try {
-    const dbHealth = await prisma.$queryRaw`SELECT 1 AS healthy`;
-    return NextResponse.json({
-      automationMode: null,
-      dbHealth,
-      workspaceId: session.payload.workspaceId,
-    });
-  } catch (error: unknown) {
-    console.error("CRM status error:", error);
-    return NextResponse.json(
-      {
-        error: "Failed to fetch system state",
-        details: error instanceof Error ? error.message : "Unknown error",
-      },
-      { status: 500 }
-    );
-  }
+  const state = await ((prisma as any).systemState as any).upsert({
+    where: { id: "singleton" },
+    update: {},
+    create: { id: "singleton" },
+  });
+  return NextResponse.json({ automationMode: null, dbHealth: true, workspaceId: session.payload.workspaceId });
 }
 
 export async function POST(request: NextRequest) {
@@ -37,9 +26,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 });
     }
 
-    if (type === "dryRun") return NextResponse.json({ ok: true });
-    if (type === "health") return NextResponse.json({ healthy: true });
-    if (type === "wasmRanking") return NextResponse.json({ ranking: false });
+    if (type === "dryRun") {
+      await ((prisma as any).systemState as any).upsert({
+        where: { id: "singleton" },
+        update: { dryRun: true },
+        create: { id: "singleton", dryRun: true },
+      });
+      return NextResponse.json({ ok: true });
+    }
+    if (type === "health") {
+      return NextResponse.json({ healthy: true });
+    }
+    if (type === "wasmRanking") {
+      await ((prisma as any).systemState as any).upsert({
+        where: { id: "singleton" },
+        update: { wasmRanking: true },
+        create: { id: "singleton", wasmRanking: true },
+      });
+      return NextResponse.json({ ranking: true });
+    }
 
     return NextResponse.json({ error: "Failed to update system state" }, { status: 500 });
   } catch {

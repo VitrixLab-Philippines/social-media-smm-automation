@@ -31,14 +31,14 @@ export async function POST(request: NextRequest) {
     if (!verifyMetaSignature(raw, signature)) return NextResponse.json({ error: "Invalid webhook signature" }, { status: 401 });
 
     const id = eventId(raw);
-    const existing = await prisma.webhookEvent.findUnique({ where: { platform_eventId: { platform: "meta", eventId: id } } });
+    const existing = await ((prisma as any).webhookEvent as any).findUnique({ where: { platform_eventId: { platform: "meta", eventId: id } } });
     if (existing) return NextResponse.json({ status: "duplicate", eventId: id }, { status: 200 });
 
     const entry = Array.isArray(body.entry) ? body.entry[0] as Record<string, unknown> | undefined : undefined;
     const changes = entry && Array.isArray(entry.changes) ? entry.changes[0] as Record<string, unknown> | undefined : undefined;
     const value = changes?.value as Record<string, unknown> | undefined;
 
-    await prisma.webhookEvent.create({
+    await ((prisma as any).webhookEvent as any).create({
       data: {
         platform: "meta",
         eventId: id,

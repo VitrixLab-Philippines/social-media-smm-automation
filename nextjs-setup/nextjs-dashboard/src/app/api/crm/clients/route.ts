@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { verifySession } from "@/lib/auth";
 import { checkRateLimit, rateLimitResponse, readJsonWithLimit, requireSameOrigin } from "@/lib/security";
+import { toClientDTO } from "@/lib/crm";
 
 const ClientStatus = ["PROSPECT", "ACTIVE", "PAUSED", "CHURNED"] as const;
 
@@ -36,10 +37,10 @@ export async function GET(req: NextRequest) {
     ];
   }
 
-  const clients = await prisma.client.findMany({
+  const clients = (await prisma.client.findMany({
     where,
     orderBy: { lastActivity: "desc" },
-  });
+  })).map(toClientDTO);
 
   const body: Record<string, unknown> = { clients };
 

@@ -32,12 +32,12 @@ enum ClientStatus {
 }
 
 enum DraftStatus {
-  DRAFT
-  PENDING
-  APPROVED
-  REJECTED
-  SCHEDULED
-  PUBLISHED
+  draft
+  pending
+  approved
+  rejected
+  scheduled
+  published
 }
 
 enum JobStatus {
@@ -59,9 +59,12 @@ enum Platform {
   YOUTUBE
 }
 
-// ------------------------------------------------------------------
-// Auth & tenancy
-// ------------------------------------------------------------------
+model SystemState {
+  id          String   @id @default("singleton")
+  dryRun      Boolean  @default(true)
+  wasmRanking Boolean  @default(false)
+  updatedAt   DateTime @updatedAt
+}
 
 model User {
   id           String   @id @default(cuid())
@@ -214,7 +217,7 @@ model ContentDraft {
   platform        String
   text            String
   hashtags        String[]
-  status          DraftStatus @default(DRAFT)
+  status          DraftStatus @default(draft)
   metadata        Json?
 
   engagementScore Int?

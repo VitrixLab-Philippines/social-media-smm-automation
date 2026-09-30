@@ -47,7 +47,7 @@ async function main() {
       platform: "meta",
       text: "Get started with social media management automation.",
       hashtags: ["#content", "#automation"],
-      status: "APPROVED",
+      status: "approved",
       metadata: {},
     },
   });

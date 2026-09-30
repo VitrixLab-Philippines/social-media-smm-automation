@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
   ];
 
   const total = items.length;
-  const unread = items.filter((i: any) => i.status !== "PUBLISHED").length;
+  const unread = items.filter((i: any) => i.status !== "published").length;
 
   return NextResponse.json({
     items,
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
         data: {
           topic,
           platform: platform || "meta",
-          status: "DRAFT",
+          status: "draft",
           workspaceId,
           text: "",
           hashtags: [],

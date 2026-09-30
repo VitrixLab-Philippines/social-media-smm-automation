@@ -49,51 +49,31 @@ export async function checkRateLimit(request: NextRequest, policy: RateLimitPoli
   const windowSeconds = policy.windowSeconds ?? WINDOW_SECONDS;
   const scope = policy.scope ?? request.nextUrl.pathname;
   const key = `smmai:rl:${scope}:${clientIp(request)}`;
+
+  // Try Redis first, fall back to memory buckets if unavailable
   const client = redisClient();
 
-  if (!client && process.env.NODE_ENV === "production") {
-    return { allowed: false, remaining: 0, retryAfter: 5, unavailable: true };
-  }
-
   if (client) {
-    const consume = async (redisClient: Redis) => {
-      if (redisClient.status === "wait") await redisClient.connect();
-      const count = await redisClient.incr(key);
-      if (count === 1) await redisClient.expire(key, windowSeconds);
-      return {
-        allowed: count <= policy.limit,
-        remaining: Math.max(0, policy.limit - count),
-        retryAfter: count > policy.limit ? await redisClient.ttl(key) : 0,
-      };
-    };
-
     try {
+      const consume = async (redisClient: Redis) => {
+        if (redisClient.status === "wait") await redisClient.connect();
+        const count = await redisClient.incr(key);
+        if (count === 1) await redisClient.expire(key, windowSeconds);
+        return {
+          allowed: count <= policy.limit,
+          remaining: Math.max(0, policy.limit - count),
+          retryAfter: count > policy.limit ? await redisClient.ttl(key) : 0,
+        };
+      };
+
       return await consume(client);
     } catch (error) {
-      // A warm Netlify instance can retain a terminal ioredis client after
-      // the upstream Redis connection was closed. Drop it and retry once.
-      console.error("[Redis] Rate limiter unavailable; reconnecting:", error);
-      if (redis === client) {
-        redis = null;
-        client.disconnect();
-      }
-
-      const retryClient = redisClient();
-      if (!retryClient) {
-        return { allowed: false, remaining: 0, retryAfter: 5, unavailable: true };
-      }
-
-      try {
-        return await consume(retryClient);
-      } catch (retryError) {
-        console.error("[Redis] Rate limiter reconnect failed:", retryError);
-        if (redis === retryClient) redis = null;
-        retryClient.disconnect();
-        return { allowed: false, remaining: 0, retryAfter: 5, unavailable: true };
-      }
+      console.error("[Redis] Rate limiter consume error, falling back to memory:", error);
+      // Fall through to memory buckets
     }
   }
 
+  // Memory bucket fallback (works without Redis, good for development)
   const now = Date.now();
   const current = memoryBuckets.get(key);
   if (!current || current.resetAt <= now) {

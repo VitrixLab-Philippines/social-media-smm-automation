@@ -1,14 +1,15 @@
 import type { NextConfig } from 'next';
-import { resolve } from 'node:path';
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ['@prisma/client', 'pg'],
-
-  // Explicitly tell Turbopack where the monorepo root is.
-  // This fixes "Could not find the Next.js package" in pnpm workspaces.
-  turbopack: {
-    root: resolve(process.cwd(), '..', '..'),
-  },
+  // NOTE: Do NOT list @prisma/client here.
+  // Prisma 7 uses a custom output at src/generated/prisma (see prisma/schema.prisma).
+  // Externalizing @prisma/client makes Turbopack try to load
+  // `.prisma/client/default`, which doesn't exist with a custom output
+  // under pnpm — that is exactly the "Failed to load external module
+  // @prisma/client / Cannot find module '.prisma/client/default'" crash
+  // you saw on POST /api/auth/login.
+  // The Neon HTTP adapter has no native binary, so bundling is safe.
+  serverExternalPackages: [],
 };
 
 export default nextConfig;

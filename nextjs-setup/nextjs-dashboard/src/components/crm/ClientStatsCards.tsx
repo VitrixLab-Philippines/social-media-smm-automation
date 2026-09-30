@@ -5,10 +5,10 @@ import { ClientStats } from "@/lib/crm";
 
 export default function ClientStatsCards({ stats }: { stats: ClientStats }) {
   const cards = [
-    { label: "Total clients", value: stats.total, accent: "#6366f1" },
-    { label: "Active", value: stats.active, accent: "#10b981" },
-    { label: "Prospects", value: stats.prospects, accent: "#f59e0b" },
-    { label: "Revenue", value: `$${stats.totalRevenue.toLocaleString()}`, accent: "#0ea5e9" },
+    { label: "Total clients", value: stats.total, accent: "var(--text)" },
+    { label: "Active", value: stats.active, accent: "var(--primary)" },
+    { label: "Prospects", value: stats.prospects, accent: "var(--accent)" },
+    { label: "Revenue", value: `$${stats.totalRevenue.toLocaleString()}`, accent: "var(--primary)" },
   ];
 
   return (
@@ -24,13 +24,13 @@ export default function ClientStatsCards({ stats }: { stats: ClientStats }) {
         <div
           key={c.label}
           style={{
-            border: "1px solid #e5e7eb",
+            border: "1px solid var(--line)",
             borderRadius: 10,
             padding: "12px 14px",
-            background: "#fff",
+            background: "var(--panel)",
           }}
         >
-          <div style={{ fontSize: 12, color: "#6b7280" }}>{c.label}</div>
+          <div style={{ fontSize: 12, color: "var(--muted)" }}>{c.label}</div>
           <div style={{ fontSize: 22, fontWeight: 700, color: c.accent }}>
             {c.value}
           </div>
