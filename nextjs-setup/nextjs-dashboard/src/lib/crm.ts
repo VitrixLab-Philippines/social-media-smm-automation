@@ -93,4 +93,71 @@ export type DashboardViewSection =
   | "automation"
   | "audit";
 
+export interface ClientStats {
+  total: number;
+  active: number;
+  prospects: number;
+  churned: number;
+  totalRevenue: number;
+  totalPosts: number;
+}
+
+export function toClientDTO(row: {
+  id: string; name: string; company: string; email: string;
+  phone: string | null; website: string | null; industry: string | null;
+  status: ClientStatus; approved: boolean; revenue: number;
+  accountManager: string | null; tags: string[]; notes: string | null;
+  postCount: number; lastPostAt: Date | null; lastActivity: Date; createdAt: Date;
+}): Client {
+  return {
+    id: row.id, name: row.name, company: row.company, email: row.email,
+    phone: row.phone, website: row.website, industry: row.industry,
+    status: row.status, approved: row.approved,
+    posts: { count: row.postCount, lastPost: row.lastPostAt ?? row.createdAt },
+    revenue: row.revenue, accountManager: row.accountManager,
+    tags: row.tags, notes: row.notes,
+    lastActivity: row.lastActivity.toISOString(),
+  };
+}
+
 export const initialDrafts: ContentDraft[] = [];
+
+// Pipeline (crm-plan-v2.md §7.2: Deal/Lead views over the Opportunity/Lead models)
+export type OpportunityStatus = "OPEN" | "WON" | "LOST";
+export type LeadStatus = "NEW" | "QUALIFIED" | "WORKING" | "CONVERTED" | "LOST";
+export const LEAD_STATUSES: LeadStatus[] = ["NEW", "QUALIFIED", "WORKING", "CONVERTED", "LOST"];
+
+export interface Lead {
+  id: string;
+  title: string;
+  status: LeadStatus;
+  source: string | null;
+  value: number | null;
+  createdAt: string;
+}
+
+export interface Opportunity {
+  id: string;
+  title: string;
+  amount: number | null;
+  status: OpportunityStatus;
+  expectedCloseAt: string | null;
+  lead: { id: string; title: string } | null;
+  createdAt: string;
+}
+
+export interface PipelineStageView {
+  id: string;
+  name: string;
+  position: number;
+  probability: number;
+  opportunities: Opportunity[];
+}
+
+export interface PipelineView {
+  pipeline: { id: string; name: string };
+  stages: PipelineStageView[];
+  leads: Lead[];
+  counts: { openOpportunities: number; openValue: number; leads: number };
+}
+

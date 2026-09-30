@@ -16,10 +16,11 @@ export async function GET(request: NextRequest) {
 
   let filtered = await prisma.contentDraft.findMany({
     where: { workspaceId },
+    orderBy: { createdAt: "desc" },
   });
 
   if (status && status !== "all") {
-    filtered = filtered.filter((d: any) => d.status === status.toUpperCase());
+    filtered = filtered.filter((d: any) => d.status === status);
   }
   if (platform && platform !== "all") {
     filtered = filtered.filter((d: any) => d.platform === platform);
@@ -27,11 +28,11 @@ export async function GET(request: NextRequest) {
 
   const counts = {
     all: filtered.length,
-    pending: filtered.filter((d: any) => d.status === "PENDING").length,
-    approved: filtered.filter((d: any) => d.status === "APPROVED").length,
-    draft: filtered.filter((d: any) => d.status === "DRAFT").length,
-    rejected: filtered.filter((d: any) => d.status === "REJECTED").length,
-    published: filtered.filter((d: any) => d.status === "PUBLISHED").length,
+    pending: filtered.filter((d: any) => d.status === "pending").length,
+    approved: filtered.filter((d: any) => d.status === "approved").length,
+    draft: filtered.filter((d: any) => d.status === "draft").length,
+    rejected: filtered.filter((d: any) => d.status === "rejected").length,
+    published: filtered.filter((d: any) => d.status === "published").length,
   };
 
   return NextResponse.json({
@@ -54,7 +55,7 @@ export async function POST(request: NextRequest) {
       platform: body.platform || "instagram",
       text: body.text || "",
       hashtags: body.hashtags || [],
-      status: "PENDING",
+      status: "pending",
       createdAt: new Date().toISOString(),
       author: body.author || "Marketing Team",
     };
@@ -100,7 +101,7 @@ export async function PATCH(request: NextRequest) {
 
     const draft = await prisma.contentDraft.update({
       where: { id },
-      data: { status: status.toUpperCase() as "DRAFT" | "PENDING" | "APPROVED" | "REJECTED" | "SCHEDULED" | "PUBLISHED" },
+      data: { status: status.toLowerCase() as "draft" | "pending" | "approved" | "rejected" | "scheduled" | "published" },
     });
 
     return NextResponse.json({ success: true, draft });

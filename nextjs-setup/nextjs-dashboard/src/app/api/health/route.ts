@@ -15,10 +15,35 @@ export async function GET(request: NextRequest) {
   };
 
   // Readiness check - can the service reach dependencies?
-  const readiness = await checkReadiness();
+  let readiness = { status: "unhealthy", checks: {} };
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    readiness = {
+      status: "ok",
+      checks: { db: { status: "ok", detailed: "PostgreSQL connected" } },
+    };
+  } catch (error) {
+    readiness = {
+      status: "unhealthy",
+      checks: { db: { status: "unhealthy", detailed: String(error) } },
+    };
+  }
 
-  // Integration health
-  const integration = await checkIntegrationHealth();
+  // Integration health - check webhook events table
+  let integration = { status: "unhealthy", checks: {} };
+  try {
+    // Use raw query to avoid type issues with webhookEvent model
+    await prisma.$queryRaw`SELECT 1 FROM "WebhookEvent" LIMIT 1`;
+    integration = {
+      status: "ok",
+      checks: { webhookEvent: { status: "ok", detailed: "Webhook events table accessible" } },
+    };
+  } catch (error) {
+    integration = {
+      status: "unhealthy",
+      checks: { webhookEvent: { status: "unhealthy", detailed: String(error) } },
+    };
+  }
 
   // Determine overall status
   const overall = readiness.status === "ok" && integration.status === "ok"
@@ -31,26 +56,4 @@ export async function GET(request: NextRequest) {
     integration,
     overall,
   });
-}
-
-async function checkReadiness() {
-  // Check database connection
-  try {
-    await prisma.$queryRaw`SELECT 1`;
-    const db = { status: "ok", detailed: "PostgreSQL connected" };
-    return { status: "ok", checks: { db } };
-  } catch (error) {
-    const db = { status: "unhealthy", detailed: String(error) };
-    return { status: "unhealthy", checks: { db } };
-  }
-}
-
-async function checkIntegrationHealth() {
-  // Check webhook events table accessibility
-  try {
-    await prisma.webhookEvent.count();
-    return { status: "ok", detailed: "Webhook events table accessible" };
-  } catch (error) {
-    return { status: "unhealthy", detailed: String(error) };
-  }
 }

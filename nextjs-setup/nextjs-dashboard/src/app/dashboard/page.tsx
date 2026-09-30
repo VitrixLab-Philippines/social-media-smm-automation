@@ -10,6 +10,8 @@ import AnalyticsCards from "@/components/crm/AnalyticsCards";
 import BrandProfileCard from "@/components/crm/BrandProfileCard";
 import GraphExplorer from "@/components/dashboard/GraphExplorer";
 import CommandCenter from "@/components/dashboard/CommandCenter";
+import ClientsTable from "@/components/crm/ClientsTable";
+import PipelineBoard from "@/components/crm/PipelineBoard";
 import { DashboardViewSection } from "@/lib/crm";
 
 const sectionMeta: Record<DashboardViewSection, { eyebrow: string; title: string; description: string }> = {
@@ -86,24 +88,24 @@ export default function DashboardPage() {
 
           {currentSection === "graph" && <GraphExplorer />}
 
-          {["inbox","calendar","pipeline","accounts","automation","audit"].includes(currentSection) && (
+          {["inbox","calendar","accounts","automation","audit"].includes(currentSection) && (
             <section className="card" aria-labelledby="planned-surface" style={{ padding: "1.25rem" }}>
-              <h2 id="planned-surface" style={{ margin: 0, fontSize: "var(--text-lg)" }}>{sectionMeta[currentSection].title}</h2>
-              <p style={{ color: "var(--muted)", lineHeight: "var(--lh-relaxed)" }}>This surface is now part of the application information architecture and server contract. Its records are workspace-scoped; provider actions remain behind authenticated API services, queues, and audit events.</p>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: "0.65rem" }}>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.6rem", alignItems: "center" }}>
+                <h2 id="planned-surface" style={{ margin: 0, fontSize: "var(--text-lg)" }}>{sectionMeta[currentSection].title}</h2>
+                <span style={{ padding: "0.15rem 0.5rem", border: "1px solid rgba(245,158,11,0.35)", borderRadius: "var(--radius-small)", background: "rgba(245,158,11,0.12)", color: "var(--accent)", fontSize: "var(--text-xs)", fontWeight: "var(--weight-bold)" }}>Coming soon</span>
+              </div>
+              <p style={{ marginTop: "0.65rem", color: "var(--muted)", lineHeight: "var(--lh-relaxed)", fontSize: "var(--text-sm)" }}>
+                Not built yet. This section is reserved in the navigation, and its records will be workspace-scoped behind the same authenticated API as the rest of the dashboard.
+              </p>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: "0.65rem", marginTop: "0.9rem" }}>
                 <div className="card" style={{ padding: "0.8rem" }}>Loading state</div><div className="card" style={{ padding: "0.8rem" }}>Empty state</div><div className="card" style={{ padding: "0.8rem" }}>Error/retry state</div>
               </div>
             </section>
           )}
 
-          {currentSection === "clients" && (
-            <section className="card" aria-labelledby="clients-heading">
-              <h2 id="clients-heading" style={{ margin: 0, fontSize: "var(--text-lg)" }}>Client workspace</h2>
-              <p style={{ margin: "0.5rem 0 0", color: "var(--muted)", fontSize: "var(--text-sm)" }}>
-                Client management is isolated here so the editorial dashboard stays focused on content operations.
-              </p>
-            </section>
-          )}
+          {currentSection === "clients" && <ClientsTable />}
+
+          {currentSection === "pipeline" && <PipelineBoard />}
 
           {currentSection === "settings" && (
             <div style={{ display: "grid", gap: "1.5rem" }}>

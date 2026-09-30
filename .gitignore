@@ -48,3 +48,12 @@ test-db.mts
 # TypeScript build info (regenerated on every build)
 *.tsbuildinfo
 **/tsconfig.tsbuildinfo
+
+# Local debug / test scripts
+test_login*.py
+verify_hash.py
+linux.env
+env.txt
+skills-lock.json
+.claude/
+.windsurf/
