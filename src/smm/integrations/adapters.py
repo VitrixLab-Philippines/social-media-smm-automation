@@ -1,8 +1,8 @@
 from typing import Optional
 import json
 import base64
-from smm.domain.models import ContentDraft, PublishResult
-from smm.domain.models import BrandProfile
+from smm.domain.models import BrandProfile, ContentDraft, PublishResult
+from smm.integrations.contracts import X_PLATFORM_KEY, normalize_platform
 
 class MetaAdapter:
     """Meta publishing boundary.
@@ -207,13 +207,13 @@ class LinkedInAdapter:
 
 
 class TwitterAdapter:
-    """Twitter/X publishing boundary.
+    """X (formerly Twitter) publishing boundary (canonical key: "x").
 
-    Follows the same interface as MetaAdapter for consistent
-    publisher integration across platforms.
+    Accepts the legacy "twitter" spelling only via AdapterFactory
+    normalization; all emitted results use the canonical key.
     """
 
-    platform = "twitter"
+    platform = X_PLATFORM_KEY
 
     def __init__(self, access_token: Optional[str] = None,
                  access_token_secret: Optional[str] = None,
@@ -237,33 +237,33 @@ class TwitterAdapter:
 
     def publish(self, draft: ContentDraft, *, dry_run: bool = True) -> PublishResult:
         if dry_run:
-            return PublishResult("twitter", True, None, "dry-run: publish not sent", True)
+            return PublishResult(X_PLATFORM_KEY, True, None, "dry-run: publish not sent", True)
 
         if not self.validate_credentials():
             return PublishResult(
-                "twitter", False, None,
-                "Twitter credentials are not configured. "
-                "Set TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET, "
-                "and TWITTER_BEARER_TOKEN environment variables.",
+                X_PLATFORM_KEY, False, None,
+                "X credentials are not configured. "
+                "Set X_ACCESS_TOKEN, X_ACCESS_TOKEN_SECRET, "
+                "and X_BEARER_TOKEN environment variables.",
                 False,
             )
 
-        # In a real implementation, this would call the Twitter API v2
-        # POST https://api.twitter.com/2/tweets
+        # In a real implementation, this would call the X API v2
+        # POST https://api.x.com/2/tweets
         # Parameters: text, media_ids, reply_parameters, geo_metadata
         try:
             # Simulate successful API call
             external_id = self._generate_external_id()
             return PublishResult(
-                "twitter", True, external_id,
-                "Post successfully published to Twitter/X platform.",
+                X_PLATFORM_KEY, True, external_id,
+                "Post successfully published to X platform.",
                 False,
             )
         except Exception as e:
             classified = self.classify_error(e)
             return PublishResult(
-                "twitter", False, None,
-                f"Twitter publish failed: {str(e)}",
+                X_PLATFORM_KEY, False, None,
+                f"X publish failed: {str(e)}",
                 classified == "RATE_LIMITED",
             )
 
@@ -299,16 +299,21 @@ class TwitterAdapter:
 
 
 class AdapterFactory:
-    """Factory for creating adapter instances by platform name."""
+    """Factory for creating adapter instances by platform name.
+
+    Platform input is normalized (legacy "twitter" -> canonical "x") before
+    dispatch so adapter resolution agrees with capability lookups.
+    """
 
     @staticmethod
     def get_adapter(platform: str, **kwargs) -> object:
         """Get an adapter instance for the specified platform."""
-        if platform == "meta":
+        canonical = normalize_platform(platform)
+        if canonical == "meta":
             return MetaAdapter(**kwargs)
-        elif platform == "linkedin":
+        elif canonical == "linkedin":
             return LinkedInAdapter(**kwargs)
-        elif platform == "twitter":
+        elif canonical == X_PLATFORM_KEY:
             return TwitterAdapter(**kwargs)
         else:
             raise ValueError(f"Unsupported platform: {platform}")

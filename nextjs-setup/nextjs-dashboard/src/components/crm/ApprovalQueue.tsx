@@ -61,20 +61,44 @@ export default function ApprovalQueue({ selectedPlatform }: ApprovalQueueProps) 
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [showCreateModal]);
 
-  async function handleUpdateStatus(id: string, status: DraftStatus) {
+  const [selected, setSelected] = useState<string[]>([]);
+  const [rejectNote, setRejectNote] = useState("");
+  const [rejectTarget, setRejectTarget] = useState<string | null>(null);
+
+  async function handleUpdateStatus(id: string, status: DraftStatus, note?: string) {
     setNotice("");
     try {
       const res = await fetch("/api/crm/drafts", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, status }),
+        body: JSON.stringify({ id, status, ...(note ? { note } : {}) }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Status update failed.");
       setNotice(status === "approved" ? "Draft approved and ready for publishing." : "Draft status updated.");
+      setSelected((prev) => prev.filter((item) => item !== id));
       await loadDrafts();
     } catch (err) {
       setNotice(err instanceof Error ? err.message : "Status update failed.");
+    }
+  }
+
+  async function handleBatchApprove() {
+    if (selected.length === 0) return;
+    setNotice("");
+    try {
+      const res = await fetch("/api/crm/drafts", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: selected.slice(0, 20), status: "approved" }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Batch approval failed.");
+      setNotice(`Approved ${data.updated?.length ?? selected.length} draft(s).`);
+      setSelected([]);
+      await loadDrafts();
+    } catch (err) {
+      setNotice(err instanceof Error ? err.message : "Batch approval failed.");
     }
   }
 
@@ -141,6 +165,14 @@ export default function ApprovalQueue({ selectedPlatform }: ApprovalQueueProps) 
       {notice && <div role="status" style={{ marginBottom: "1rem", padding: "0.65rem 0.8rem", border: "1px solid var(--line)", borderRadius: "var(--radius-small)", background: "var(--surface)", color: "var(--text)", fontSize: "var(--text-xs)" }}>{notice}</div>}
       {error && <div role="alert" style={{ marginBottom: "1rem", padding: "0.75rem", border: "1px solid rgba(239,68,68,0.3)", borderRadius: "var(--radius-small)", background: "rgba(239,68,68,0.08)", color: "var(--text)", fontSize: "var(--text-sm)" }}>{error}</div>}
 
+      {selected.length > 0 && (
+        <div style={{ marginBottom: "1rem", display: "flex", flexWrap: "wrap", gap: "0.6rem", alignItems: "center", padding: "0.6rem 0.8rem", border: "1px solid var(--line)", borderRadius: "var(--radius-small)", background: "var(--surface)", fontSize: "var(--text-xs)" }}>
+          <span>{selected.length} selected</span>
+          <button type="button" className="btn primary" style={{ padding: "0.4rem 0.7rem", fontSize: "var(--text-xs)" }} onClick={() => void handleBatchApprove()}>Approve selected (max 20)</button>
+          <button type="button" className="btn secondary" style={{ padding: "0.4rem 0.7rem", fontSize: "var(--text-xs)" }} onClick={() => setSelected([])}>Clear</button>
+        </div>
+      )}
+
       {loading ? (
         <div className="card" style={{ padding: "2rem", color: "var(--muted)" }}>Loading content…</div>
       ) : drafts.length === 0 ? (
@@ -152,8 +184,36 @@ export default function ApprovalQueue({ selectedPlatform }: ApprovalQueueProps) 
       ) : (
         <div style={{ display: "grid", gap: "1rem", gridTemplateColumns: viewMode === "grid" ? "repeat(auto-fill, minmax(min(100%, 320px), 1fr))" : "1fr" }}>
           {drafts.map((draft) => (
-            <ContentDraftCard key={draft.id} draft={draft} compact={viewMode === "list"} onApprove={(id) => void handleUpdateStatus(id, "approved")} onReject={(id) => void handleUpdateStatus(id, "rejected")} onUpdateStatus={(id, status) => void handleUpdateStatus(id, status)} />
+            <div key={draft.id} style={{ position: "relative" }}>
+              {activeTab === "pending" && (
+                <label style={{ position: "absolute", top: "0.7rem", left: "0.7rem", zIndex: 2, display: "flex", gap: "0.3rem", alignItems: "center", fontSize: "var(--text-xs)", color: "var(--muted)", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--radius-small)", padding: "0.2rem 0.45rem" }}>
+                  <input
+                    type="checkbox"
+                    aria-label={`Select draft ${draft.topic}`}
+                    checked={selected.includes(draft.id)}
+                    onChange={(e) => setSelected((prev) => (e.target.checked ? [...prev, draft.id] : prev.filter((item) => item !== draft.id)))}
+                  />
+                  Select
+                </label>
+              )}
+              <ContentDraftCard draft={draft} compact={viewMode === "list"} onApprove={(id) => void handleUpdateStatus(id, "approved")} onReject={(id) => setRejectTarget(id)} onUpdateStatus={(id, status) => void handleUpdateStatus(id, status)} />
+            </div>
           ))}
+        </div>
+      )}
+
+      {rejectTarget && (
+        <div role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) { setRejectTarget(null); setRejectNote(""); } }}
+          style={{ position: "fixed", inset: 0, zIndex: 100, padding: "1rem", display: "grid", placeItems: "center", background: "rgba(0,0,0,0.72)" }}>
+          <div role="dialog" aria-modal="true" aria-labelledby="reject-draft-title" className="card" style={{ width: "min(100%, 480px)", padding: "1.5rem", background: "var(--panel)" }}>
+            <h3 id="reject-draft-title" style={{ margin: "0 0 0.5rem", fontSize: "var(--text-lg)" }}>Reject draft</h3>
+            <p style={{ margin: "0 0 0.75rem", color: "var(--muted)", fontSize: "var(--text-sm)" }}>Add a revision note so the author knows what to fix. The note is stored on the draft history.</p>
+            <label style={fieldLabel}>Revision note<textarea required rows={4} value={rejectNote} onChange={(event) => setRejectNote(event.target.value)} placeholder="What needs to change before this can ship?" style={{ ...fieldStyle, resize: "vertical" }} /></label>
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem", marginTop: "1rem" }}>
+              <button type="button" className="btn secondary" style={{ padding: "0.55rem 0.8rem", fontSize: "var(--text-xs)" }} onClick={() => { setRejectTarget(null); setRejectNote(""); }}>Cancel</button>
+              <button type="button" className="btn primary" disabled={!rejectNote.trim()} style={{ padding: "0.55rem 0.8rem", fontSize: "var(--text-xs)" }} onClick={() => { const target = rejectTarget; setRejectTarget(null); const note = rejectNote; setRejectNote(""); void handleUpdateStatus(target, "rejected", note); }}>Reject with note</button>
+            </div>
+          </div>
         </div>
       )}
 

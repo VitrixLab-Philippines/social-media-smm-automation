@@ -3,8 +3,15 @@
 **Section ID:** `accounts`
 **API:** [`src/app/api/settings/route.ts`](file:///D:/citrixlabph/smma/nextjs-setup/nextjs-dashboard/src/app/api/settings/route.ts)
 **Backend:** [`src/smm/integrations/adapters.py`](file:///D:/citrixlabph/smma/src/smm/integrations/adapters.py), [`src/smm/integrations/contracts.py`](file:///D:/citrixlabph/smma/src/smm/integrations/contracts.py)
-**Status:** 🔴 Not Started
+**Status:** 🟢 Phase 2 Implemented
 **Priority:** P0 — Platform Integration Provision
+
+> **Implemented (2026-10-02):** `SocialAccountsManager` UI, OAuth
+> connect/callback/disconnect routes, `/api/accounts` + `/{id}/capabilities` +
+> `/{id}/refresh`, encrypted credential storage via `lib/secrets.ts`, and
+> LinkedIn/X webhook ingestion. The `twitter` → `x` key split is resolved.
+> Remaining: webhook event log viewer in the UI, and promoting the route-level
+> test matrix rows to automated tests.
 
 ---
 

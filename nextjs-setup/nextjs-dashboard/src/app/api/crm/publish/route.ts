@@ -3,6 +3,7 @@ import crypto from "node:crypto";
 import prisma from "@/lib/prisma";
 import { verifySession } from "@/lib/auth";
 import { checkRateLimit, rateLimitResponse, readJsonWithLimit, requireIdempotencyKey, requireSameOrigin } from "@/lib/security";
+import { clientIpHash, requestIdFromHeaders, writeAuditEvent } from "@/lib/audit";
 import { enqueuePublishJob, getQueueLength, getQueueStats } from "@/lib/queue";
 
 export async function POST(req: NextRequest) {
@@ -30,8 +31,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "draftId and platform are required" }, { status: 400 });
   }
 
+  const requestId = requestIdFromHeaders(req);
+  const clientIp = clientIpHash(req);
+
   const requestHash = crypto.createHash("sha256").update(JSON.stringify({ draftId, platform })).digest("hex");
-  const existing = await ((prisma as any).idempotencyRecord as any).findUnique({
+  const existing = await prisma.idempotencyRecord.findUnique({
     where: { workspaceId_key: { workspaceId: session.payload.workspaceId, key: idempotencyKey } },
   });
   if (existing) {
@@ -56,7 +60,7 @@ export async function POST(req: NextRequest) {
         },
       });
       const responseBody = { status: "accepted", draftId, platform, jobId: job.id };
-      const record = await ((tx as any).idempotencyRecord as any).create({
+      const record = await tx.idempotencyRecord.create({
         data: {
           workspaceId: session.payload.workspaceId,
           key: idempotencyKey,
@@ -70,36 +74,118 @@ export async function POST(req: NextRequest) {
       return { job, record, responseBody };
     });
 
-    // Use Next.js after() for deferred state transitions
-    // This ensures the database updates run after the response is flushed
+    // Use Next.js after() for deferred state transitions.
+    // Phase 2: DRY_RUN is a server-authoritative safety gate. A dry-run must
+    // record a simulated result and return the draft to "approved" — it must
+    // never be marked published, and no provider call may run.
+    const dryRun = process.env.DRY_RUN !== "false";
+    const persisted = await prisma.systemState.upsert({
+      where: { id: "singleton" },
+      update: {},
+      create: { id: "singleton", dryRun },
+    });
+    const persistedSettings = (persisted?.settings ?? undefined) as unknown as Record<string, unknown> | undefined;
+    const effectiveDryRun =
+      typeof persistedSettings?.dryRun === "boolean" ? persistedSettings.dryRun : (persisted?.dryRun ?? dryRun);
+
+    if (effectiveDryRun) {
+      // No queue handoff in dry-run: no provider worker ever owns this job.
+      const simulated = await prisma.publishJob.update({
+        where: { id: result.job.id },
+        data: { status: "CANCELLED", error: "dry-run: publish not sent", completedAt: new Date() },
+      });
+      await prisma.contentDraft.update({ where: { id: String(draftId) }, data: { status: "approved" } });
+      await writeAuditEvent({
+        workspaceId: session.payload.workspaceId,
+        actorUserId: session.payload.userId,
+        action: "draft.simulated",
+        resourceType: "draft",
+        resourceId: String(draftId),
+        requestId,
+        ipHash: clientIp,
+        metadata: { platform, jobId: result.job.id, dryRun: true },
+      });
+      return NextResponse.json({ ...result.responseBody, dryRun: true, status: "simulated", job: simulated }, { status: 202 });
+    }
+
     after(async () => {
       try {
         await prisma.publishJob.update({ where: { id: result.job.id }, data: { status: "SUCCEEDED", completedAt: new Date() } });
         await prisma.contentDraft.update({ where: { id: String(draftId) }, data: { status: "published", publishedAt: new Date() } });
+        await writeAuditEvent({
+          workspaceId: session.payload.workspaceId,
+          actorUserId: session.payload.userId,
+          action: "draft.published",
+          resourceType: "draft",
+          resourceId: String(draftId),
+          requestId,
+          ipHash: clientIp,
+          metadata: { platform, jobId: result.job.id, dryRun: false },
+        });
       } catch (err) {
         await prisma.publishJob.update({
           where: { id: result.job.id },
           data: { status: "FAILED", error: err instanceof Error ? err.message : "Unknown error", completedAt: new Date() },
         });
+        await writeAuditEvent({
+          workspaceId: session.payload.workspaceId,
+          actorUserId: session.payload.userId,
+          action: "job.failed",
+          resourceType: "publishJob",
+          resourceId: result.job.id,
+          requestId,
+          ipHash: clientIp,
+          metadata: { platform, draftId: String(draftId), error: err instanceof Error ? err.message : "Unknown error" },
+        });
       }
     });
 
-    await enqueuePublishJob({
-      jobId: result.job.id,
-      workflowId: "default",
+    try {
+      await enqueuePublishJob({
+        jobId: result.job.id,
+        workflowId: "default",
+        workspaceId: session.payload.workspaceId,
+        socialAccountId: platform,
+        contentRevisionId: draftId,
+        idempotencyKey,
+        type: "publish.requested",
+        version: 1,
+      });
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : "Queue unavailable";
+      await prisma.publishJob.update({
+        where: { id: result.job.id },
+        data: { status: "FAILED", error: `Queue handoff failed: ${reason}`, completedAt: new Date() },
+      });
+      await writeAuditEvent({
+        workspaceId: session.payload.workspaceId,
+        actorUserId: session.payload.userId,
+        action: "job.failed",
+        resourceType: "publishJob",
+        resourceId: result.job.id,
+        requestId,
+        ipHash: clientIp,
+        metadata: { platform, draftId: String(draftId), error: reason },
+      });
+      return NextResponse.json({ error: "Queue unavailable — job kept in database, nothing was published" }, { status: 503 });
+    }
+
+    await writeAuditEvent({
       workspaceId: session.payload.workspaceId,
-      socialAccountId: platform,
-      contentRevisionId: draftId,
-      idempotencyKey,
-      type: "publish.requested",
-      version: 1,
+      actorUserId: session.payload.userId,
+      action: "job.queued",
+      resourceType: "publishJob",
+      resourceId: result.job.id,
+      requestId,
+      ipHash: clientIp,
+      metadata: { platform, draftId: String(draftId), dryRun: effectiveDryRun },
     });
 
-    return NextResponse.json({ ...result.responseBody, idempotencyRecordId: result.record.id }, { status: 202 });
+    return NextResponse.json({ ...result.responseBody, dryRun: effectiveDryRun, idempotencyRecordId: result.record.id }, { status: 202 });
   } catch (error) {
     const code = (error as { code?: string }).code;
     if (code === "P2002") {
-      const replay = await ((prisma as any).idempotencyRecord as any).findUnique({ where: { workspaceId_key: { workspaceId: session.payload.workspaceId, key: idempotencyKey } } });
+      const replay = await prisma.idempotencyRecord.findUnique({ where: { workspaceId_key: { workspaceId: session.payload.workspaceId, key: idempotencyKey } } });
       if (replay?.requestHash === requestHash) return NextResponse.json(replay.response ?? { status: "accepted" }, { status: replay.statusCode ?? 202, headers: { "Idempotent-Replay": "true" } });
       return NextResponse.json({ error: "Idempotency-Key conflict" }, { status: 409 });
     }

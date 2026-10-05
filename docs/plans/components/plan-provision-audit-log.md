@@ -1,9 +1,19 @@
 # Provision Upgrade Plan: Audit Log
 
 **Section ID:** `audit`
-**API:** [`src/app/api/crm/status/route.ts`](file:///D:/citrixlabph/smma/nextjs-setup/nextjs-dashboard/src/app/api/crm/status/route.ts)
-**Status:** 🔴 Not Started
-**Priority:** P1 — Security & Compliance Provision
+**API:** [`src/app/api/audit/route.ts`](file:///D:/citrixlabph/smma/nextjs-setup/nextjs-dashboard/src/app/api/audit/route.ts)
+**Status:** 🟢 Phase 2 Implemented
+**Priority:** P0 — Security & Compliance Provision (promoted from P1)
+
+> **Implemented (2026-10-02):** `lib/audit.ts` writer helper and **event
+> emission** on approvals, rejections, simulations, publishes, job queue/fail,
+> connects/disconnects, refresh failures, settings changes, and webhook
+> accept/reject. `GET /api/audit` provides cursor pagination + action filters and
+> an `AuditLogViewer` UI. Remaining: CSV export, JSON-diff expansion,
+> retention-policy display.
+
+> **Path correction:** the original plan referenced `pages/api/audit.ts`; this is
+> an App Router project, so the endpoint lives at `src/app/api/audit/route.ts`.
 
 ---
 

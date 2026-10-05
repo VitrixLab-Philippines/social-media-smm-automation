@@ -3,8 +3,15 @@
 **Section ID:** `automation`
 **API:** [`src/app/api/automation/route.ts`](file:///D:/citrixlabph/smma/nextjs-setup/nextjs-dashboard/src/app/api/automation/route.ts)
 **Backend:** [`src/smm/workflows/daily.py`](file:///D:/citrixlabph/smma/src/smm/workflows/daily.py), [`src/smm/schedules/cron.py`](file:///D:/citrixlabph/smma/src/smm/schedules/cron.py)
-**Status:** 🔴 Not Started
-**Priority:** P1 — Workflow Automation Provision
+**Status:** 🟢 Phase 2 Implemented
+**Priority:** P0 — Workflow Automation Provision (promoted from P1)
+
+> **Implemented (2026-10-02):** `AutomationHub` UI, `GET /api/automation/hub`
+> with **real Redis queue depth + dead-letter length**, publish-job history with
+> draft context, durable workflow pause/resume (`PATCH`), scheduler trigger that
+> actually enqueues, provider-aware worker dispatch (Meta/LinkedIn/X) with
+> error classification, and a worker-level DRY_RUN gate. Remaining: human-readable
+> cron display, workflow templates, error-log pagination.
 
 ---
 

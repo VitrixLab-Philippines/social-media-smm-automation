@@ -7,6 +7,13 @@
 > **Branch:** `docs/master-dashboard-plan-v1`  
 > **Target PR base:** `dev`  
 > **Status:** 🟡 Active Planning
+>
+> **Phase 2 update (2026-10-02):** The Phase 2 exit-critical provisions are now
+> implemented — **Social Accounts**, **Settings**, **Audit Log**, **Automation**,
+> and **Approval Gate** (revision notes + batch approve). See
+> [`phase2-plan-priority-review.md`](./phase2-plan-priority-review.md) for the
+> prioritization and [`phase2-test-matrix.md`](./phase2-test-matrix.md) for the
+> exit gate. Statuses below reflect post-implementation state.
 
 ---
 
@@ -69,8 +76,8 @@ Provisions are the **section-level views** rendered inside the dashboard when a 
 | Provision | Section ID | Status | Plan |
 |---|---|---|---|
 | **Overview** | `overview` | 🟡 In Progress | [plan-provision-overview.md](./components/plan-provision-overview.md) |
-| **Approval Gate** | `approval` | 🔴 Not Started | [plan-provision-approval-gate.md](./components/plan-provision-approval-gate.md) |
-| **Draft Library** | `drafts` | 🔴 Not Started | [plan-provision-draft-library.md](./components/plan-provision-draft-library.md) |
+| **Approval Gate** | `approval` | 🟢 Phase 2 Implemented | [plan-provision-approval-gate.md](./components/plan-provision-approval-gate.md) |
+| **Draft Library** | `drafts` | 🟡 In Progress | [plan-provision-draft-library.md](./components/plan-provision-draft-library.md) |
 | **Content Calendar** | `calendar` | 🔴 Not Started | [plan-provision-content-calendar.md](./components/plan-provision-content-calendar.md) |
 
 ### Engagement & CRM
@@ -79,24 +86,24 @@ Provisions are the **section-level views** rendered inside the dashboard when a 
 |---|---|---|---|
 | **Unified Inbox** | `inbox` | 🔴 Not Started | *(plan TBD — use template)* |
 | **Clients** | `clients` | 🟡 In Progress | [plan-provision-clients.md](./components/plan-provision-clients.md) |
-| **Deal Pipeline** | `pipeline` | 🔴 Not Started | [plan-provision-pipeline.md](./components/plan-provision-pipeline.md) |
+| **Deal Pipeline** | `pipeline` | 🟢 Built (status was stale) | [plan-provision-pipeline.md](./components/plan-provision-pipeline.md) |
 
 ### Intelligence & Quality
 
 | Provision | Section ID | Status | Plan |
 |---|---|---|---|
-| **Analytics** | `analytics` | 🔴 Not Started | [plan-provision-analytics.md](./components/plan-provision-analytics.md) |
-| **Brand & Guardrails** | `guardrails` | 🔴 Not Started | [plan-provision-guardrails.md](./components/plan-provision-guardrails.md) |
-| **Automation** | `automation` | 🔴 Not Started | [plan-provision-automation.md](./components/plan-provision-automation.md) |
+| **Analytics** | `analytics` | 🟡 In Progress | [plan-provision-analytics.md](./components/plan-provision-analytics.md) |
+| **Brand & Guardrails** | `guardrails` | 🟡 In Progress | [plan-provision-guardrails.md](./components/plan-provision-guardrails.md) |
+| **Automation** | `automation` | 🟢 Phase 2 Implemented | [plan-provision-automation.md](./components/plan-provision-automation.md) |
 
 ### Workspace & System
 
 | Provision | Section ID | Status | Plan |
 |---|---|---|---|
-| **Social Accounts** | `accounts` | 🔴 Not Started | [plan-provision-accounts.md](./components/plan-provision-accounts.md) |
-| **Settings** | `settings` | 🔴 Not Started | [plan-provision-settings.md](./components/plan-provision-settings.md) |
-| **Audit Log** | `audit` | 🔴 Not Started | [plan-provision-audit-log.md](./components/plan-provision-audit-log.md) |
-| **System Diagnostics** | `graph` | 🔴 Not Started | *(dev-only — plan TBD)* |
+| **Social Accounts** | `accounts` | 🟢 Phase 2 Implemented | [plan-provision-accounts.md](./components/plan-provision-accounts.md) |
+| **Settings** | `settings` | 🟢 Phase 2 Implemented | [plan-provision-settings.md](./components/plan-provision-settings.md) |
+| **Audit Log** | `audit` | 🟢 Phase 2 Implemented | [plan-provision-audit-log.md](./components/plan-provision-audit-log.md) |
+| **System Diagnostics** | `graph` | 🟡 Built (status was stale) | *(dev-only — plan TBD)* |
 
 ---
 
