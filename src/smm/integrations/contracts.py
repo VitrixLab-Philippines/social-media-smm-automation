@@ -5,7 +5,18 @@ from typing import Protocol
 
 from smm.domain.models import ContentDraft, PublishResult
 
+# Platforms supported by the planner. "twitter" is accepted as input and
+# normalized to the canonical "x" key (see normalize_platform).
 PLATFORMS = ("meta", "facebook", "instagram", "linkedin", "x", "tiktok", "youtube")
+
+# Canonical key for the X platform. Adapter registries must use this so
+# resolves go through normalization instead of raw string comparison.
+X_PLATFORM_KEY = "x"
+
+# Legacy aliases mapped to canonical keys before any capability lookup,
+# adapter resolution, or API validation.
+PLATFORM_ALIASES = {"twitter": "x"}
+
 
 
 @dataclass(frozen=True)
@@ -41,8 +52,7 @@ PLATFORM_CAPABILITIES: dict[str, PlatformCapabilities] = {
 
 def normalize_platform(value: str) -> str:
     normalized = value.strip().lower()
-    if normalized == "twitter":
-        normalized = "x"
+    normalized = PLATFORM_ALIASES.get(normalized, normalized)
     if normalized not in PLATFORM_CAPABILITIES:
         raise ValueError(f"Unsupported social platform: {value}")
     return normalized

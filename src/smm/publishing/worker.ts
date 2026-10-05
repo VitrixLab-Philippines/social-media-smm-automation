@@ -1,7 +1,7 @@
 import Redis from "ioredis";
 import { PrismaClient } from "@prisma/client";
 import { dequeuePublishJob, getQueueStats, addToDLQ, getDLQLength } from "@/lib/queue";
-import { MetaAdapter } from "@/integrations/adapters";
+import { MetaAdapter, LinkedInAdapter, TwitterAdapter } from "@/integrations/adapters";
 import { PublishingService } from "@/publishing/service";
 import { ModerationService } from "@/moderation/policy";
 import { BrandProfile, ContentDraft } from "@/domain/models";
@@ -17,7 +17,21 @@ const DEAD_LETTER_QUEUE = "smmai:dlq:publish";
 const FAILURE_COUNTER_PREFIX = "smmai:failure:";
 
 const moderationService = new ModerationService();
-const metaAdapter = new MetaAdapter();
+const adapters = {
+  meta: new MetaAdapter(),
+  linkedin: new LinkedInAdapter(),
+  x: new TwitterAdapter(),
+  // Legacy alias accepted at intake; dispatch stays canonical.
+  twitter: new TwitterAdapter(),
+} as const;
+
+type ProviderKey = keyof typeof adapters;
+
+function resolveAdapter(platform: string) {
+  const key = platform.trim().toLowerCase();
+  const canonical = (key === "twitter" ? "x" : key) as ProviderKey;
+  return adapters[canonical] ?? null;
+}
 
 interface ProcessResult {
   jobId: string;
@@ -60,10 +74,10 @@ async function processPublishJob(
     const moderation = moderationService.validate(draft, brand);
 
     if (!moderation.approved) {
-      // Mark draft as rejected
+      // Mark draft as rejected (lowercase enum values per schema).
       await prisma.contentDraft.update({
         where: { id: contentRevisionId },
-        data: { status: "REJECTED" },
+        data: { status: "rejected" },
       });
 
       return {
@@ -73,14 +87,37 @@ async function processPublishJob(
       };
     }
 
-    // Publish via adapter
-    const publishResult = await metaAdapter.publish(draft, { dry_run: false });
+    // Publish via the provider adapter for this draft's platform.
+    const adapter = resolveAdapter((draft as { platform?: string }).platform ?? "");
+    if (!adapter) {
+      return {
+        jobId,
+        status: "failed",
+        message: `Unsupported platform for job ${jobId}`,
+      };
+    }
 
-    if (publishResult.success) {
-      // Update draft status to PUBLISHED
+    // DRY_RUN safety gate: never call a provider unless explicitly disabled.
+    const dryRun = process.env.DRY_RUN !== "false";
+    if (dryRun) {
       await prisma.contentDraft.update({
         where: { id: contentRevisionId },
-        data: { status: "PUBLISHED" },
+        data: { status: "approved" },
+      });
+      return {
+        jobId,
+        status: "succeeded",
+        message: "dry-run: publish not sent",
+      };
+    }
+
+    const publishResult = await adapter.publish(draft, { dry_run: false });
+
+    if (publishResult.success) {
+      // Update draft status to published (lowercase enum values per schema).
+      await prisma.contentDraft.update({
+        where: { id: contentRevisionId },
+        data: { status: "published" },
       });
 
       // Record success in publishJob (we'd need to track this, for now just update draft)

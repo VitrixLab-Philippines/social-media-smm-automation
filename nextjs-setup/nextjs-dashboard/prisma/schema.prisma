@@ -63,6 +63,7 @@ model SystemState {
   id          String   @id @default("singleton")
   dryRun      Boolean  @default(true)
   wasmRanking Boolean  @default(false)
+  settings    Json     @default("{}")
   updatedAt   DateTime @updatedAt
 }
 

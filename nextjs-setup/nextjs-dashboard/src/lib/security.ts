@@ -105,63 +105,76 @@ export async function checkRateLimit(
       };
     };
 
-    try {
-      return await consume(client);
-    } catch (error) {
-      // A warm Netlify instance can retain an ioredis client after
-      // the upstream Redis connection has been closed.
-      console.error(
-        "[Redis] Rate limiter unavailable; reconnecting:",
-        error,
-      );
-
-      if (redis === client) {
-        redis = null;
-      }
-
+    // Returns null when Redis is configured but could not serve the counter,
+    // so the caller decides whether that is fatal (production) or should
+    // degrade to the in-memory limiter (development).
+    const attempt = async (): Promise<RateLimitResult | null> => {
       try {
-        client.disconnect();
-      } catch {
-        // Ignore disconnect errors. The client is already unusable.
-      }
-
-      // Recreate the client and retry once.
-      const retryClient = redisClient();
-
-      if (!retryClient) {
-        return {
-          allowed: false,
-          remaining: 0,
-          retryAfter: 5,
-          unavailable: true,
-        };
-      }
-
-      try {
-        return await consume(retryClient);
-      } catch (retryError) {
+        return await consume(client);
+      } catch (error) {
+        // A warm Netlify instance can retain an ioredis client after
+        // the upstream Redis connection has been closed.
         console.error(
-          "[Redis] Rate limiter reconnect failed:",
-          retryError,
+          "[Redis] Rate limiter unavailable; reconnecting:",
+          error,
         );
 
-        if (redis === retryClient) {
+        if (redis === client) {
           redis = null;
         }
 
         try {
-          retryClient.disconnect();
+          client.disconnect();
         } catch {
-          // Ignore disconnect errors.
+          // Ignore disconnect errors. The client is already unusable.
         }
 
-        return {
-          allowed: false,
-          remaining: 0,
-          retryAfter: 5,
-          unavailable: true,
-        };
+        // Recreate the client and retry once.
+        const retryClient = redisClient();
+
+        if (!retryClient) {
+          return null;
+        }
+
+        try {
+          return await consume(retryClient);
+        } catch (retryError) {
+          console.error(
+            "[Redis] Rate limiter reconnect failed:",
+            retryError,
+          );
+
+          if (redis === retryClient) {
+            redis = null;
+          }
+
+          try {
+            retryClient.disconnect();
+          } catch {
+            // Ignore disconnect errors.
+          }
+
+          return null;
+        }
       }
+    };
+
+    const result = await attempt();
+
+    if (result) {
+      return result;
+    }
+
+    // Redis is configured but unreachable. Production keeps failing closed;
+    // development falls through to the in-memory limiter below so a missing
+    // local Redis does not block every mutation.
+    if (process.env.NODE_ENV === "production") {
+      return {
+        allowed: false,
+        remaining: 0,
+        retryAfter: 5,
+        unavailable: true,
+      };
     }
   }
 

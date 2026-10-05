@@ -2,8 +2,14 @@
 
 **Section ID:** `settings`
 **API:** [`src/app/api/settings/route.ts`](file:///D:/citrixlabph/smma/nextjs-setup/nextjs-dashboard/src/app/api/settings/route.ts)
-**Status:** 🔴 Not Started
-**Priority:** P1 — Workspace Settings Provision
+**Status:** 🟢 Phase 2 Implemented
+**Priority:** P0 — Workspace Settings Provision (promoted from P1)
+
+> **Implemented (2026-10-02):** `SettingsHub` UI, server-authoritative
+> **`DRY_RUN` toggle with a confirmation dialog** persisted to `SystemState.settings`,
+> AI-provider selection, and a `settings.changed` audit event per save. Out-of-scope
+> plan items were dropped — Billing, 2FA, and avatar upload do not exist in the
+> Prisma schema. Remaining: notification rules, per-key API management.
 
 ---
 

@@ -46,10 +46,50 @@ Live publishing is not enabled by default. `DRY_RUN=true` is the safe default.
 
 ## Roadmap
 
-- Phase 1: Meta / Instagram + Facebook Page
-- Phase 2: LinkedIn + X
+- Phase 1: Meta / Instagram + Facebook Page ✅
+- Phase 2: LinkedIn + X 🟡 — OAuth account lifecycle, encrypted credentials,
+  capability discovery, provider-aware queue dispatch, audit trail, and
+  LinkedIn/X webhook ingestion are implemented. See
+  `docs/plans/phase2-test-matrix.md` for the exit gate.
 - Phase 3: TikTok + YouTube
 - Phase 4: analytics-driven recommendation loop
+
+## Environment
+
+Phase 2 requires these additional variables (see `.env.example`):
+
+| Variable | Purpose |
+|---|---|
+| `TOKEN_ENCRYPTION_KEY` | AES-256-GCM key for provider credentials at rest |
+| `OAUTH_STATE_SECRET` | HMAC key signing single-use OAuth state values |
+| `LINKEDIN_CLIENT_ID` / `LINKEDIN_CLIENT_SECRET` | LinkedIn OAuth app |
+| `LINKEDIN_WEBHOOK_SECRET` / `LINKEDIN_VERIFY_TOKEN` | LinkedIn webhook verification |
+| `X_CLIENT_ID` / `X_CLIENT_SECRET` | X OAuth app |
+| `X_WEBHOOK_SECRET` / `X_VERIFY_TOKEN` | X webhook verification |
+| `REDIS_URL` | Durable publish queue + distributed rate limiting |
+
+Generate a key with:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+```
+
+## Phase 2 API surface
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /api/integrations/{platform}/connect` | Returns a state-bound authorization URL |
+| `GET /api/integrations/{platform}/callback` | Server-side code exchange; encrypts tokens; redirects to the dashboard |
+| `POST /api/integrations/{platform}/disconnect` | Purges credentials and cancels queued work for the account |
+| `GET /api/accounts` | Connection health + capabilities (never tokens) |
+| `POST /api/accounts/{id}/refresh` | Re-validates credentials; flips expired tokens to `REAUTH_REQUIRED` |
+| `GET /api/accounts/{id}/capabilities` | Capability discovery for UI gating |
+| `POST /api/webhooks/{linkedin\|x}` | Signature-verified, deduplicated ingestion |
+| `GET /api/audit` | Workspace-scoped audit trail (cursor paginated) |
+| `GET /api/automation/hub` | Real queue depth, DLQ length, recent jobs |
+
+`twitter` remains accepted at API boundaries and is normalized to the canonical
+`x` provider key.
 
 ## Development
 

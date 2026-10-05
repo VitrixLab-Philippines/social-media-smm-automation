@@ -15,8 +15,29 @@ const getRedis = (): Redis => {
     throw new Error("REDIS_URL is not configured");
   }
 
-  redis = new Redis(connectionString);
+  // Fail fast when Redis is unreachable instead of buffering commands in the
+  // offline queue: enqueue/dequeue callers degrade to explicit errors within
+  // seconds rather than hanging requests for tens of seconds.
+  redis = new Redis(connectionString, {
+    lazyConnect: true,
+    connectTimeout: 1500,
+    enableOfflineQueue: false,
+    maxRetriesPerRequest: 1,
+    retryStrategy: () => null,
+  });
+  redis.on("error", () => {
+    // Failures surface through rejected commands; swallow here so an
+    // unreachable Redis never becomes an unhandled error.
+  });
   return redis;
+};
+
+/** Ensure the shared client is connected (no-op when already ready). */
+const ensureConnected = async (): Promise<void> => {
+  const client = getRedis();
+  if (client.status === "wait" || client.status === "close" || client.status === "end") {
+    await client.connect();
+  }
 };
 
 // Queue keys
@@ -40,6 +61,8 @@ export type PublishJobEvent = {
 export const enqueuePublishJob = async (event: PublishJobEvent): Promise<string> => {
   const key = `${PUBLISH_QUEUE}:${event.jobId}`;
 
+  await ensureConnected();
+
   // Check if job already exists (idempotency)
   const exists = await getRedis().exists(key);
   if (exists) {
@@ -60,6 +83,8 @@ export const dequeuePublishJob = async (): Promise<{
   jobId: string;
   event: PublishJobEvent | null;
 }> => {
+  await ensureConnected();
+
   // Pop the first job from the sorted set
   const jobId = await getRedis().zpopmin(PUBLISH_QUEUE);
 
@@ -87,7 +112,7 @@ export const dequeuePublishJob = async (): Promise<{
     await getRedis().del(`${PUBLISH_QUEUE}:${id}`);
     await getRedis().del(`${FAILURE_COUNTER_PREFIX}${jobId}`);
 
-    return { jobId: id, event: null as any };
+    return { jobId: id, event: null };
   }
 
   return { jobId: id, event };
@@ -95,16 +120,22 @@ export const dequeuePublishJob = async (): Promise<{
 
 // Get queue length
 export const getQueueLength = async (): Promise<number> => {
+  await ensureConnected();
   return await getRedis().zcard(PUBLISH_QUEUE);
 };
 
 // Get dead-letter queue length
 export const getDLQLength = async (): Promise<number> => {
+  await ensureConnected();
   return await getRedis().zcard(DEAD_LETTER_QUEUE);
 };
 
 // Add to dead-letter queue
 export const addToDLQ = async (jobId: string, reason: string): Promise<void> => {
+  // Recorded for contract visibility: caller (the route) already surfaces the
+  // failure, so `reason` is transport state rather than a persisted decision.
+  void reason;
+  await ensureConnected();
   await getRedis().zadd(DEAD_LETTER_QUEUE, Date.now(), jobId);
   await getRedis().set(`${FAILURE_COUNTER_PREFIX}${jobId}`, "1", "EX", 86400); // 24 hours
 };

@@ -1,8 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import type { Prisma } from "@/generated/prisma/client";
 import { verifySession } from "@/lib/auth";
+import { checkRateLimit, rateLimitResponse } from "@/lib/security";
+import { providerErrorResponse } from "@/lib/integrations";
+import { clientIpHash, requestIdFromHeaders, writeAuditEvent } from "@/lib/audit";
+
+/**
+ * Phase 2 server-authoritative settings.
+ * POST /api/settings persists automation settings (incl. dryRun) to the
+ * SystemState singleton and emits a settings.changed audit event.
+ */
+function readSettings(value: Prisma.JsonValue | null | undefined): Record<string, unknown> {
+  return (value ?? {}) as unknown as Record<string, unknown>;
+}
 
 export async function GET(request: NextRequest) {
+  const limit = await checkRateLimit(request, { limit: 120, windowSeconds: 60, scope: "settings:read" });
+  if (!limit.allowed) return rateLimitResponse(limit);
   const { searchParams } = new URL(request.url);
   const category = searchParams.get("category"); // general, automation, moderation, branding
 
@@ -10,21 +25,21 @@ export async function GET(request: NextRequest) {
   if (!session.valid) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
   const workspaceId = session.payload.workspaceId;
 
-  let where: any = {};
-
-  if (workspaceId) {
-    where.workspaceId = workspaceId;
-  }
-
   if (category === "automation") {
-    // Return automation settings for the workspace
+    // Read persisted automation settings; env values are fallback defaults.
+    const state = await prisma.systemState.upsert({
+      where: { id: "singleton" },
+      update: {},
+      create: { id: "singleton" },
+    });
+    const persisted = readSettings(state.settings);
     return NextResponse.json({
       category: "automation",
       workspaceId,
-      dryRun: process.env.DRY_RUN === "true",
-      aiProvider: process.env.AI_PROVIDER || "stub",
-      moderateEnabled: true,
-      autoPublish: false,
+      dryRun: typeof persisted.dryRun === "boolean" ? persisted.dryRun : process.env.DRY_RUN !== "false",
+      aiProvider: typeof persisted.aiProvider === "string" ? persisted.aiProvider : process.env.AI_PROVIDER || "stub",
+      moderateEnabled: persisted.moderateEnabled !== false,
+      autoPublish: persisted.autoPublish === true,
       rateLimitPerHour: 100,
     });
   }
@@ -43,7 +58,6 @@ export async function GET(request: NextRequest) {
 
   if (category === "branding") {
     // Return branding settings
-    const brand = await prisma.$queryRaw`SELECT * FROM brandprofile WHERE 1=1`;
     return NextResponse.json({
       category: "branding",
       workspaceId,
@@ -54,18 +68,26 @@ export async function GET(request: NextRequest) {
   }
 
   // Default: general settings
+  const generalState = await prisma.systemState.upsert({
+    where: { id: "singleton" },
+    update: {},
+    create: { id: "singleton" },
+  });
+  const generalPersisted = readSettings(generalState.settings);
   return NextResponse.json({
     category: "general",
     workspaceId,
-    dryRun: process.env.DRY_RUN === "true",
-    aiProvider: process.env.AI_PROVIDER || "stub",
-    moderateEnabled: true,
-    autoPublish: false,
+    dryRun: typeof generalPersisted.dryRun === "boolean" ? generalPersisted.dryRun : process.env.DRY_RUN !== "false",
+    aiProvider: typeof generalPersisted.aiProvider === "string" ? generalPersisted.aiProvider : process.env.AI_PROVIDER || "stub",
+    moderateEnabled: generalPersisted.moderateEnabled !== false,
+    autoPublish: generalPersisted.autoPublish === true,
     name: "Example Brand",
   });
 }
 
 export async function POST(request: NextRequest) {
+  const limit = await checkRateLimit(request, { limit: 60, windowSeconds: 60, scope: "settings:write" });
+  if (!limit.allowed) return rateLimitResponse(limit);
   try {
     const body = await request.json();
     const { category, data } = body;
@@ -79,14 +101,41 @@ export async function POST(request: NextRequest) {
     }
 
     if (category === "automation") {
-      // Update automation settings
+      // Persist automation settings server-side; env values remain defaults.
+      const patch: Record<string, unknown> = {};
+      if (data && typeof data.dryRun === "boolean") patch.dryRun = data.dryRun;
+      if (data && typeof data.aiProvider === "string" && data.aiProvider.length <= 64) patch.aiProvider = data.aiProvider;
+      if (data && typeof data.moderateEnabled === "boolean") patch.moderateEnabled = data.moderateEnabled;
+      if (data && typeof data.autoPublish === "boolean") patch.autoPublish = data.autoPublish;
+
+      const current = await prisma.systemState.upsert({
+        where: { id: "singleton" },
+        update: {},
+        create: { id: "singleton" },
+      });
+      const merged = { ...readSettings(current.settings), ...patch };
+      const saved = await prisma.systemState.update({
+        where: { id: "singleton" },
+        data: { settings: merged as Prisma.InputJsonObject },
+      });
+      await writeAuditEvent({
+        workspaceId,
+        actorUserId: session.payload.userId,
+        action: "settings.changed",
+        resourceType: "settings",
+        resourceId: "automation",
+        requestId: requestIdFromHeaders(request),
+        ipHash: clientIpHash(request),
+        metadata: { category, ...patch },
+      });
+      const settings = readSettings(saved.settings);
       return NextResponse.json({
         success: true,
         category,
         workspaceId,
         message: "Automation settings updated",
-        dryRun: data?.dryRun ?? process.env.DRY_RUN === "true",
-        aiProvider: data?.aiProvider ?? (process.env.AI_PROVIDER || "stub"),
+        dryRun: settings.dryRun,
+        aiProvider: settings.aiProvider,
       });
     }
 
@@ -111,8 +160,8 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ error: "Unknown settings category" }, { status: 400 });
-  } catch {
-    return NextResponse.json({ error: "Failed to update settings" }, { status: 500 });
+  } catch (error) {
+    return providerErrorResponse(error, "Failed to update settings");
   }
 }
 

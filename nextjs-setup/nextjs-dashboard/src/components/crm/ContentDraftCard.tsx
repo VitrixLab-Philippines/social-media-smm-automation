@@ -16,6 +16,14 @@ interface ContentDraftCardProps {
 
 const platformLabels: Record<string, string> = { meta: "Meta", instagram: "Instagram", linkedin: "LinkedIn", x: "X", twitter: "X", tiktok: "TikTok", youtube: "YouTube" };
 
+function extractReviewNote(metadata: unknown): string | undefined {
+  if (metadata && typeof metadata === "object") {
+    const note = (metadata as Record<string, unknown>).lastReviewNote;
+    return typeof note === "string" && note.length > 0 ? note : undefined;
+  }
+  return undefined;
+}
+
 export default function ContentDraftCard({
   draft: draftData,
   onApprove = () => {},
@@ -27,6 +35,16 @@ export default function ContentDraftCard({
 }: ContentDraftCardProps) {
   const [publishing, setPublishing] = React.useState(false);
   const [publishMessage, setPublishMessage] = React.useState("");
+  const [dryRun, setDryRun] = React.useState(true);
+
+  React.useEffect(() => {
+    fetch("/api/crm/status", { cache: "no-store" })
+      .then((res) => res.json())
+      .then((data) => {
+        if (typeof data.dryRun === "boolean") setDryRun(data.dryRun);
+      })
+      .catch(() => undefined);
+  }, []);
 
   const draft = draftData || {
     id: "unknown",
@@ -39,18 +57,29 @@ export default function ContentDraftCard({
     createdAt: new Date(),
   };
 
+  const lastReviewNote = extractReviewNote(
+    "metadata" in draft ? (draft as { metadata?: unknown }).metadata : undefined,
+  );
+
   async function createPublishJob() {
     setPublishing(true);
     setPublishMessage("");
     try {
+      const idempotencyKey = typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}-${draft.id}`;
       const res = await fetch("/api/crm/publish", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "Idempotency-Key": idempotencyKey },
         body: JSON.stringify({ draftId: draft.id, platform: draft.platform }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Unable to create publish job.");
-      setPublishMessage("Publish job queued. Delivery status will update asynchronously.");
+      setPublishMessage(
+        data.dryRun === false
+          ? "Publish job queued. Delivery status will update asynchronously."
+          : "Simulation queued (DRY-RUN). No provider received a live request; the draft returns to approved.",
+      );
       onPublish(draft.id, draft.platform);
       onUpdateStatus(draft.id, "scheduled");
     } catch (error) {
@@ -90,6 +119,12 @@ export default function ContentDraftCard({
         <div style={{ fontSize: "var(--text-xs)", color: "var(--muted)" }}>AI signal <strong style={{ color: "var(--text)" }}>{draft.engagementScore}/100</strong></div>
       )}
 
+      {lastReviewNote && (
+        <div role="note" aria-label="Latest revision note" style={{ padding: "0.55rem 0.65rem", borderRadius: "var(--radius-small)", background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.35)", color: "var(--text)", fontSize: "var(--text-xs)" }}>
+          <strong style={{ color: "var(--accent)" }}>Revision note:</strong> {lastReviewNote}
+        </div>
+      )}
+
       {publishMessage && <div role="status" style={{ padding: "0.55rem 0.65rem", borderRadius: "var(--radius-small)", background: "var(--surface)", border: "1px solid var(--line)", color: "var(--muted)", fontSize: "var(--text-xs)" }}>{publishMessage}</div>}
 
       <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", borderTop: "1px solid var(--line)", paddingTop: "0.8rem", marginTop: "auto" }}>
@@ -99,7 +134,7 @@ export default function ContentDraftCard({
         </>}
 
         {draft.status === "approved" && <>
-          <button type="button" className="btn primary" disabled={publishing} style={{ flex: "1 1 180px", padding: "0.5rem 0.7rem", fontSize: "var(--text-xs)", opacity: publishing ? 0.65 : 1 }} onClick={() => void createPublishJob()}>{publishing ? "Queueing…" : "Queue for publishing"}</button>
+          <button type="button" className="btn primary" disabled={publishing} style={{ flex: "1 1 180px", padding: "0.5rem 0.7rem", fontSize: "var(--text-xs)", opacity: publishing ? 0.65 : 1 }} onClick={() => void createPublishJob()}>{publishing ? "Queueing…" : dryRun ? "Simulate publish (dry-run)" : "Queue for publishing"}</button>
           <button type="button" className="btn secondary" style={{ padding: "0.5rem 0.7rem", fontSize: "var(--text-xs)" }} onClick={() => onEdit(draft.id)}>Return to draft</button>
         </>}
 

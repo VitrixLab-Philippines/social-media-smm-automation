@@ -4,8 +4,16 @@
 **Dashboard Page:** [`src/app/dashboard/page.tsx`](file:///D:/citrixlabph/smma/nextjs-setup/nextjs-dashboard/src/app/dashboard/page.tsx)
 **API:** [`src/app/api/crm/drafts/route.ts`](file:///D:/citrixlabph/smma/nextjs-setup/nextjs-dashboard/src/app/api/crm/drafts/route.ts)
 **Backend Service:** [`src/smm/publishing/service.py`](file:///D:/citrixlabph/smma/src/smm/publishing/service.py)
-**Status:** 🔴 Not Started
+**Status:** 🟢 Phase 2 Implemented
 **Priority:** P0 — Human Gate (Core Business Logic)
+
+> **Implemented (2026-10-02):** queue with platform filter, approve/reject,
+> rejection **revision notes**, **batch approve (max 20)**, workspace-scoped RBAC
+> with an explicit viewer denial, per-transition **audit events**, and the
+> **DRY_RUN** fix (simulation returns the draft to `approved` and never marks it
+> published; the button reads "Simulate publish (dry-run)"). Remaining:
+> approve/reject history timeline, moderation-violation inline warnings,
+> AI-vs-human diff view.
 
 ---
 

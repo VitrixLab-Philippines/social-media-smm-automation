@@ -12,6 +12,10 @@ import GraphExplorer from "@/components/dashboard/GraphExplorer";
 import CommandCenter from "@/components/dashboard/CommandCenter";
 import ClientsTable from "@/components/crm/ClientsTable";
 import PipelineBoard from "@/components/crm/PipelineBoard";
+import SocialAccountsManager from "@/components/dashboard/SocialAccountsManager";
+import AutomationHub from "@/components/dashboard/AutomationHub";
+import AuditLogViewer from "@/components/dashboard/AuditLogViewer";
+import SettingsHub from "@/components/dashboard/SettingsHub";
 import { DashboardViewSection } from "@/lib/crm";
 
 const sectionMeta: Record<DashboardViewSection, { eyebrow: string; title: string; description: string }> = {
@@ -88,7 +92,7 @@ export default function DashboardPage() {
 
           {currentSection === "graph" && <GraphExplorer />}
 
-          {["inbox","calendar","accounts","automation","audit"].includes(currentSection) && (
+          {["inbox","calendar"].includes(currentSection) && (
             <section className="card" aria-labelledby="planned-surface" style={{ padding: "1.25rem" }}>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "0.6rem", alignItems: "center" }}>
                 <h2 id="planned-surface" style={{ margin: 0, fontSize: "var(--text-lg)" }}>{sectionMeta[currentSection].title}</h2>
@@ -103,21 +107,17 @@ export default function DashboardPage() {
             </section>
           )}
 
+          {currentSection === "accounts" && <SocialAccountsManager />}
+
+          {currentSection === "automation" && <AutomationHub />}
+
+          {currentSection === "audit" && <AuditLogViewer />}
+
           {currentSection === "clients" && <ClientsTable />}
 
           {currentSection === "pipeline" && <PipelineBoard />}
 
-          {currentSection === "settings" && (
-            <div style={{ display: "grid", gap: "1.5rem" }}>
-              <AutomationStatusCard />
-              <section className="card" aria-labelledby="settings-note">
-                <h2 id="settings-note" style={{ margin: 0, fontSize: "var(--text-lg)" }}>Workspace configuration</h2>
-                <p style={{ margin: "0.5rem 0 0", color: "var(--muted)", fontSize: "var(--text-sm)" }}>
-                  Configuration surfaces should remain server-authoritative. This view intentionally exposes status and policy context without pretending browser-local toggles are persisted.
-                </p>
-              </section>
-            </div>
-          )}
+          {currentSection === "settings" && <SettingsHub />}
         </div>
       </DashboardShell>
       <SiteFooter />
