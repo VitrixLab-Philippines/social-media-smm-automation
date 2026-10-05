@@ -249,11 +249,43 @@ export function requireSameOrigin(request: NextRequest) {
 
   if (!origin) return true;
 
+  let originHost: string;
   try {
-    return new URL(origin).host === request.nextUrl.host;
+    originHost = new URL(origin).host;
   } catch {
     return false;
   }
+
+  // Accept the Next.js-resolved host (works locally and on most hosts).
+  if (originHost === request.nextUrl.host) return true;
+
+  // Trusted origins across all deployment environments.  Each env var covers a
+  // specific stage so the same-origin gate stays strict without rejecting valid
+  // same-site requests caused by reverse-proxy host mismatches on Netlify /
+  // Vercel / local dev.
+  //
+  //   NEXT_PUBLIC_APP_URL       – primary / production origin
+  //   NEXT_PUBLIC_APP_URL_LOCAL – local dev origin
+  //   NEXT_PUBLIC_APP_URL_DEV   – dev / preview origin
+  //   NEXT_PUBLIC_APP_URL_UAT   – UAT / staging origin
+  const trustedUrls = [
+    process.env.NEXT_PUBLIC_APP_URL,
+    process.env.NEXT_PUBLIC_APP_URL_LOCAL,
+    process.env.NEXT_PUBLIC_APP_URL_DEV,
+    process.env.NEXT_PUBLIC_APP_URL_UAT,
+  ];
+
+  for (const url of trustedUrls) {
+    const trimmed = url?.trim();
+    if (!trimmed) continue;
+    try {
+      if (originHost === new URL(trimmed).host) return true;
+    } catch {
+      // Malformed URL — skip and continue.
+    }
+  }
+
+  return false;
 }
 
 export async function readJsonWithLimit<T = unknown>(
