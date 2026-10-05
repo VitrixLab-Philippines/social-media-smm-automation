@@ -264,10 +264,10 @@ export function requireSameOrigin(request: NextRequest) {
   // same-site requests caused by reverse-proxy host mismatches on Netlify /
   // Vercel / local dev.
   //
-  //   NEXT_PUBLIC_APP_URL       – primary production URL
-  //   NEXT_PUBLIC_APP_URL_LOCAL – local dev   (http://localhost:3000)
-  //   NEXT_PUBLIC_APP_URL_DEV   – dev preview (https://smmai-dev.netlify.app)
-  //   NEXT_PUBLIC_APP_URL_UAT   – UAT staging (https://smma-uat.vercel.app)
+  //   NEXT_PUBLIC_APP_URL       – primary / production origin
+  //   NEXT_PUBLIC_APP_URL_LOCAL – local dev origin
+  //   NEXT_PUBLIC_APP_URL_DEV   – dev / preview origin
+  //   NEXT_PUBLIC_APP_URL_UAT   – UAT / staging origin
   const trustedUrls = [
     process.env.NEXT_PUBLIC_APP_URL,
     process.env.NEXT_PUBLIC_APP_URL_LOCAL,
