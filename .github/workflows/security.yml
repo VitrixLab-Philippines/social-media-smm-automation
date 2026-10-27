@@ -28,13 +28,30 @@ jobs:
   secrets:
     name: Secret scan
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # The official gitleaks-action v2 requires a paid organizational license.
+      # Use the upstream CLI directly; pin the release and verify its published SHA-256.
+      - name: Install Gitleaks CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="8.30.1"
+          archive="gitleaks_${version}_linux_x64.tar.gz"
+          url="https://github.com/gitleaks/gitleaks/releases/download/v${version}/${archive}"
+          expected_sha256="551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb"
+
+          curl --fail --silent --show-error --location "$url" --output "$RUNNER_TEMP/$archive"
+          echo "$expected_sha256  $RUNNER_TEMP/$archive" | sha256sum --check --status
+          tar -xzf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP" gitleaks
+          "$RUNNER_TEMP/gitleaks" version
+          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+      - name: Scan repository history for secrets
+        run: gitleaks git . --redact --verbose --exit-code 1
 
   dependency-audit:
     name: Dependency audit
@@ -44,11 +61,14 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: python -m pip install --upgrade pip pip-audit
+      - name: Upgrade audit tooling
+        run: python -m pip install --upgrade "setuptools>=84.1.0" pip pip-audit
       - run: pip-audit
+      # Use the repository root packageManager pin as the source of truth.
       - uses: pnpm/action-setup@v4
         with:
-          version: 10
+          version: 9.15.0
+          run_install: false
       - uses: actions/setup-node@v4
         with:
           node-version: 22
