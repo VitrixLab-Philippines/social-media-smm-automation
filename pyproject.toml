@@ -1,5 +1,7 @@
 [build-system]
-requires = ["setuptools>=68"]
+# Security baseline updated 2026-10-26: PYSEC-2026-3447 fixed in 83.0.0;
+# GHSA-xmj3-9gf7-h52w fixed in 84.1.0 (Windows-only legacy-wheel path issue).
+requires = ["setuptools>=84.1.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
